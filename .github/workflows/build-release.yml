@@ -1,0 +1,58 @@
+name: Build release packages
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  windows:
+    name: Windows VST3 package
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -A x64
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Package
+        shell: pwsh
+        run: .\scripts\package-windows-release.ps1
+
+      - name: Upload Windows ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: AudioReactiveImagePOC-v1.0.0-windows
+          path: dist/AudioReactiveImagePOC-v1.0.0-windows.zip
+          if-no-files-found: error
+
+  macos:
+    name: macOS VST3 AU Standalone package
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Package
+        run: bash scripts/package-macos-release.sh
+
+      - name: Upload macOS ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: AudioReactiveImagePOC-v1.0.0-macos
+          path: dist/AudioReactiveImagePOC-v1.0.0-macos.zip
+          if-no-files-found: error
+

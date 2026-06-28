@@ -48,6 +48,7 @@ Preparer une premiere version partageable par telechargement simple.
 - Sources JUCE/CMake versionnees.
 - Artefacts generes exclus de Git.
 - ZIP macOS local dans `dist/`.
+- ZIP Windows produit sur runner Windows ou machine Windows.
 - Notes de release et instructions d'installation incluses.
 
 ### Versioning Decision
@@ -59,6 +60,8 @@ Versionne dans Git:
 - `README.md`
 - `RELEASE_NOTES.md`
 - `scripts/package-macos-release.sh`
+- `scripts/package-windows-release.ps1`
+- `.github/workflows/build-release.yml`
 - `docs/project/`
 - `.gitignore`
 - `AGENTS.md`
@@ -84,3 +87,6 @@ Non versionne:
 | 2026-06-28 | `unzip -l ... | grep '__MACOSX\\|/\\._\\|^.* \\._'` | Pass | Aucun fichier parasite macOS detecte dans le ZIP. |
 | 2026-06-28 | `git check-ignore -v build/... dist/... .codex/...` | Pass | `build/`, `dist/` et `.codex/` sont ignores. |
 | 2026-06-28 | `git diff --check` | Pass | Aucun probleme de whitespace detecte. |
+| 2026-06-28 | `which x86_64-w64-mingw32-g++` | Info | Aucune toolchain Windows locale sur ce Mac; le binaire Windows doit etre produit sur Windows. |
+| 2026-06-28 | `bash -n scripts/package-macos-release.sh` | Pass | Packaging macOS valide localement. |
+| 2026-06-28 | GitHub Actions `build-release.yml` | Prepared | Workflow ajoute pour produire `AudioReactiveImagePOC-v1.0.0-windows.zip` sur `windows-latest`. |
