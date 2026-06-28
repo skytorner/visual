@@ -7,4 +7,7 @@ vendor/
 dist/
 build/
 .codex/
+CMakeUserPresets.json
+.vscode/
+.idea/
 *.log

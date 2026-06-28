@@ -31,3 +31,56 @@ Preparer le dossier `visual` pour un pilotage Codex / ChatGPT reproductible.
 | 2026-06-19 | `git check-ignore -v .codex/shareout/latest/HANDOFF_SUMMARY.md` | Pass | `.codex/shareout/` est ignore par Git. |
 | 2026-06-19 | `git diff --check` | Pass | Aucun probleme de whitespace detecte. |
 | 2026-06-19 | `git branch --show-current` | Pass | Branche par defaut alignee sur `main`. |
+
+## AudioReactiveImagePOC v1.0.0
+
+Status: Preparing.
+
+Date opened: 2026-06-28.
+
+### Goal
+
+Preparer une premiere version partageable par telechargement simple.
+
+### Scope
+
+- Version produit `1.0.0`.
+- Sources JUCE/CMake versionnees.
+- Artefacts generes exclus de Git.
+- ZIP macOS local dans `dist/`.
+- Notes de release et instructions d'installation incluses.
+
+### Versioning Decision
+
+Versionne dans Git:
+
+- `CMakeLists.txt`
+- `Source/`
+- `README.md`
+- `RELEASE_NOTES.md`
+- `scripts/package-macos-release.sh`
+- `docs/project/`
+- `.gitignore`
+- `AGENTS.md`
+
+Non versionne:
+
+- `.codex/`
+- `build/`
+- `dist/`
+- artefacts CMake/JUCE generes
+- ZIPs de release generes
+- secrets, env locaux, logs et caches IDE
+
+### Verification Results
+
+| Date | Command / QA | Result | Notes |
+| --- | --- | --- | --- |
+| 2026-06-28 | `bash -n scripts/package-macos-release.sh` | Pass | Script de packaging syntaxiquement valide. |
+| 2026-06-28 | `cmake -S . -B build -DCMAKE_BUILD_TYPE=Release` | Pass | Configuration CMake/JUCE generee. |
+| 2026-06-28 | `cmake --build build --config Release` | Pass | VST3, AU et Standalone generes. Warnings restants issus de JUCE. |
+| 2026-06-28 | `bash scripts/package-macos-release.sh` | Pass | ZIP cree: `dist/AudioReactiveImagePOC-v1.0.0-macos.zip`. |
+| 2026-06-28 | `unzip -l dist/AudioReactiveImagePOC-v1.0.0-macos.zip` | Pass | Archive contient VST3, AU, Standalone, README, release notes et install guide. |
+| 2026-06-28 | `unzip -l ... | grep '__MACOSX\\|/\\._\\|^.* \\._'` | Pass | Aucun fichier parasite macOS detecte dans le ZIP. |
+| 2026-06-28 | `git check-ignore -v build/... dist/... .codex/...` | Pass | `build/`, `dist/` et `.codex/` sont ignores. |
+| 2026-06-28 | `git diff --check` | Pass | Aucun probleme de whitespace detecte. |

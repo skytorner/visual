@@ -1,37 +1,259 @@
-# visual
+# AudioReactiveImagePOC
 
-Depot prepare pour un workflow Codex / ChatGPT avec memoire projet, pilotage par tickets, skills locaux et exports de contexte.
+`AudioReactiveImagePOC` is a JUCE/C++ proof-of-concept audio effect plugin.
 
-## Structure de pilotage
+It is designed to be inserted on an audio track in a DAW. The plugin passes the incoming audio through unchanged, analyses global RMS/peak/envelope, and animates a user-loaded PNG/JPG image from the detected audio energy.
 
-- `AGENTS.md`: consignes a lire par les agents.
-- `.codex/project-memory.md`: decisions durables, principes et limites du projet.
-- `.codex/progress.md`: journal compact de ce qui a ete fait.
-- `.codex/next-actions.md`: backlog actif et prochaines actions.
-- `.codex/archive-next-actions.md`: archive des tickets termines.
-- `.codex/skills/`: skills locaux propres au projet.
-- `.codex/tools/export-chatgpt-context.sh`: export local du contexte utile pour ChatGPT.
-- `docs/project/`: couche de pilotage projet, release, decisions et QA.
+Current release version: `1.0.0`.
 
-## Export ChatGPT
+## Features
 
-Exporter le contexte leger:
+- Stereo audio effect/analyzer.
+- Stereo passthrough: no destructive processing and no added latency.
+- Global RMS, peak, and attack/release-smoothed envelope.
+- UI thread animation driven from lock-free `std::atomic<float>` audio metrics.
+- Upload Image button for PNG/JPG/JPEG files.
+- Placeholder when no image is loaded.
+- Sliders:
+  - Sensitivity
+  - Smoothing
+  - Min Scale
+  - Max Scale
+  - Rotation Amount
+  - Opacity Amount
+- Reset button.
+- State persistence for parameters and local image path.
+- VST3 build by default.
+- AU on macOS and Standalone target are enabled when supported by JUCE/CMake.
 
-```bash
-bash .codex/tools/export-chatgpt-context.sh
+## Project Structure
+
+```txt
+CMakeLists.txt
+Source/
+  PluginProcessor.h
+  PluginProcessor.cpp
+  PluginEditor.h
+  PluginEditor.cpp
+README.md
 ```
 
-Exporter un ticket precis:
+## Prerequisites macOS
+
+- macOS with Xcode Command Line Tools:
 
 ```bash
-bash .codex/tools/export-chatgpt-context.sh --ticket VISUAL-001
+xcode-select --install
 ```
 
-Exporter le contexte complet de pilotage:
+- CMake 3.22 or newer:
 
 ```bash
-bash .codex/tools/export-chatgpt-context.sh --full
+brew install cmake
 ```
 
-Le resultat est genere dans `.codex/shareout/latest/`. Ne jamais y ajouter de secrets.
+- A DAW for testing, for example REAPER, Ableton Live, or Logic Pro.
 
+Notes:
+
+- The CMake project fetches JUCE automatically from GitHub with `FetchContent`.
+- VST3 and Standalone are enabled for all platforms supported by JUCE.
+- AU is enabled only on Apple platforms.
+
+## Prerequisites Windows
+
+- Visual Studio 2022 with the "Desktop development with C++" workload.
+- CMake 3.22 or newer.
+- Git.
+- A DAW for testing, for example REAPER or Ableton Live.
+
+Optional but useful:
+
+- Ninja build system.
+
+## Clone And Build
+
+From this repository root:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release
+```
+
+## Package A Shareable macOS Release ZIP
+
+After building, create a local ZIP that can be shared by download:
+
+```bash
+bash scripts/package-macos-release.sh
+```
+
+The package is generated at:
+
+```txt
+dist/AudioReactiveImagePOC-v1.0.0-macos.zip
+```
+
+`dist/` is intentionally ignored by Git. Commit source code, scripts, and release notes; upload the ZIP separately as the downloadable release asset.
+
+The default JUCE tag is configured in `CMakeLists.txt`:
+
+```cmake
+set(JUCE_GIT_TAG "8.0.8" CACHE STRING "JUCE git tag or branch to fetch")
+```
+
+You can override it:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DJUCE_GIT_TAG=master
+cmake --build build --config Release
+```
+
+## Generated Plugin Locations
+
+JUCE/CMake places plugin artifacts under the build directory. Typical paths:
+
+### macOS
+
+```txt
+build/AudioReactiveImagePOC_artefacts/Release/VST3/AudioReactiveImagePOC.vst3
+build/AudioReactiveImagePOC_artefacts/Release/AU/AudioReactiveImagePOC.component
+build/AudioReactiveImagePOC_artefacts/Release/Standalone/AudioReactiveImagePOC.app
+```
+
+### Windows
+
+```txt
+build/AudioReactiveImagePOC_artefacts/Release/VST3/AudioReactiveImagePOC.vst3
+build/AudioReactiveImagePOC_artefacts/Release/Standalone/AudioReactiveImagePOC.exe
+```
+
+## Install Locally In A DAW
+
+### macOS VST3
+
+Copy:
+
+```txt
+build/AudioReactiveImagePOC_artefacts/Release/VST3/AudioReactiveImagePOC.vst3
+```
+
+To:
+
+```txt
+~/Library/Audio/Plug-Ins/VST3/
+```
+
+Or system-wide:
+
+```txt
+/Library/Audio/Plug-Ins/VST3/
+```
+
+### macOS AU
+
+Copy:
+
+```txt
+build/AudioReactiveImagePOC_artefacts/Release/AU/AudioReactiveImagePOC.component
+```
+
+To:
+
+```txt
+~/Library/Audio/Plug-Ins/Components/
+```
+
+Or system-wide:
+
+```txt
+/Library/Audio/Plug-Ins/Components/
+```
+
+If Logic Pro does not detect the AU immediately:
+
+```bash
+killall -9 AudioComponentRegistrar
+```
+
+Then restart Logic Pro.
+
+### Windows VST3
+
+Copy:
+
+```txt
+build/AudioReactiveImagePOC_artefacts/Release/VST3/AudioReactiveImagePOC.vst3
+```
+
+To:
+
+```txt
+C:\Program Files\Common Files\VST3\
+```
+
+Then rescan plugins in your DAW.
+
+## Test In REAPER
+
+1. Copy the VST3 into the local VST3 folder.
+2. Open REAPER.
+3. Go to `Options > Preferences > Plug-ins > VST`.
+4. Click `Re-scan`.
+5. Insert `AudioReactiveImagePOC` on an audio track.
+6. Play audio through the track.
+7. Click `Upload Image` and choose a PNG/JPG.
+8. Confirm the image pulses with the audio level.
+9. Move the sliders and confirm the animation intensity changes.
+
+## Test In Ableton Live
+
+1. Copy the VST3 into the platform VST3 folder.
+2. Open Ableton Live.
+3. Go to `Settings/Preferences > Plug-Ins`.
+4. Enable VST3 plug-ins and rescan.
+5. Drop `AudioReactiveImagePOC` on an audio track.
+6. Load an image and play audio.
+7. Confirm audio remains audible and the image reacts to level changes.
+
+## Test In Logic Pro
+
+Logic Pro uses AU, not VST3.
+
+1. Build on macOS.
+2. Copy `AudioReactiveImagePOC.component` into `~/Library/Audio/Plug-Ins/Components/`.
+3. Restart Logic Pro or reset the AudioComponent registrar.
+4. Open `Logic Pro > Settings > Plug-In Manager`.
+5. Confirm `AudioReactiveImagePOC` is validated.
+6. Insert it as an Audio FX on a track.
+7. Load an image and play audio.
+
+## Design Notes
+
+- The audio thread only reads samples, calculates RMS/peak/envelope, and stores results in atomics.
+- The plugin does not allocate, load images, touch UI objects, or lock in `processBlock`.
+- Image loading happens on the message/UI thread via JUCE `FileChooser`.
+- The audio buffer is left untouched except for clearing extra output channels if a host exposes more outputs than inputs.
+- The plugin reports zero tail and zero latency.
+
+## Limitations V1
+
+- No FFT or frequency-band animation.
+- No video export.
+- No embedded image data in plugin state; only the local image path is saved.
+- If the image file is moved or deleted, the plugin shows a clean missing-file message.
+- No custom preset browser.
+- No GPU shader pipeline.
+- No Elementary Audio dependency. JUCE is sufficient for this V1 because the POC only needs plugin hosting glue, audio passthrough analysis, image loading, and UI rendering.
+
+## Roadmap V2
+
+- Optional state embedding for small images or project-local asset copy.
+- Frequency-band driven animation modes.
+- Beat/onset detection.
+- Preset management.
+- Drag-and-drop image loading.
+- Additional transforms: blur, displacement, crop, color tint.
+- More robust metering display.
+- DAW automation names and parameter grouping polish.
+- Optional GPU/OpenGL or shader-based rendering if V1 UI rendering becomes limiting.
