@@ -6,6 +6,9 @@ constexpr int editorWidth = 760;
 constexpr int editorHeight = 560;
 constexpr int topBarHeight = 48;
 constexpr int controlsHeight = 150;
+constexpr int controlLabelHeight = 20;
+constexpr int controlSliderHeight = 38;
+constexpr int controlGap = 8;
 }
 
 AudioReactiveImagePOCAudioProcessorEditor::AudioReactiveImagePOCAudioProcessorEditor(
@@ -122,17 +125,13 @@ void AudioReactiveImagePOCAudioProcessorEditor::resized()
     bounds.removeFromTop(10);
     auto controls = bounds.removeFromBottom(controlsHeight);
 
-    constexpr int labelHeight = 20;
-    constexpr int sliderHeight = 38;
-    constexpr int gap = 8;
-
-    auto firstRow = controls.removeFromTop(labelHeight + sliderHeight);
-    auto secondRow = controls.removeFromTop(labelHeight + sliderHeight);
+    auto firstRow = controls.removeFromTop(controlLabelHeight + controlSliderHeight);
+    auto secondRow = controls.removeFromTop(controlLabelHeight + controlSliderHeight);
 
     auto layoutSlider = [](juce::Rectangle<int> cell, juce::Label& label, juce::Slider& slider)
     {
-        cell = cell.reduced(gap / 2, 0);
-        label.setBounds(cell.removeFromTop(labelHeight));
+        cell = cell.reduced(controlGap / 2, 0);
+        label.setBounds(cell.removeFromTop(controlLabelHeight));
         slider.setBounds(cell);
     };
 

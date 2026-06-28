@@ -22,6 +22,13 @@ $StandalonePath = Join-Path $BuildDir "Standalone\$Product.exe"
 $ReadmePath = Join-Path $RootDir "README.md"
 $ReleaseNotesPath = Join-Path $RootDir "RELEASE_NOTES.md"
 
+if (-not (Test-Path $Vst3Path)) {
+    $Candidates = Get-ChildItem -Path (Join-Path $RootDir "build") -Recurse -Directory -Filter "$Product.vst3" -ErrorAction SilentlyContinue
+    if ($Candidates.Count -gt 0) {
+        $Vst3Path = $Candidates[0].FullName
+    }
+}
+
 Require-Path $Vst3Path
 Require-Path $ReadmePath
 Require-Path $ReleaseNotesPath
@@ -63,4 +70,3 @@ Compress-Archive -Path $PackageDir -DestinationPath $ZipPath -CompressionLevel O
 
 Write-Host "Release package created:"
 Write-Host $ZipPath
-

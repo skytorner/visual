@@ -18,8 +18,12 @@ jobs:
       - name: Configure
         run: cmake -S . -B build -A x64
 
-      - name: Build
-        run: cmake --build build --config Release
+      - name: Build VST3
+        run: cmake --build build --config Release --target AudioReactiveImagePOC_VST3
+
+      - name: List generated Windows artifacts
+        shell: pwsh
+        run: Get-ChildItem -Path build\AudioReactiveImagePOC_artefacts -Recurse | Select-Object FullName
 
       - name: Package
         shell: pwsh
@@ -55,4 +59,3 @@ jobs:
           name: AudioReactiveImagePOC-v1.0.0-macos
           path: dist/AudioReactiveImagePOC-v1.0.0-macos.zip
           if-no-files-found: error
-
