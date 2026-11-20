@@ -23,8 +23,10 @@ bool AudioReactiveImagePOCAudioProcessor::isBusesLayoutSupported(const BusesLayo
     const auto& input = layouts.getMainInputChannelSet();
     const auto& output = layouts.getMainOutputChannelSet();
 
-    return input == juce::AudioChannelSet::stereo()
-        && output == juce::AudioChannelSet::stereo();
+    // Keep the input/output channel counts identical: this is a transparent audio effect.
+    // Logic Pro needs an explicit mono/mono layout to insert the AU on a mono track.
+    return (input == juce::AudioChannelSet::mono() && output == juce::AudioChannelSet::mono())
+        || (input == juce::AudioChannelSet::stereo() && output == juce::AudioChannelSet::stereo());
 }
 
 void AudioReactiveImagePOCAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,

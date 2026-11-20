@@ -111,3 +111,20 @@ Status: POC valide fonctionnellement sur les scénarios audio testés, correctio
 - Régression confirmée : insertion sur piste mono impossible (seul stereo/stereo déclaré).
 - Éléments différés : bounce offline, tests Windows/DAW non essayés, MIDI natif.
 - Aucune compilation ou revalidation du code n'a été exécutée lors de ce cadrage documentaire.
+
+## VISUAL-003 — Mono/stereo layout fix (code change, 2026-11-20)
+
+- Changement ciblé : `isBusesLayoutSupported()` accepte mono->mono ou stereo->stereo; rejette tout autre layout.
+- Le traitement RMS/peak/envelope, la sortie audio, les identifiants plugin/paramètres, la sauvegarde et l'interface restent inchangés.
+- Relecture statique de la modification : condition par layout explicite; pas de nouveau mutex/allocation ou I/O dans `processBlock()`.
+- Build CMake JUCE : **NOT RUN** dans cette intervention GitHub distante.
+- Pluginval sur le nouveau build : **NOT RUN**.
+- Tests Logic Pro 13 et REAPER mono/stéréo sur le nouveau build : **NOT RUN** (QA humaine nécessaire avant merge).
+- Les anciennes validations POC ne sont pas transférées automatiquement au nouveau binaire.
+
+### Suivi QA VISUAL-003 — Retour Logic Pro 13 (2026-11-20)
+
+- L'utilisateur rapporte que le plugin peut maintenant être sélectionné/inséré dans Logic en **stéréo, Dual Mono et mono**; échec d'insertion mono d'origine corrigé dans son scénario manuel.
+- « Dual Mono » est une modalité de Logic : le code JUCE ne négocie que mono/mono ou stéréo/stéréo; pas de troisième type de bus implémenté.
+- Build macOS signalé terminé sans erreur; le SHA du checkout local n'était pas inclus dans le log.
+- QA encore ouverte : nouveau passage pluginval AU/VST3 niveau 5, confirmation du commit compilé et régressions sur un ancien projet / REAPER si possible.
