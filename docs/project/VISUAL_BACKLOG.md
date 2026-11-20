@@ -24,7 +24,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-003 — Support mono et stéréo sans régression
 
-- Status: Needs verification. **Correction de layout codée; build et QA DAW sur le nouvel artefact en attente.**
+- Status: Needs verification. **Correction codée; build local macOS rapporté PASS; insertion Logic Pro 13 en stéréo, Dual Mono et mono confirmée. Nouveau pluginval, SHA du binaire et régressions encore à vérifier.**
 - Priority: P0.
 - Scope: adapter négociation des bus pour mono->mono et stereo->stereo, sans changement d'identité plugin ni UI.
 - Acceptance:
