@@ -97,3 +97,17 @@ Non versionne:
 | 2026-06-28 | Windows packaging path fallback | Prepared | `package-windows-release.ps1` recherche le dossier VST3 genere si le chemin standard JUCE/CMake varie. |
 | 2026-06-28 | `cmake --build build --config Release --target AudioReactiveImagePOC_VST3` | Pass | Verification locale macOS de la cible VST3 apres correctif; seul warning restant issu de JUCE. |
 | 2026-06-28 | GitHub Release automation | Prepared | Le workflow telecharge les ZIPs macOS/Windows et cree ou met a jour automatiquement la GitHub Release quand un tag `v*` est pousse. |
+
+## QA baseline Audio Reactive — 2026-11-20
+
+Status: POC valide fonctionnellement sur les scénarios audio testés, corrections requises avant MVP.
+
+- Tests manuels utilisateur : Logic Pro 13/macOS, REAPER/macOS, réactivité audio sur drums et note isolée; plusieurs instances et restauration Logic.
+- Logic : buffers 32/64/128/256/512/1024 PASS; sample rates 44.1/48/96 kHz rapportés PASS; ouverture/fermeture UI et écoute bypass sans coupure rapportés PASS.
+- Stress manuel léger : 4 pistes jouant un beat de 2 minutes PASS (pas une endurance longue).
+- Image absente : message et remplacement possible PASS; portabilité cross-machine non vérifiée.
+- Pluginval strictness 5 : AU ALL TESTS PASSED, `auval` code 0; VST3 ALL TESTS PASSED.
+- Observations pluginval : AU version 0.1.0 vs VST3 version 1.0.0; warning AU `Current program is -1`; validateur externe VST3 SKIPPED faute de chemin.
+- Régression confirmée : insertion sur piste mono impossible (seul stereo/stereo déclaré).
+- Éléments différés : bounce offline, tests Windows/DAW non essayés, MIDI natif.
+- Aucune compilation ou revalidation du code n'a été exécutée lors de ce cadrage documentaire.

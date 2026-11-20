@@ -1,24 +1,53 @@
-# Visual QA Checklist
+# AV Sampler / visual — QA Baseline
 
-Utiliser cette checklist apres chaque ticket important.
+Date du bilan : 2026-11-20.
+Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; log utilisateur `log audio react.txt` de pluginval. **Ce document transcrit les résultats, il n'exécute pas de tests.**
 
-## Project Tracking
+## Matrice POC existant
 
-| Check | Result |
-| --- | --- |
-| `AGENTS.md` est a jour. | Pending |
-| `.codex/project-memory.md` reflete les decisions durables. | Pending |
-| `.codex/progress.md` contient le travail termine. | Pending |
-| `.codex/next-actions.md` contient les prochaines actions. | Pending |
-| `docs/project/VISUAL_BACKLOG.md` est synchronise avec la roadmap active. | Pending |
-| `docs/project/VISUAL_RELEASE_LOG.md` contient les verifications. | Pending |
+| Test | Statut | Portée / preuve |
+| --- | --- | --- |
+| Logic Pro 13 : réactivité audio piste drums et note isolée | PASS manuel | Notes jouées dans l'instrument -> audio -> image animée; **pas** de preuve de MIDI natif. |
+| Plusieurs instances dans Logic | PASS manuel | Instances indépendantes sur plusieurs pistes. |
+| Fermeture / réouverture du projet | PASS manuel | Paramètres et image restaurés tant que chemin d'image accessible. |
+| Buffers Logic 32/64/128/256/512/1024 | PASS manuel | Fonctionnement perçu avec plusieurs instances; identité temporelle de l'enveloppe non quantifiée. |
+| Sample rates 44.1/48/96 kHz | PASS rapporté / pluginval | Tests pluginval également exécutés à ces taux; mesure perceptive équivalente non prouvée. |
+| Import image, image absente et remplacement | PASS manuel | Message d'erreur + possibilité de choisir un autre média; pas de transport automatique entre machines. |
+| Fermeture/réouverture de l'éditeur en lecture | PASS manuel | Pas de crash rapporté. |
+| Bypass et audio sans coupure audible | PASS manuel | Test d'écoute; null-test bit-perfect encore non effectué. |
+| Stress léger | PASS manuel | 4 pistes / beat de 2 minutes; pas une endurance longue. |
+| REAPER | PASS manuel | Mêmes scénarios audio fonctionnels rapportés par l'utilisateur; format précis REAPER non consigné. |
+| Piste mono | FAIL confirmé | Plugin impossible à insérer; `isBusesLayoutSupported` stereo/stereo seulement. |
+| Boucle offline bounce | DEFERRED | Plugin génère visuel UI, pas fichier vidéo; audio bounce à qualifier ultérieurement. |
+| Windows | NOT TESTED | Build CI prévu historiquement, pas de validation DAW utilisateur. |
+| MIDI Note On/Off | OUT OF SCOPE | MIDI explicitement désactivé dans le POC. |
 
-## Security / Hygiene
+## Pluginval : résultat du log utilisateur
 
-| Check | Result |
-| --- | --- |
-| Aucun secret n'est committe. | Pending |
-| `.codex/shareout/` est ignore par Git. | Pending |
-| Les exports ChatGPT ne contiennent pas `.env` ni dumps. | Pending |
-| Les fichiers temporaires ne sont pas suivis. | Pending |
+| Artefact | Strictness | Résultat | Observations |
+| --- | --- | --- | --- |
+| AudioUnit `aufx,Arip,Vpoc` | 5 | PASS | `ALL TESTS PASSED`; `auval` exit code 0; version affichée `0.1.0`; avertissement `Current program is -1`. |
+| VST3 `AudioReactiveImagePOC.vst3` | 5 | PASS | `ALL TESTS PASSED`; version affichée `1.0.0`; `vst3 validator` SKIPPED car chemin non défini. |
 
+Les deux tests pluginval ont parcouru audio processing, automation et state à 44.1/48/96 kHz et buffers 64/128/256/512/1024, avec sub-block 32 pour automation. `pluginval` ne prouve pas la compatibilité avec tous les hôtes. Les deux artefacts peuvent ne pas provenir du même build.
+
+## QA nécessaire pour VISUAL-003 (support mono)
+
+- [ ] Build de la branche modifiée (AU et VST3 au minimum).
+- [ ] Contrôle automatisé des layouts mono->mono, stereo->stereo; autres rejets documentés.
+- [ ] Traitement audio inchangé (transparence) sur mono et stéréo.
+- [ ] Pluginval sur les **nouveaux** artefacts AU et VST3.
+- [ ] Test manuel d'insertion et de lecture sur pistes mono et stéréo dans Logic Pro 13; si possible REAPER.
+- [ ] Sauvegarder / rouvrir un projet existant sans modifier son état ni perdre les images.
+- [ ] Vérifier explicitement que les versions/bundle des binaires testés correspondent au build.
+
+## QA technique continue
+
+- [ ] Tests unitaires DSP reproductibles (RMS/peak/silence/paramètres).
+- [ ] Mesure comparée de l'enveloppe en temps réel selon sample rate / taille du buffer.
+- [ ] Vérifier sécurité du FileChooser asynchrone en fermant l'éditeur.
+- [ ] Vérifier signature/notarisation et installation sans Xcode pour une bêta distribuée.
+
+## Politique de preuve
+
+`PASS` = observation manuelle utilisateur ou sortie d'outil explicitement mentionnée. Une vérification non lancée reste `NOT TESTED`. Les résultats POC de novembre sont la référence; chaque nouveau build modifié doit être revérifié. Ne jamais transformer un avertissement pluginval ou une étape ignorée en test PASS.
