@@ -1,31 +1,31 @@
-# Agent Instructions
+# Agent Instructions — visual / AV Sampler
 
-Ce depot utilise un workflow de pilotage inspire de `real-mvp`.
+Le dépôt `skytorner/visual` est le POC JUCE/C++17 du futur AV Sampler. Priorité : Audio Reactive MVP fiable avant MIDI et pads.
 
-Avant tout travail de fond, lire dans cet ordre:
+## Lire avant de coder (sources versionnées)
 
-1. `.codex/project-memory.md`
-2. `.codex/next-actions.md`
-3. `.codex/progress.md`
+1. `docs/project/VISUAL_PRODUCT.md`
+2. `docs/project/VISUAL_DECISIONS.md`
+3. `docs/project/VISUAL_ARCHITECTURE.md`
 4. `docs/project/VISUAL_BACKLOG.md`
-5. `docs/project/VISUAL_RELEASE_LOG.md`
-6. `docs/project/VISUAL_DECISIONS.md`
+5. `docs/project/VISUAL_QA_CHECKLIST.md`
+6. `docs/project/VISUAL_CODEX_CHATGPT_WORKFLOW.md`
+7. `docs/project/VISUAL_RELEASE_LOG.md`
 
-Regles de travail:
+Le répertoire `.codex/` est **local et ignoré par Git**. S'il existe, ses fichiers `project-memory.md`, `next-actions.md`, `progress.md` et ses skills peuvent être lus en complément; s'il manque, poursuivre normalement avec les documents ci-dessus. Aucun ticket ne doit dépendre de son existence.
 
-- Une tache = une branche = une verification = une mise a jour des documents de suivi.
-- Conserver les decisions durables dans `.codex/project-memory.md` ou `docs/project/VISUAL_DECISIONS.md`.
-- Conserver le journal d'avancement dans `.codex/progress.md`.
-- Garder `.codex/next-actions.md` centre sur les prochaines actions executables.
-- Archiver les tickets termines dans `.codex/archive-next-actions.md`.
-- Ne jamais mettre de secrets, `.env`, dumps, cles privees ou captures de credentials dans Git ou `.codex/shareout/`.
-- Les outils, recherches, exports ChatGPT, scripts QA et skills locaux restent sous `.codex/` sauf s'ils sont necessaires au runtime du produit.
+## Règles techniques
 
-Fin de tache attendue:
+- Une tâche = une branche = vérifications adaptées = PR = docs de suivi.
+- Préférer les corrections ciblées à une réécriture et appliquer SOLID/DRY/KISS pragmatiquement.
+- Conserver JUCE natif/C++/CMake et les identifiants plugin/paramètres pour le MVP sauf décision explicite.
+- `processBlock()` : pas de mutex, I/O, chargement de média, allocation dynamique ou opération UI; ne pas changer le son.
+- Tester la régression des projets DAW, des paramètres, de la stéréo et du chargement d'image.
+- Ne pas prétendre que le POC reçoit du MIDI; il réagit à l'audio.
+- N'annoncer PASS qu'avec une preuve et distinguer manuels, outils et non exécutés.
 
-- Resumer la tache traitee.
-- Lister les fichiers modifies.
-- Donner les commandes de verification executees et leur resultat.
-- Indiquer les risques restants et les actions QA humaines.
-- Mettre a jour les fichiers de pilotage concernes.
+## Hygiène / livraison
 
+- Pas de secrets, `.env`, dumps, captures de credentials, ZIP ou artefacts de build dans Git.
+- Fin de tâche : résumé, branche/PR, fichiers modifiés, commandes réellement exécutées, résultats, risques et tests humains restant à faire.
+- Mettre à jour `docs/project/VISUAL_BACKLOG.md` et les décisions/QA/release log concernées.

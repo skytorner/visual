@@ -1,60 +1,50 @@
 # Visual Codex / ChatGPT Workflow
 
-Ce document definit la boucle legere entre Codex, ChatGPT et le proprietaire humain du projet `visual`.
+Ce document définit la boucle légère entre l'humain, Codex et ChatGPT pour `skytorner/visual`.
 
-## Objective
+## Source de vérité
 
-Faire avancer le projet ticket par ticket avec un etat facile a relire et a partager. Codex implemente et met a jour le depot. ChatGPT peut aider a prioriser, relire un export de contexte, preparer le prochain prompt ou organiser la QA. Le proprietaire humain garde les decisions produit, UX, infrastructure, credentials et release.
+1. `docs/project/VISUAL_PRODUCT.md` — quoi et pourquoi.
+2. `docs/project/VISUAL_DECISIONS.md` — décisions durables, invariants et compromis.
+3. `docs/project/VISUAL_ARCHITECTURE.md` — architecture actuelle et contraintes du temps réel.
+4. `docs/project/VISUAL_BACKLOG.md` — ticket suivant et critères de done.
+5. `docs/project/VISUAL_QA_CHECKLIST.md` — baseline et preuve des tests.
+6. `docs/project/VISUAL_RELEASE_LOG.md` — résultats techniques / releases historiques.
 
-## Roles
+`.codex/project-memory.md`, `.codex/progress.md`, `.codex/next-actions.md` et éventuels skills locaux sont **optionnels** et non versionnés; Codex doit pouvoir démarrer depuis un clone vierge avec uniquement `AGENTS.md` et `docs/project/`.
 
-### Codex
+## Rôles
 
-- Traite un ticket a la fois.
-- Lit la memoire et les documents de pilotage avant de changer le depot.
-- Met a jour le backlog, le release log, la memoire et le journal quand necessaire.
-- Execute les verifications pertinentes et rapporte les commandes.
-- Genere un export ChatGPT quand une decision ou un handoff est utile.
+- Humain : priorité produit, tests avec vrai DAW, validation des changements et distribution.
+- Codex : analyse ciblée, implémentation d'un ticket, tests, branche/PR, mise à jour des docs et rapport factuel.
+- ChatGPT : aide au cadrage, audit des résultats/exports et préparation des tickets/prompts, sans se substituer à l'exécution locale.
 
-### ChatGPT
+## Workflow — une tâche, une branche
 
-- Lit `.codex/shareout/latest/` quand le proprietaire humain l'upload.
-- Aide a choisir le prochain ticket.
-- Aide a preparer prompts, QA et questions de decision.
-- Ne remplace pas la verification locale ni le jugement produit.
+1. Lire `AGENTS.md` et les docs versionnées.
+2. Choisir **un seul** ticket du backlog, définir les risques et tests avant modification.
+3. Créer `codex/VISUAL-XXX-sujet` depuis main à jour.
+4. Préserver les contrats existants; coder le minimum, ne pas modifier l'identité plugin.
+5. Exécuter les tests locaux accessibles et `git diff --check`; ne pas inventer de tests.
+6. Documenter les fichiers, commandes, PASS/FAIL/NOT RUN, risques et QA humaine restante dans PR/release log.
+7. Relecture puis merge; si la QA manuelle est nécessaire, laisser PR non fusionnée jusqu'à validation.
+8. Mettre à jour l'état du ticket uniquement lorsque ses critères sont remplis.
 
-### Human Owner
+## Changements à haut risque
 
-- Decide la direction produit et les compromis.
-- Realise la QA manuelle si necessaire.
-- Gere les secrets, comptes, domaines, hebergement et credentials.
-- Upload l'export ChatGPT seulement apres verification qu'il ne contient pas de secrets.
+- DSP : tests reproductibles, aucun lock/allocation/I/O sur audio thread, passthrough préservé.
+- Identifiants de paramètres, bundle/plugin et sauvegardes : migration documentée et test d'ouverture de vieux projets.
+- Médias : aucune régression de l'import ou du message de fichier manquant.
+- CI : compiler sur Mac/Windows selon l'artefact et contrôler le build précis au lieu de s'appuyer sur la seule compilation.
 
-## Core Rule
+## Exports optionnels
 
-Un ticket = une branche = une verification = une mise a jour documentaire.
+Si l'outil local existe, `bash .codex/tools/export-chatgpt-context.sh --ticket VISUAL-XXX`. Ne jamais exiger cette commande pour exécuter un ticket : `.codex/` est ignoré.
 
-## Recommended Work Order
+## Hygiène
 
-1. Lire `docs/project/VISUAL_BACKLOG.md`.
-2. Choisir le prochain ticket P0/P1.
-3. Implementer uniquement ce ticket.
-4. Verifier.
-5. Mettre a jour les documents.
-6. Exporter le contexte si ChatGPT doit aider au pilotage.
+Jamais de credentials, `.env`, dumps, fichiers clients ou exports bruts sensibles dans Git. Ne pas committer les ZIP/artefacts. Les logs QA peuvent être résumés sans chemin personnel de la machine.
 
-## Export Commands
+## Format de fin de tâche
 
-```bash
-bash .codex/tools/export-chatgpt-context.sh
-bash .codex/tools/export-chatgpt-context.sh --ticket VISUAL-001
-bash .codex/tools/export-chatgpt-context.sh --full
-```
-
-## Guardrails
-
-- Ne pas uploader de secrets.
-- Ne pas utiliser `.codex/shareout/` comme documentation permanente.
-- Garder les exports legers par defaut.
-- Ne pas melanger plusieurs tickets sans decision explicite.
-
+Résumé, branche/PR, fichiers modifiés, commandes réellement exécutées et résultats, risques/dette restante, tests manuels nécessaires, ticket suivant.
