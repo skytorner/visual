@@ -24,7 +24,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-003 — Support mono et stéréo sans régression
 
-- Status: Open. **Premier ticket technique.**
+- Status: Needs verification. **Correction de layout codée; build et QA DAW sur le nouvel artefact en attente.**
 - Priority: P0.
 - Scope: adapter négociation des bus pour mono->mono et stereo->stereo, sans changement d'identité plugin ni UI.
 - Acceptance:

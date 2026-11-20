@@ -51,3 +51,7 @@ Les deux tests pluginval ont parcouru audio processing, automation et state à 4
 ## Politique de preuve
 
 `PASS` = observation manuelle utilisateur ou sortie d'outil explicitement mentionnée. Une vérification non lancée reste `NOT TESTED`. Les résultats POC de novembre sont la référence; chaque nouveau build modifié doit être revérifié. Ne jamais transformer un avertissement pluginval ou une étape ignorée en test PASS.
+
+## VISUAL-003 — Branche corrective (nouveau build non encore testé)
+
+La condition de layouts a été modifiée pour annoncer mono->mono et stereo->stereo, sans modification de `processBlock()` ni identifiants plugin/paramètres. **Les résultats ci-dessus se rapportent au POC historique** : le correctif reste `Needs verification` jusqu'à recompilation AU/VST3, pluginval et vérification d'insertion sur une piste mono Logic Pro 13.

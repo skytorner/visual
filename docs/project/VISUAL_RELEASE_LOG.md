@@ -111,3 +111,13 @@ Status: POC valide fonctionnellement sur les scénarios audio testés, correctio
 - Régression confirmée : insertion sur piste mono impossible (seul stereo/stereo déclaré).
 - Éléments différés : bounce offline, tests Windows/DAW non essayés, MIDI natif.
 - Aucune compilation ou revalidation du code n'a été exécutée lors de ce cadrage documentaire.
+
+## VISUAL-003 — Mono/stereo layout fix (code change, 2026-11-20)
+
+- Changement ciblé : `isBusesLayoutSupported()` accepte mono->mono ou stereo->stereo; rejette tout autre layout.
+- Le traitement RMS/peak/envelope, la sortie audio, les identifiants plugin/paramètres, la sauvegarde et l'interface restent inchangés.
+- Relecture statique de la modification : condition par layout explicite; pas de nouveau mutex/allocation ou I/O dans `processBlock()`.
+- Build CMake JUCE : **NOT RUN** dans cette intervention GitHub distante.
+- Pluginval sur le nouveau build : **NOT RUN**.
+- Tests Logic Pro 13 et REAPER mono/stéréo sur le nouveau build : **NOT RUN** (QA humaine nécessaire avant merge).
+- Les anciennes validations POC ne sont pas transférées automatiquement au nouveau binaire.
