@@ -33,13 +33,13 @@ Les deux tests pluginval ont parcouru audio processing, automation et state à 4
 
 ## QA nécessaire pour VISUAL-003 (support mono)
 
-- [ ] Build de la branche modifiée (AU et VST3 au minimum).
+- [x] Build de la branche modifiée (AU et VST3 au minimum) : compilation macOS rapportée réussie, mais SHA local non affiché dans le log.
 - [ ] Contrôle automatisé des layouts mono->mono, stereo->stereo; autres rejets documentés.
 - [ ] Traitement audio inchangé (transparence) sur mono et stéréo.
-- [ ] Pluginval sur les **nouveaux** artefacts AU et VST3.
-- [ ] Test manuel d'insertion et de lecture sur pistes mono et stéréo dans Logic Pro 13; si possible REAPER.
+- [x] Pluginval sur les **nouveaux** artefacts AU et VST3 : strictness 5, tous les tests pluginval PASS (v1.0.0 des deux côtés). L'exécutable Steinberg VST3 validator externe reste non configuré.
+- [x] Insertion dans Logic Pro 13 : utilisateur confirme les trois choix proposés par l'hôte, stéréo, Dual Mono et mono. La lecture/réactivité exacte de chaque mode n'a pas été explicitement détaillée; le test REAPER de ce nouveau build reste à confirmer.
 - [ ] Sauvegarder / rouvrir un projet existant sans modifier son état ni perdre les images.
-- [ ] Vérifier explicitement que les versions/bundle des binaires testés correspondent au build.
+- [ ] Vérifier explicitement le SHA du checkout source local compilé. Les artefacts contrôlés sont ceux de `build/`, versions AU/VST3 1.0.0; le log ne prouve pas le commit SHA.
 
 ## QA technique continue
 
@@ -51,3 +51,11 @@ Les deux tests pluginval ont parcouru audio processing, automation et state à 4
 ## Politique de preuve
 
 `PASS` = observation manuelle utilisateur ou sortie d'outil explicitement mentionnée. Une vérification non lancée reste `NOT TESTED`. Les résultats POC de novembre sont la référence; chaque nouveau build modifié doit être revérifié. Ne jamais transformer un avertissement pluginval ou une étape ignorée en test PASS.
+
+## VISUAL-003 — Branche corrective : résultats intermédiaires
+
+La condition de layouts a été modifiée pour annoncer mono->mono et stereo->stereo, sans modification de `processBlock()` ni identifiants plugin/paramètres. La compilation locale AU/VST3/Standalone a été rapportée réussie, avec warnings JUCE/SDK non bloquants. L'utilisateur confirme désormais que Logic Pro 13 **propose/accepte Stéréo, Dual Mono et Mono**. Le « Dual Mono » est un mode de traitement/instanciation de l'hôte Logic, **pas** un troisième layout JUCE ajouté au plugin : le code n'accepte explicitement que mono/mono et stéréo/stéréo.
+
+**Nouveau rapport utilisateur :** `log audio react2.txt`, sur les fichiers sous `build/AudioReactiveImagePOC_artefacts/Release`. AU `aufx,Arip,Vpoc` et VST3 `AudioReactiveImagePOC.vst3` sont tous deux détectés en **v1.0.0** et terminent `ALL TESTS PASSED` à strictness 5. Le traitement audio, l'automation, l'état, l'éditeur et les bus passent sur 44.1/48/96 kHz, avec buffers 64/128/256/512/1024. La liste des layouts contient **Mono et Stereo** pour les deux formats. `auval` retourne le code 0. Avertissement AU `Current program is -1` toujours présent. Validateur Steinberg VST3 externe **skipped**, chemin non défini. Dual Mono reste un choix de Logic, non un bus JUCE distinct.
+
+**Conclusion ciblée :** bug d'insertion mono corrigé dans Logic et compatibilité pluginval du nouvel artefact validée. `VISUAL-003` est clôturable. Points reportés à la QA technique / tickets suivants : SHA source du build local non consigné, contrôle automatisé des layouts, transparence bit-perfect mono/stéréo, vérification lecture/réactivité détaillée selon mode, restauration d'un ancien projet et REAPER sur ce nouveau build. Les lignes de la matrice historique ci-dessus décrivent encore le POC initial et non une régression actuelle.
