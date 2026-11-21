@@ -35,10 +35,10 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-004 — Tests de calculs audio et transparence
 
-- Status: Open.
+- Status: Needs verification — fonctions d'analyse extraites et tests C++17/CTest autonomes prêts; CTest Linux local PASS; build JUCE macOS, CI GitHub et QA pluginval du nouveau code encore à confirmer.
 - Priority: P0.
-- Scope: tests déterministes RMS/peak, silence, paramètres extrêmes, passthrough et restauration d'état, idéalement hors DAW.
-- Acceptance: commandes reproductibles + CI courte.
+- Scope: tests déterministes RMS/peak, silence, paramètres extrêmes, accès read-only aux buffers audio; vérification de restauration d'état JUCE séparée du test DSP autonome.
+- Acceptance: commandes reproductibles + CI courte; build macOS et nouveau pluginval, transparence du plugin entier / restauration d'état sous JUCE à confirmer avant Done.
 
 ### VISUAL-005 — Enveloppe temporellement cohérente
 

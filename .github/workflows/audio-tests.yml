@@ -1,0 +1,21 @@
+name: Audio analysis tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  audio-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure standalone tests
+        run: cmake -S tests -B build-tests -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build-tests --config Release --parallel 2
+      - name: Test
+        run: ctest --test-dir build-tests --output-on-failure

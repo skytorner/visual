@@ -138,3 +138,17 @@ Status: POC valide fonctionnellement sur les scénarios audio testés, correctio
 - Logic Pro 13 : utilisateur confirme sélection/insertion sur Mono, Dual Mono, Stereo; pas de preuve séparée de MIDI natif.
 - **Décision : clôture de VISUAL-003 pour le correctif fonctionnel mono**, sans confondre pluginval avec un test null audio ou le validateur Steinberg; SHA local de compilation non consigné, QA nouvelle version sur ancien projet / REAPER non exécutée.
 - Suite : VISUAL-004 tests automatisés audio/layout/transparence; VISUAL-007 qualification des artefacts et packaging.
+
+## VISUAL-004 — Tests de l'analyse audio (2026-11-21)
+
+Status: Needs verification (PR isolée, pas encore distribuée).
+
+- Extraction minimale de `analyseAudio` (RMS/peak multi-canal) et `nextEnvelope` vers un en-tête C++17 sans dépendance JUCE, utilisé par `processBlock`.
+- Le calcul suit les mêmes équations; aucune modification intentionnelle des buffers, paramètres JUCE, versions et identifiants du plugin.
+- Test autonome `cmake -S tests -B build-tests -DCMAKE_BUILD_TYPE=Release` : PASS sur environnement Linux local.
+- `cmake --build build-tests --config Release` : PASS.
+- `ctest --test-dir build-tests --output-on-failure` : PASS (1/1).
+- `g++ -std=c++17 -Wall -Wextra -Werror -pedantic -fsyntax-only tests/AudioSignalAnalysisTests.cpp` : PASS.
+- CMake du plugin / AU/VST3 macOS : NOT RUN sur ce changement; pluginval nouveau build : NOT RUN.
+- CI courte GitHub Actions ajoutée : statut encore inconnu à la création du commit.
+- Limitations : l'analyse pure read-only ne prouve pas le passthrough end-to-end de l'effet; état APVTS et imagePath restent à tester via intégration JUCE. Le lissage temporel reste l'objet de VISUAL-005.
