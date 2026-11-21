@@ -7,6 +7,10 @@ These lightweight C++17 tests compile without JUCE and exercise the very same an
 - Read-only audio analysis, including exact source-buffer comparisons.
 - Envelope attack/release and sensitivity/smoothing extremes.
 
+## Daily shortcut (macOS)
+
+Run `make test` from the repository root for the tests alone, or just `make` to run tests and compile all plugin formats. See the main README for `make install` and other shortcuts.
+
 ## Run locally (from the repository root)
 
 ```bash

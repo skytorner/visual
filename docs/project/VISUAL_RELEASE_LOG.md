@@ -152,3 +152,9 @@ Status: Needs verification (PR isolée, pas encore distribuée).
 - CMake du plugin / AU/VST3 macOS : NOT RUN sur ce changement; pluginval nouveau build : NOT RUN.
 - CI courte GitHub Actions ajoutée : statut encore inconnu à la création du commit.
 - Limitations : l'analyse pure read-only ne prouve pas le passthrough end-to-end de l'effet; état APVTS et imagePath restent à tester via intégration JUCE. Le lissage temporel reste l'objet de VISUAL-005.
+
+### VISUAL-004 — Raccourcis développeur (2026-11-21)
+
+- Ajout d'un `Makefile` versionné pour `make` (test + build), `make test`, `make plugin`, `make status`, `make install[-au|-vst3]`, `make package` et `make help`.
+- Installation DAW explicitement séparée du build, uniquement sur macOS dans `~/Library/Audio/Plug-Ins/`; elle ne s'exécute jamais via `make` seul.
+- Contrôle de la syntaxe et des commandes Make sur Linux local : `make help` PASS, `make -n` PASS, `make -n install` PASS; `make install-au CMAKE=true` rejette correctement Linux. Les actions réelles macOS d'installation / de build restent NOT RUN.
