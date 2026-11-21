@@ -128,3 +128,13 @@ Status: POC valide fonctionnellement sur les scénarios audio testés, correctio
 - « Dual Mono » est une modalité de Logic : le code JUCE ne négocie que mono/mono ou stéréo/stéréo; pas de troisième type de bus implémenté.
 - Build macOS signalé terminé sans erreur; le SHA du checkout local n'était pas inclus dans le log.
 - QA encore ouverte : nouveau passage pluginval AU/VST3 niveau 5, confirmation du commit compilé et régressions sur un ancien projet / REAPER si possible.
+
+### Final validation VISUAL-003 — pluginval (2026-11-21)
+
+- Nouveau journal utilisateur `log audio react2.txt`, fichiers de `build/AudioReactiveImagePOC_artefacts/Release/` (et non ancien `dist/`).
+- **VST3 v1.0.0 : PASS, strictness 5, `ALL TESTS PASSED`**, 44.1/48/96 kHz, tailles 64/128/256/512/1024, état/automation/éditeur, layouts Mono et Stereo. Le validateur Steinberg VST3 *externe* a été **skipped** faute de chemin.
+- **AU v1.0.0 : PASS, strictness 5, `ALL TESTS PASSED`**, mêmes variations audio, `auval` code 0, layouts Mono et Stereo. Avertissement non bloquant `Current program is -1`.
+- Versions AU et VST3 désormais cohérentes à 1.0.0 (ancienne différence de versions résolue pour les binaires testés).
+- Logic Pro 13 : utilisateur confirme sélection/insertion sur Mono, Dual Mono, Stereo; pas de preuve séparée de MIDI natif.
+- **Décision : clôture de VISUAL-003 pour le correctif fonctionnel mono**, sans confondre pluginval avec un test null audio ou le validateur Steinberg; SHA local de compilation non consigné, QA nouvelle version sur ancien projet / REAPER non exécutée.
+- Suite : VISUAL-004 tests automatisés audio/layout/transparence; VISUAL-007 qualification des artefacts et packaging.
