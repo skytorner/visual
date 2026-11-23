@@ -106,6 +106,16 @@ void SamplerIconButton::paintButton(juce::Graphics& graphics, bool isMouseOver, 
     }
 }
 
+void FxControlBar::setSpeedMultiplier(double multiplier)
+{
+    const auto clampedMultiplier = juce::jlimit(0.5, 1.5, multiplier);
+    if (juce::approximatelyEqual(speedMultiplier, clampedMultiplier))
+        return;
+
+    speedMultiplier = clampedMultiplier;
+    repaint();
+}
+
 void FxControlBar::paint(juce::Graphics& graphics)
 {
     auto bounds = getLocalBounds().toFloat();
@@ -127,19 +137,36 @@ void FxControlBar::paint(juce::Graphics& graphics)
     {
         auto cell = placeholders.withX(placeholders.getX() + cellWidth * static_cast<float>(i))
             .withWidth(cellWidth).reduced(3.0f, 0.0f);
-        graphics.setColour(juce::Colour(0xff20252d));
+        const auto isSpeedControl = i == 1;
+        graphics.setColour(isSpeedControl ? juce::Colour(0xff1e2d39) : juce::Colour(0xff20252d));
         graphics.fillRoundedRectangle(cell, 5.0f);
-        graphics.setColour(juce::Colour(0xff3a414c));
+        graphics.setColour(isSpeedControl ? juce::Colour(0xff3bd5df) : juce::Colour(0xff3a414c));
         graphics.drawRoundedRectangle(cell, 5.0f, 1.0f);
         graphics.setColour(juce::Colour(0xff8b96a6));
         graphics.setFont(juce::FontOptions(10.0f).withStyle("Bold"));
         graphics.drawFittedText(names[static_cast<std::size_t>(i)],
             cell.withY(cell.getY() + 5.0f).withHeight(15.0f).toNearestInt(),
             juce::Justification::centred, 1);
-        graphics.setColour(juce::Colour(0xff697382));
-        graphics.setFont(10.0f);
-        graphics.drawFittedText("Coming soon", cell.withY(cell.getY() + 21.0f)
-            .withHeight(14.0f).toNearestInt(), juce::Justification::centred, 1);
+        if (isSpeedControl)
+        {
+            graphics.setColour(juce::Colour(0xffe3f4fa));
+            graphics.setFont(juce::FontOptions(13.0f).withStyle("Bold"));
+            graphics.drawFittedText(juce::String(speedMultiplier, 2) + "x",
+                cell.withY(cell.getY() + 19.0f).withHeight(16.0f).toNearestInt(),
+                juce::Justification::centred, 1);
+            graphics.setColour(juce::Colour(0xff9fbbc8));
+            graphics.setFont(9.0f);
+            graphics.drawFittedText("MIDI CC 1",
+                cell.withY(cell.getY() + 36.0f).withHeight(12.0f).toNearestInt(),
+                juce::Justification::centred, 1);
+        }
+        else
+        {
+            graphics.setColour(juce::Colour(0xff697382));
+            graphics.setFont(10.0f);
+            graphics.drawFittedText("Coming soon", cell.withY(cell.getY() + 21.0f)
+                .withHeight(14.0f).toNearestInt(), juce::Justification::centred, 1);
+        }
     }
 }
 

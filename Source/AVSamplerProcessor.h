@@ -1,6 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "CueRouting.h"
 #include <array>
 #include <atomic>
 
@@ -16,6 +17,7 @@ public:
         bool loopEnabled = false;
         bool playbackRequested = true;
         int selectedCueIndex = 0;
+        int speedMidiCcValue = avsampler::defaultVideoSpeedControllerValue;
     };
 
     AVSamplerAudioProcessor();
@@ -56,6 +58,7 @@ private:
     mutable juce::CriticalSection projectStateLock;
     ProjectState projectState;
     std::atomic<int> pendingCueIndex { -1 };
+    std::atomic<int> speedMidiCcValue { avsampler::defaultVideoSpeedControllerValue };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AVSamplerAudioProcessor)
 };

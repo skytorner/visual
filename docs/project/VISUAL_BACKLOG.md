@@ -142,6 +142,20 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
   - Rapport avec captures avant/après à dimensions comparables et mise à jour des documents de suivi.
 - Exclusions: nouveaux effets, 16 pads, MIDI Learn, changement de notes, mapping éditable, nouveau moteur vidéo, création d'un nouveau thème ou copie des logos/icônes/style propriétaire.
 
+### VISUAL-013 — Premier effet vidéo piloté par MIDI CC
+
+- Status: In progress — implémentation locale sur `codex/VISUAL-013-midi-speed-cc`; vérifications et revue à terminer.
+- Priority: P1.
+- Scope: activer uniquement Speed parmi les emplacements FX, piloté par CC1 (0–127 -> 0,5×–1,5×; 64 = 1×), avec affichage de la vitesse et sauvegarde/restauration de la valeur.
+- Acceptance:
+  - CC1 modifie la vitesse de lecture vidéo sans affecter le routage NoteOn des Cue Points ni la sortie silencieuse.
+  - `processBlock()` reste sans verrou, allocation, I/O, chargement média et appel UI; `setPlaySpeed()` est appelé sur le thread message.
+  - Une session sauvegardée restaure la valeur CC; un état ancien sans le nouveau champ démarre à 1×.
+  - Le slot Speed affiche sa valeur et CC1; Level, Color et Glitch restent désactivés.
+  - Tests C++ couvrent mapping, bornes, routage des événements et persistance; build AU/CTest et `git diff --check` sont consignés.
+  - QA Logic sur le build exact confirme le contrôle depuis CC1, la neutralité à 64, les extrêmes et le save/reload; toute mesure de latence reste distincte.
+- Exclusions: choix dynamique de CC, MIDI Learn, vélocité, autres effets, synchronisation tempo/frame et promesse de précision temporelle.
+
 ## Non-objectifs explicites
 
 Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, marché de modules, DSP audio destructif, multi-DAW/Windows revendiqués sans tests.

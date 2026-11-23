@@ -1,5 +1,26 @@
 # Visual Release Log
 
+## VISUAL-013 — Premier effet vidéo piloté par MIDI CC
+
+Date : 2026-11-23. Branche : `codex/VISUAL-013-midi-speed-cc`.
+
+### Portée
+
+- Speed est le premier slot FX actif. MIDI CC1 est mappé sur 0,5×–1,5×, valeur 64 = 1×.
+- Le processeur publie la valeur CC via un atomique; l'éditeur applique `VideoComponent::setPlaySpeed()` sur le thread message, y compris après chargement asynchrone.
+- La valeur est incluse dans l'état du projet; les sessions anciennes sans propriété démarrent à 1×. Les autres slots restent désactivés.
+
+### Vérifications
+
+| Date | Commande / QA | Résultat | Notes |
+| --- | --- | --- | --- |
+| 2026-11-23 | `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU CueRoutingTests AVSamplerCoreTests TimelineMathTests AudioReactiveImageProcessorTests -j 4` | PASS | Cibles AU et tests compilées; avertissements non bloquants du SDK macOS dans les modules JUCE Metal/AppKit. |
+| 2026-11-23 | `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release` | PASS, 4/4 | CueRoutingTests, TimelineMathTests, AudioReactiveImageProcessorTests et AVSamplerCoreTests. |
+| 2026-11-23 | `git diff --check` | PASS | Aucun problème whitespace détecté. |
+| — | Logic Pro : CC1, états extrêmes et sauvegarde/réouverture | NOT TESTED | Validation humaine nécessaire après build; pas d'installation automatique. |
+
+pluginval sur le nouvel artefact, installation et test hôte Logic ne sont pas exécutés dans cette tâche. L'artefact AU est généré dans `/private/tmp/visual-009-build/AVSampler_artefacts/Release/AU/AVSampler.component`; il n'est pas installé.
+
 ## Initial Setup
 
 Status: Planning.

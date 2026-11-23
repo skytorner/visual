@@ -35,6 +35,7 @@ Logic Pro (piano roll / MIDI)
 - Les nouvelles propriétés `playbackRequested` et `selectedCueIndex` sont rétrocompatibles: absence de propriété lecture dans un ancien état signifie autoplay et sélection Cue 1. Un chemin média absent reste mémorisé; le relink change seulement le chemin et préserve les Cue timings absolus, Loop et préférence de lecture.
 - VISUAL-012 garde les responsabilités d'éditeur dans JUCE natif. `CueTimelineComponent` ne dessine plus les cartes de notes; `AssignedPadsComponent` lit le même `ProjectState` et sélectionne le même index sans envoyer de NoteOn ni seek. `FxControlBar` est une vue sans callback ou propriété moteur. `SamplerIconButton` ne commande que Play/Pause, Loop et Eject. Le composant vidéo JUCE centre la taille native dans son rectangle avec `RectanglePlacement::centred`, sans étirement.
 - Eject ferme le `VideoComponent` et vide seulement `videoPath`. Cue positions, Loop, playback demandé et Cue sélectionné sont inchangés; remplacer ou relier un média garde le comportement de VISUAL-011.
+- VISUAL-013 ajoute CC1 comme contrôle fixe de Speed. `processBlock()` met à jour un atomique (aucun accès UI ou vidéo); le timer éditeur applique la vitesse via `VideoComponent::setPlaySpeed()` sur le thread message et l'état CC est inclus dans `ProjectState`. La vitesse est également posée après chargement asynchrone du média.
 
 ## Plugin audio existant
 
@@ -59,4 +60,4 @@ DAW (effet audio) -> processBlock() -> RMS / Peak / Envelope -> atomics
 
 ## Évolutions hors Phase 1
 
-Timeline 16 pads, mapping éditable/MIDI Learn, CC, vélocité et comportements Hold/Toggle/One Shot seront ajoutés après validation du routage MIDI -> vidéo dans Logic. Ne pas introduire d'architecture générique avant un besoin concret.
+Timeline 16 pads, mapping éditable/MIDI Learn, autres CC, vélocité et comportements Hold/Toggle/One Shot restent hors scope. Speed utilise le CC1 fixe de VISUAL-013; ne pas introduire d'architecture générique avant un besoin concret.

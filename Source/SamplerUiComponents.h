@@ -30,7 +30,11 @@ private:
 class FxControlBar final : public juce::Component
 {
 public:
+    void setSpeedMultiplier(double multiplier);
     void paint(juce::Graphics& graphics) override;
+
+private:
+    double speedMultiplier = 1.0;
 };
 
 class AssignedPadsComponent final : public juce::Component

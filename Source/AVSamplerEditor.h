@@ -47,6 +47,7 @@ private:
     int loopRestartWaitTicks = 0;
     int activeCueIndex = -1;
     bool displayedPlaybackRequested = true;
+    int lastAppliedSpeedMidiCcValue = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AVSamplerAudioProcessorEditor)
 };

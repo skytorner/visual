@@ -102,6 +102,17 @@ La nouvelle direction vidéo/MIDI est autorisée le 2026-11-23. Les validations 
 
 Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, sans rapport de chaque scénario séparé; garder les limites de preuve détaillées ci-dessus.
 
+## VISUAL-013 — Speed piloté par MIDI CC
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Mapping CC1 0–127, CC non assigné ignoré, limites 0,5×/1×/1,5× | PASS automatisé | `CueRoutingTests`, CTest sur le build VISUAL-013. |
+| MIDI CC1 capturé dans `processBlock()` avec cues NoteOn inchangés | PASS automatisé | `AVSamplerCoreTests` confirme l'état CC; les tests de Cue continuent à passer. |
+| Sauvegarde/restauration CC1 et valeur neutre d'un état historique | PASS automatisé | `AVSamplerCoreTests` valide le round-trip et le défaut 64 (1×). |
+| Build macOS AU et CTest | PASS build/test | `AVSampler_AU`, les quatre suites CTest et `git diff --check` passent; warnings du SDK JUCE Metal/AppKit seulement. |
+| Logic: plage CC1, 64 neutre, affichage Speed et réouverture de session | NOT TESTED | QA humaine requise sur l'artefact local exact; aucune latence mesurée. |
+| Autres emplacements FX | PASS statique | Level, Color, Glitch restent inactifs dans le code de l'éditeur. |
+
 ## VISUAL-012 — Composition UI et pads assignés
 
 | Vérification | Statut | Portée |

@@ -48,6 +48,27 @@ int main()
         return 1;
     }
 
-    std::cout << "Cue note mapping and event priority passed\n";
+    auto speedCcValue = avsampler::defaultVideoSpeedControllerValue;
+    speedCcValue = avsampler::videoSpeedValueForMidiEvent(speedCcValue, 1, 100);
+    if (speedCcValue != 100
+        || avsampler::videoSpeedValueForMidiEvent(speedCcValue, 7, 12) != 100
+        || avsampler::videoSpeedValueForMidiEvent(speedCcValue, 1, -10) != 0
+        || avsampler::videoSpeedValueForMidiEvent(speedCcValue, 1, 200) != 127)
+    {
+        std::cerr << "Video speed CC mapping or clamping failed\n";
+        return 1;
+    }
+
+    if (avsampler::videoSpeedMultiplierForControllerValue(0) != 0.5
+        || avsampler::videoSpeedMultiplierForControllerValue(64) != 1.0
+        || avsampler::videoSpeedMultiplierForControllerValue(127) != 1.5
+        || avsampler::videoSpeedMultiplierForControllerValue(-1) != 0.5
+        || avsampler::videoSpeedMultiplierForControllerValue(128) != 1.5)
+    {
+        std::cerr << "Video speed multiplier range failed\n";
+        return 1;
+    }
+
+    std::cout << "Cue note routing and video speed CC mapping passed\n";
     return 0;
 }
