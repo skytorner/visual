@@ -35,10 +35,10 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-004 — Tests de calculs audio et transparence
 
-- Status: Open.
+- Status: Done — tests/build/CI PASS et validation globale utilisateur. Le journal fourni rapporte pluginval AU/VST3 à strictness 4 PASS; strictness 5 n'est pas documenté et le SHA source n'apparaît pas dans le rapport.
 - Priority: P0.
-- Scope: tests déterministes RMS/peak, silence, paramètres extrêmes, passthrough et restauration d'état, idéalement hors DAW.
-- Acceptance: commandes reproductibles + CI courte.
+- Scope: tests déterministes RMS/peak, silence, paramètres extrêmes, accès read-only aux buffers audio; intégration JUCE séparée pour la transparence complète de `processBlock()` et la restauration d'état.
+- Acceptance: commandes reproductibles + CI courte; build macOS et tests JUCE passent. Pluginval et QA hôte du nouvel artefact restent documentés séparément et ne sont pas revendiqués sans résultat.
 
 ### VISUAL-005 — Enveloppe temporellement cohérente
 

@@ -123,3 +123,19 @@ La condition de layouts a été modifiée pour annoncer mono->mono et stereo->st
 **Nouveau rapport utilisateur :** `log audio react2.txt`, sur les fichiers sous `build/AudioReactiveImagePOC_artefacts/Release`. AU `aufx,Arip,Vpoc` et VST3 `AudioReactiveImagePOC.vst3` sont tous deux détectés en **v1.0.0** et terminent `ALL TESTS PASSED` à strictness 5. Le traitement audio, l'automation, l'état, l'éditeur et les bus passent sur 44.1/48/96 kHz, avec buffers 64/128/256/512/1024. La liste des layouts contient **Mono et Stereo** pour les deux formats. `auval` retourne le code 0. Avertissement AU `Current program is -1` toujours présent. Validateur Steinberg VST3 externe **skipped**, chemin non défini. Dual Mono reste un choix de Logic, non un bus JUCE distinct.
 
 **Conclusion ciblée :** bug d'insertion mono corrigé dans Logic et compatibilité pluginval du nouvel artefact validée. `VISUAL-003` est clôturable. Points reportés à la QA technique / tickets suivants : SHA source du build local non consigné, contrôle automatisé des layouts, transparence bit-perfect mono/stéréo, vérification lecture/réactivité détaillée selon mode, restauration d'un ancien projet et REAPER sur ce nouveau build. Les lignes de la matrice historique ci-dessus décrivent encore le POC initial et non une régression actuelle.
+
+## VISUAL-004 — Suite de tests audio (branche en validation)
+
+- [x] Extraction minimale de la mesure RMS/peak et de l'enveloppe dans `Source/AudioSignalAnalysis.h`; `processBlock()` utilise la même logique et conserve le passthrough.
+- [x] Tests C++17 autonomes sur mono, stéréo, silence, buffers vides, tailles 32/64/128/256/512/1024, enveloppe et paramètres extrêmes.
+- [x] Les tests vérifient que `analyseAudio()` ne modifie pas les tableaux sources.
+- [x] Tests locaux Linux : configuration CMake, compilation, CTest 1/1 PASS; compilation avec `-Wall -Wextra -Werror -pedantic` sans erreur.
+- [x] Vérification GitHub Actions sur le head actualisé de la PR avec `.github/workflows/audio-tests.yml` : run `45275406778`, conclusion success.
+- [x] Recompiler AU/VST3/Standalone macOS après ce refactoring; AVSampler_AU compile également.
+- [x] pluginval strictness 4 rapporté PASS par l'utilisateur pour AudioReactive VST3 et AU et AVSampler AU (`log audio react3.txt`); strictness 5 non exécuté/documenté. L'AU mentionne le warning existant `Current program is -1`; le journal ne donne pas le SHA source du build.
+- [x] Test du `processBlock()` complet en mono et stéréo : chaque échantillon de sortie est identique bit à bit à l'entrée, RMS et peak attendus; CTest JUCE 4/4.
+- [x] Tests d'intégration des paramètres APVTS et du `imagePath` après sauvegarde-restauration; CTest JUCE 4/4.
+
+Validation propriétaire : l'utilisateur confirme globalement « on validé » après communication des emplacements de build et fournit ensuite un journal pluginval. Scénarios DAW précis non énumérés; strictness 5 et correspondance SHA du rapport restent non vérifiées.
+
+La formule de lissage **par bloc** n'est pas changée intentionnellement ici : sa dépendance à la taille du buffer reste traitée par VISUAL-005.

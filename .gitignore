@@ -11,3 +11,4 @@ CMakeUserPresets.json
 .vscode/
 .idea/
 *.log
+build-tests/

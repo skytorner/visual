@@ -129,6 +129,25 @@ if(BUILD_TESTING)
     add_test(NAME TimelineMathTests COMMAND TimelineMathTests)
 
     if(APPLE)
+        add_executable(AudioReactiveImageProcessorTests tests/AudioReactiveImageProcessorTests.cpp)
+        target_include_directories(AudioReactiveImageProcessorTests PRIVATE
+            Source
+            "${CMAKE_CURRENT_BINARY_DIR}/AudioReactiveImagePOC_artefacts/JuceLibraryCode"
+            "${JUCE_MODULES_DIR}"
+        )
+        target_compile_features(AudioReactiveImageProcessorTests PRIVATE cxx_std_17)
+        target_compile_definitions(AudioReactiveImageProcessorTests PRIVATE
+            JUCE_WEB_BROWSER=0
+            JUCE_USE_CURL=0
+            JUCE_VST3_CAN_REPLACE_VST2=0
+        )
+        target_link_libraries(AudioReactiveImageProcessorTests PRIVATE
+            AudioReactiveImagePOC
+            juce::juce_audio_utils
+            juce::juce_gui_extra
+        )
+        add_test(NAME AudioReactiveImageProcessorTests COMMAND AudioReactiveImageProcessorTests)
+
         add_executable(AVSamplerCoreTests tests/AVSamplerCoreTests.cpp)
         target_include_directories(AVSamplerCoreTests PRIVATE
             Source

@@ -30,6 +30,15 @@ Ce document définit la boucle légère entre l'humain, Codex et ChatGPT pour `s
 7. Relecture puis merge; si la QA manuelle est nécessaire, laisser PR non fusionnée jusqu'à validation.
 8. Mettre à jour l'état du ticket uniquement lorsque ses critères sont remplis.
 
+## Raccourcis quotidiens sur macOS (Makefile versionné)
+
+- `make` : tests DSP CTest puis compilation JUCE incrémentale; pour la QA complète, il reste à lancer pluginval sur les nouveaux artefacts.
+- `make test` : tests DSP rapides; `make plugin` : build AU/VST3/Standalone.
+- `make status` : branche et SHA à consigner dans les rapports QA.
+- `make install` : copie volontaire des AU/VST3 compilés dans les dossiers utilisateur. **Fermer d'abord Logic Pro et REAPER**; ce n'est pas une étape implicite du build.
+- `make package` : compile et utilise le packaging ZIP macOS déjà existant dans `dist/`.
+- Le `Makefile` n'est qu'une couche de confort autour de CMake/CTest : aucun changement de stack ou de source de vérité. Sur Windows, utiliser les commandes CMake/PowerShell.
+
 ## Changements à haut risque
 
 - DSP : tests reproductibles, aucun lock/allocation/I/O sur audio thread, passthrough préservé.

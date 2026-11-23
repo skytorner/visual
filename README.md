@@ -111,6 +111,30 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build --config Release
 ```
 
+## Fast development commands (macOS)
+
+Use the repository's tracked `Makefile` instead of retyping CMake commands every time. Run these from the repository root:
+
+```bash
+make               # C++ DSP tests + JUCE plugin build (AU, VST3, Standalone)
+make test          # Only fast C++ DSP tests
+make plugin        # Only JUCE plugin build
+make status        # Print branch and commit SHA used for QA
+make help          # Show all shortcuts
+```
+
+The first build may fetch JUCE and take longer. Later invocations reuse `build/` and `build-tests/` incrementally. No Makefile change is needed when switching branches; run `git fetch` / `git switch` as usual.
+
+To test in a DAW, **close Logic Pro / REAPER first**, then deliberately run:
+
+```bash
+make install       # Build and copy AU + VST3 into ~/Library/Audio/Plug-Ins/
+make install-au    # AU only, for Logic Pro
+make install-vst3  # VST3 only, for REAPER
+```
+
+Installation never runs automatically with `make` and copies only to the current user's plugin folders. Restart the DAW after installation. The shortcuts do **not** run pluginval: validate the new AU and VST3 separately for release QA. For a macOS ZIP, `make package` builds and invokes the existing packaging script, writing into `dist/`. On Windows continue using the CMake/PowerShell commands below.
+
 ## Package A Shareable macOS Release ZIP
 
 After building, create a local ZIP that can be shared by download:

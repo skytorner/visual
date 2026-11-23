@@ -229,3 +229,35 @@ Status: POC valide fonctionnellement sur les scénarios audio testés, correctio
 - Logic Pro 13 : utilisateur confirme sélection/insertion sur Mono, Dual Mono, Stereo; pas de preuve séparée de MIDI natif.
 - **Décision : clôture de VISUAL-003 pour le correctif fonctionnel mono**, sans confondre pluginval avec un test null audio ou le validateur Steinberg; SHA local de compilation non consigné, QA nouvelle version sur ancien projet / REAPER non exécutée.
 - Suite : VISUAL-004 tests automatisés audio/layout/transparence; VISUAL-007 qualification des artefacts et packaging.
+
+## VISUAL-004 — Tests de l'analyse audio (2026-11-21)
+
+Status: Needs verification (PR isolée, pas encore distribuée).
+
+- Extraction minimale de `analyseAudio` (RMS/peak multi-canal) et `nextEnvelope` vers un en-tête C++17 sans dépendance JUCE, utilisé par `processBlock`.
+- Le calcul suit les mêmes équations; aucune modification intentionnelle des buffers, paramètres JUCE, versions et identifiants du plugin.
+- Test autonome `cmake -S tests -B build-tests -DCMAKE_BUILD_TYPE=Release` : PASS sur environnement Linux local.
+- `cmake --build build-tests --config Release` : PASS.
+- `ctest --test-dir build-tests --output-on-failure` : PASS (1/1).
+- `g++ -std=c++17 -Wall -Wextra -Werror -pedantic -fsyntax-only tests/AudioSignalAnalysisTests.cpp` : PASS.
+- CMake du plugin / AU/VST3 macOS : NOT RUN sur ce changement; pluginval nouveau build : NOT RUN.
+- CI courte GitHub Actions ajoutée : statut encore inconnu à la création du commit.
+- Limitations : l'analyse pure read-only ne prouve pas le passthrough end-to-end de l'effet; état APVTS et imagePath restent à tester via intégration JUCE. Le lissage temporel reste l'objet de VISUAL-005.
+
+### VISUAL-004 — Raccourcis développeur (2026-11-21)
+
+- Ajout d'un `Makefile` versionné pour `make` (test + build), `make test`, `make plugin`, `make status`, `make install[-au|-vst3]`, `make package` et `make help`.
+- Installation DAW explicitement séparée du build, uniquement sur macOS dans `~/Library/Audio/Plug-Ins/`; elle ne s'exécute jamais via `make` seul.
+- Contrôle de la syntaxe et des commandes Make sur Linux local : `make help` PASS, `make -n` PASS, `make -n install` PASS; `make install-au CMAKE=true` rejette correctement Linux. Les actions réelles macOS d'installation / de build restent NOT RUN.
+
+### VISUAL-004 — Validation d'intégration macOS (2026-11-23)
+
+- La PR #3 est actualisée avec le `main` courant (VISUAL-009 à 012); le merge Git local est sans conflit. La PR reste ouverte.
+- Tests autonomes macOS : `cmake -S tests -B /private/tmp/visual-004-tests -DCMAKE_BUILD_TYPE=Release`, build, puis CTest : PASS, 1/1.
+- Build JUCE Release : `AudioReactiveImagePOC_AU`, `AudioReactiveImagePOC_VST3`, `AudioReactiveImagePOC_Standalone`, `AVSampler_AU`, `AudioReactiveImageProcessorTests`, `TimelineMathTests`, `AVSamplerCoreTests`, `CueRoutingTests` : PASS.
+- CTest JUCE : PASS, 4/4. Le nouveau `AudioReactiveImageProcessorTests` vérifie l'égalité bit-à-bit entrée/sortie de `processBlock()` en mono et stéréo, les valeurs RMS/peak, ainsi que la restauration des six paramètres APVTS et de `imagePath`.
+- Les seuls warnings de compilation observés viennent de JUCE / SDK Apple (Metal déprécié et énumération AppKit); aucun warning du test ajouté après correction de sa comparaison.
+- L'utilisateur fournit `log audio react3.txt` : pluginval strictness 4 **ALL TESTS PASSED** pour AudioReactive VST3 (`AudioReactiveImagePOC.vst3`) et AU (`aufx,Arip,Vpoc`), ainsi que AVSampler AU (`aumu,AVsm,Vpoc`). Warning AU existant `Current program is -1`; strictness 5 non exécuté/documenté.
+- Le log pointe le VST3 vers `/private/tmp/visual-009-build/AudioReactiveImagePOC_artefacts/Release/VST3/AudioReactiveImagePOC.vst3`, mais ne consigne pas le SHA source; la correspondance avec le commit testé n'est donc pas indépendante.
+- Run GitHub Actions `Audio analysis tests` sur le head `c422d56f7470ab50c78caf26b411f4e9743d6f6d` : PASS, run `45278115656`.
+- L'utilisateur confirme globalement : « on validé ». Les scénarios DAW précis ne sont pas détaillés. Un précédent lancement local du binaire pluginval avait échoué avant chargement (`--version`, code 134); le journal utilisateur fournit ensuite un run réussi.

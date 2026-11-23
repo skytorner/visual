@@ -1,4 +1,5 @@
 #include "PluginProcessor.h"
+#include "AudioSignalAnalysis.h"
 #include "PluginEditor.h"
 
 AudioReactiveImagePOCAudioProcessor::AudioReactiveImagePOCAudioProcessor()
@@ -43,40 +44,17 @@ void AudioReactiveImagePOCAudioProcessor::processBlock(juce::AudioBuffer<float>&
     if (resetRequested.exchange(false, std::memory_order_acq_rel))
         envelopeState = 0.0f;
 
-    double sumSquares = 0.0;
-    float peak = 0.0f;
-
-    for (int channel = 0; channel < channelsToAnalyse; ++channel)
-    {
-        const auto* samples = buffer.getReadPointer(channel);
-
-        for (int sample = 0; sample < numSamples; ++sample)
-        {
-            const auto value = samples[sample];
-            sumSquares += static_cast<double>(value) * static_cast<double>(value);
-            peak = juce::jmax(peak, std::abs(value));
-        }
-    }
+    const auto levels = visual::analyseAudio(buffer.getArrayOfReadPointers(), channelsToAnalyse, numSamples);
 
     for (int channel = numInputChannels; channel < numOutputChannels; ++channel)
         buffer.clear(channel, 0, numSamples);
 
-    const auto sampleCount = juce::jmax(1, channelsToAnalyse * numSamples);
-    const auto rms = static_cast<float>(std::sqrt(sumSquares / static_cast<double>(sampleCount)));
-
     const auto sensitivity = parameters.getRawParameterValue(sensitivityParamId)->load();
     const auto smoothing = parameters.getRawParameterValue(smoothingParamId)->load();
-    const auto targetEnvelope = juce::jlimit(0.0f, 1.0f, rms * sensitivity);
+    envelopeState = visual::nextEnvelope(envelopeState, levels.rms, sensitivity, smoothing);
 
-    const auto attackAmount = 0.35f;
-    const auto releaseAmount = juce::jmap(smoothing, 0.0f, 1.0f, 0.22f, 0.025f);
-    const auto envelopeAmount = targetEnvelope > envelopeState ? attackAmount : releaseAmount;
-
-    envelopeState += (targetEnvelope - envelopeState) * envelopeAmount;
-    envelopeState = juce::jlimit(0.0f, 1.0f, envelopeState);
-
-    rmsLevel.store(rms, std::memory_order_relaxed);
-    peakLevel.store(juce::jlimit(0.0f, 1.0f, peak), std::memory_order_relaxed);
+    rmsLevel.store(levels.rms, std::memory_order_relaxed);
+    peakLevel.store(juce::jlimit(0.0f, 1.0f, levels.peak), std::memory_order_relaxed);
     envelopeLevel.store(envelopeState, std::memory_order_relaxed);
 }
 
