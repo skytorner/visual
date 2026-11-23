@@ -24,7 +24,7 @@ Ce document définit la boucle légère entre l'humain, Codex et ChatGPT pour `s
 1. Lire `AGENTS.md` et les docs versionnées.
 2. Choisir **un seul** ticket du backlog, définir les risques et tests avant modification.
 3. Créer `codex/VISUAL-XXX-sujet` depuis main à jour.
-4. Préserver les contrats existants; coder le minimum, ne pas modifier l'identité plugin.
+4. Préserver les contrats existants; pour un produit distinct, créer une cible et identité plugin propres sans migrer silencieusement les anciens projets.
 5. Exécuter les tests locaux accessibles et `git diff --check`; ne pas inventer de tests.
 6. Documenter les fichiers, commandes, PASS/FAIL/NOT RUN, risques et QA humaine restante dans PR/release log.
 7. Relecture puis merge; si la QA manuelle est nécessaire, laisser PR non fusionnée jusqu'à validation.

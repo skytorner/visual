@@ -52,6 +52,23 @@ Les deux tests pluginval ont parcouru audio processing, automation et state à 4
 
 `PASS` = observation manuelle utilisateur ou sortie d'outil explicitement mentionnée. Une vérification non lancée reste `NOT TESTED`. Les résultats POC de novembre sont la référence; chaque nouveau build modifié doit être revérifié. Ne jamais transformer un avertissement pluginval ou une étape ignorée en test PASS.
 
+## VISUAL-009 — Native MIDI Video POC
+
+La nouvelle direction vidéo/MIDI est autorisée le 2026-11-23. Les validations ci-dessous concernent la cible AV Sampler, sans réutiliser les PASS du plugin audio historique.
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Tests CTest note→Cue, NoteOff/non-assignée, priorité, sortie silencieuse et sauvegarde/restauration | PASS | `CueRoutingTests` et `AVSamplerCoreTests`, CTest 2/2 sur le code de cette branche. |
+| Build macOS AU `AVSampler_AU` | PASS | Cible instrument AU compilée; bundle `AVSampler.component` généré. |
+| Plugin audio historique AU/VST3/Standalone | PASS build | `AudioReactiveImagePOC_All` compile depuis cette branche; pas de pluginval/regression DAW sur le nouveau build. |
+| Métadonnées AU instrument/MIDI | PASS statique | `Info.plist` indique le type `aumu`; la config JUCE inclut `JucePlugin_WantsMidiInput=1`. Ce n'est pas un test Logic. |
+| Chargement, lecture, boucle, seek de vidéo | NOT RUN | Test manuel dans l'éditeur avec codecs représentatifs. |
+| Logic Pro: instrument, piano roll, NoteOn et NoteOff | NOT RUN | QA humaine nécessaire; compilation et Info.plist ne prouvent pas la réception effective. |
+| Sauvegarde/réouverture du projet et média | PASS unitaire / NOT RUN DAW | Test C++ de sérialisation/restauration passe; scénario projet Logic et chemin externe non testé. |
+| pluginval strictness 5 | BLOCKED BEFORE PLUGIN LOAD | pluginval 1.0.4 s'aborte à l'initialisation `NSApplication`/AppKit (`_RegisterApplication`, SIGABRT); aucun test plugin ne démarre. Rapport reçu le 2026-11-23. |
+| Latence MIDI → nouvelle image | NOT MEASURED | Aucune précision temporelle revendiquée. |
+| Lecture avec éditeur fermé | NOT TESTED | Dépendance éventuelle du rendu au composant UI à qualifier. |
+
 ## VISUAL-003 — Branche corrective : résultats intermédiaires
 
 La condition de layouts a été modifiée pour annoncer mono->mono et stereo->stereo, sans modification de `processBlock()` ni identifiants plugin/paramètres. La compilation locale AU/VST3/Standalone a été rapportée réussie, avec warnings JUCE/SDK non bloquants. L'utilisateur confirme désormais que Logic Pro 13 **propose/accepte Stéréo, Dual Mono et Mono**. Le « Dual Mono » est un mode de traitement/instanciation de l'hôte Logic, **pas** un troisième layout JUCE ajouté au plugin : le code n'accepte explicitement que mono/mono et stéréo/stéréo.

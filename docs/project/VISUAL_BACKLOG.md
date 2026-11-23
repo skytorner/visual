@@ -1,6 +1,6 @@
 # Visual Backlog
 
-Dernière mise à jour : 2026-11-20. Produit cible : AV Sampler / Audio Reactive MVP.
+Dernière mise à jour : 2026-11-23. Produit prioritaire : AV Sampler, instrument vidéo MIDI natif; POC audio conservé comme cible distincte.
 
 Statuts : `Done` (confirmé), `Open` (à faire), `Needs verification` (à contrôler), `Deferred` (hors phase). P0 nécessaire au MVP; P1 souhaitable avant bêta; P2 itération ultérieure.
 
@@ -13,7 +13,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 - Status: Done (documentation et décisions du 2026-11-20).
 - Priority: P0.
 - Scope: `VISUAL_PRODUCT.md`, `VISUAL_ARCHITECTURE.md`, `VISUAL_DECISIONS.md`, backlog, QA et instructions agent.
-- Acceptance: audio reactive first, cible JUCE native, non-objectifs, règles qualité, contrat de non-régression, résultats POC documentés.
+- Acceptance: JUCE natif; direction produit révisée vers l'instrument vidéo MIDI (VISUAL-009); POC audio conservé sans régression d'identité/état.
 
 ### VISUAL-002 — Skills et outils Codex
 
@@ -61,12 +61,34 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 - Scope: vérifier versions AU/VST3 et build exact, packaging, messages d'installation, qualification signature/notarisation, matrice de compatibilité, pluginval en workflow utile.
 - Acceptance: aucune compatibilité non testée annoncée; limitations clairement visibles.
 
-### VISUAL-008 — Vertical slice MIDI
+### VISUAL-008 — Vertical slice MIDI audio-reactive
 
-- Status: Deferred until Audio Reactive MVP.
+- Status: Superseded by VISUAL-009; le besoin MIDI porte désormais sur une cible vidéo instrument distincte.
 - Priority: P2.
 - Scope: preuve réception MIDI DAW -> note/velocity -> contrôle d'une image -> 4 pads. Pas de 16 pads directement.
-- Acceptance: événement MIDI natif distinct de l'audio réactif prouvé sur un hôte cible.
+- Acceptance: ancien objectif de routage MIDI/audio conservé comme historique, non prioritaire.
+
+### VISUAL-009 — Native MIDI Video POC
+
+- Status: Needs verification — implementation complete; Logic/codec/runtime checks pending; branche `codex/VISUAL-009-native-midi-video-poc`, issue de `main` `741f4b6`.
+- Priority: P0.
+- Scope: ajouter une cible instrument AU silencieuse; charger une vidéo locale; lecture/pause continue et boucle; quatre Cue Points réglables à la position courante; MIDI 36, 38, 40, 41 déclenche les cues; sauvegarder chemin, positions et loop; tests du mapping pur.
+- Exclusions: timeline éditable, mappings personnalisés, 16 pads, MIDI Learn, CC, effets vélocité, export vidéo, transport sync et moteur vidéo personnalisé.
+- Acceptance:
+  - Nouvelle cible et identité AV Sampler, sans modifier plugin audio, identifiants ni état.
+  - Instrument AU accepte NoteOn et produit le silence; NoteOff/non-assignées ignorées; dernier cue valide prioritaire.
+  - UI charge une vidéo locale, lit en continu, boucle, mémorise 4 points, seek puis reprend sur Cue.
+  - État vidéo/Cues/loop restauré; chemin absent récupérable.
+  - Tests mapping, build AU macOS et QA Logic piano roll/lecture/projet réellement exécutés ou marqués NOT RUN.
+  - Limites de latence, codecs, éditeur fermé et synchronisation documentées.
+  - Limite initiale de coalescence des notes sur le tick UI explicitée; mesurer si un tampon fixe devient nécessaire.
+
+### Roadmap après VISUAL-009
+
+- **Phase 2 — Video Sampler UX:** timeline, Cue déplacés, jusqu'à 16 pads, mapping et MIDI Learn (ticket ultérieur).
+- **Phase 3 — MIDI Effects:** effet(s) simples, CC, vélocité, Hold/Toggle/One Shot et lissage (tickets séparés).
+- **Phase 4 — Validation produit:** beat réel, mesures de réactivité, VST3 et DAW additionnels.
+- VISUAL-004 à VISUAL-007 restent des tickets de maintenance du plugin audio, priorité secondaire.
 
 ## Non-objectifs explicites
 

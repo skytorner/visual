@@ -98,6 +98,23 @@ Non versionne:
 | 2026-06-28 | `cmake --build build --config Release --target AudioReactiveImagePOC_VST3` | Pass | Verification locale macOS de la cible VST3 apres correctif; seul warning restant issu de JUCE. |
 | 2026-06-28 | GitHub Release automation | Prepared | Le workflow telecharge les ZIPs macOS/Windows et cree ou met a jour automatiquement la GitHub Release quand un tag `v*` est pousse. |
 
+## VISUAL-009 — Native MIDI Video POC (2026-11-23)
+
+- Direction produit confirmée explicitement par l'utilisateur : instrument MIDI vidéo JUCE natif sans génération audio. AudioReactiveImagePOC reste conservé dans une cible distincte.
+- Audit : le dépôt ne contenait pas de lecteur vidéo ni de routage MIDI. JUCE 8.0.8 inclut `juce_video`/`VideoComponent` pour chargement, lecture et seek macOS; la documentation ne garantit pas la latence ni la vue AU, qui restent à mesurer.
+- Branche dédiée : `codex/VISUAL-009-native-midi-video-poc`, créée depuis `main` GitHub vérifié `741f4b6252cc4514c5e5ffcc38a92d7d41875527`.
+- Phase 1 seulement : une vidéo, 4 cues, notes fixes, boucle, état JUCE et tests MIDI pur. Résultats build/tests et QA Logic à compléter; les anciens résultats audio ne s'appliquent pas.
+
+### Vérifications locales VISUAL-009
+
+- CMake configure en Release avec tests activés et `FETCHCONTENT_SOURCE_DIR_JUCE` pointant vers le cache local JUCE 8.0.8 : PASS.
+- `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU` : PASS; bundle AU `AVSampler.component` généré. Quatre avertissements compilateur viennent de JUCE/SDK Apple (API Metal dépréciées et switch d'événement); aucun avertissement restant dans le code AV Sampler après renommage du paramètre masquant.
+- `cmake --build /private/tmp/visual-009-build --config Release --target AudioReactiveImagePOC_All` : PASS; AU, VST3 et Standalone audio construits depuis cette branche.
+- `ctest --test-dir /private/tmp/visual-009-build --output-on-failure` : PASS, 2/2. Couvre mapping MIDI, NoteOff, notes non assignées, priorité du dernier cue, sortie silencieuse et restauration du chemin/Cues/loop.
+- Inspection de `AVSampler.component/Contents/Info.plist` avec `plutil` : type AU `aumu`, subtype `AVsm`, manufacturer `Vpoc`, version AU encodée 256 (0.1.0); génération CMake indique `JucePlugin_WantsMidiInput=1`.
+- Tentative pluginval 1.0.4 : **non exécutée sur le plugin**; le processus s'aborte dans `AppKit` lors de `NSApplication`/`_RegisterApplication`, confirmé par le rapport utilisateur (SIGABRT). Aucun résultat fonctionnel pluginval.
+- `git diff --check` final : PASS. QA Logic reste NOT RUN; aucune installation/écriture dans les dossiers Audio Units n'a été faite.
+
 ## QA baseline Audio Reactive — 2026-11-20
 
 Status: POC valide fonctionnellement sur les scénarios audio testés, corrections requises avant MVP.
