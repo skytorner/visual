@@ -29,6 +29,8 @@ Logic Pro (piano roll / MIDI)
 - La documentation JUCE expose chargement, lecture et seek sur macOS, mais ne garantit ni latence de seek, ni frame présentation, ni rendu fiable dans chaque vue AU. Mesurer en Logic avant de figer le backend.
 - Granularité effective = blocs MIDI du DAW + ordonnanceur UI + comportement du décodeur/codec; aucune promesse frame-perfect ou sample-accurate.
 - La Phase 1 utilise une mailbox atomique latest-cue : si plusieurs cues arrivent avant le tick UI suivant, seul le plus récent est appliqué. Le séquencement rapide et les pertes éventuelles sont à évaluer en Logic; un tampon fixe sera un ticket séparé si cette limite gêne le scénario réel.
+- VISUAL-010 ajoute `CueTimelineComponent` comme représentation/interactions de timeline; il réutilise l'état des quatre Cue Points existants via `setCuePosition`, sans état de Cue parallèle ni commande de seek lors d'un drag. Les flèches ajustent le Cue sélectionné par pas nominal de 1/30 s (Maj = 10 pas), car `juce::VideoComponent` ne fournit pas de frame rate du média dans l'API utilisée.
+- Les cartes gardent les marqueurs A–D sur la timeline et affichent les noms de note attendus dans Logic pour les notes fixes actuelles: C1/D1/E1/F1. Aucun pad/mapping supplémentaire n'est introduit.
 
 ## Plugin audio existant
 

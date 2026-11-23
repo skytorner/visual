@@ -2,7 +2,7 @@
 
 Dernière mise à jour : 2026-11-23. Produit prioritaire : AV Sampler, instrument vidéo MIDI natif; POC audio conservé comme cible distincte.
 
-Statuts : `Done` (confirmé), `Open` (à faire), `Needs verification` (à contrôler), `Deferred` (hors phase). P0 nécessaire au MVP; P1 souhaitable avant bêta; P2 itération ultérieure.
+Statuts : `Done` (confirmé), `In progress` (en cours), `Open` (à faire), `Needs verification` (à contrôler), `Deferred` (hors phase). P0 nécessaire au MVP; P1 souhaitable avant bêta; P2 itération ultérieure.
 
 Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doivent pas devenir de gros chantiers multidomaines.
 
@@ -86,10 +86,26 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### Roadmap après VISUAL-009
 
-- **Phase 2 — Video Sampler UX:** timeline, Cue déplacés, jusqu'à 16 pads, mapping et MIDI Learn (ticket ultérieur).
+- **Phase 2 — Video Sampler UX:** VISUAL-010 ajoute la timeline et le déplacement des quatre Cue Points existants. 16 pads, mapping éditable et MIDI Learn restent des tickets ultérieurs.
 - **Phase 3 — MIDI Effects:** effet(s) simples, CC, vélocité, Hold/Toggle/One Shot et lissage (tickets séparés).
 - **Phase 4 — Validation produit:** beat réel, mesures de réactivité, VST3 et DAW additionnels.
 - VISUAL-004 à VISUAL-007 restent des tickets de maintenance du plugin audio, priorité secondaire.
+
+### VISUAL-010 — Timeline interactive et Cue Points déplaçables
+
+- Status: Needs verification — l'utilisateur confirme le parcours principal dans Logic (timeline/cartes, drag des quatre cues, lecture continue, nouveaux déclenchements MIDI, save/reload, état Loop ON/OFF). Restent les tests clavier, tailles étroite/large et média absent/remplacé; branche `codex/VISUAL-010-interactive-cue-timeline`, empilée sur VISUAL-009 non intégré à `main`.
+- Priority: P1.
+- Scope: afficher sous la vidéo la durée complète, une règle en secondes, le playhead indépendant et quatre Cue Points colorés; sélectionner et déplacer chaque Cue Point; montrer les quatre cartes avec nom de note et temps; déplacer au clavier.
+- Mapping visible des cartes: MIDI 36/38/40/41 affichés C1/D1/E1/F1 selon le nom d'octave présenté par Logic de l'utilisateur. Les marqueurs de timeline restent A/B/C/D.
+- Exclusions: 16 pads, MIDI Learn, remapping, miniatures, nouveaux effets et refonte du moteur.
+- Acceptance:
+  - L'UI garde la vidéo et les contrôles existants; la timeline reste lisible entre 560 et 1400 px.
+  - Durée vidéo, graduation, playhead, marqueurs A–D et cartes C1/D1/E1/F1 sont synchronisés aux Cue Points existants.
+  - Glisser un marqueur borne sa position entre 0 et la durée; la lecture continue et le playhead ne saute pas.
+  - Cliquer sur marqueur/carte sélectionne le Cue; flèches le déplacent d'une frame nominale de 1/30 s, Maj+flèche de 10 frames.
+  - Les nouveaux temps sont persistés par l'état existant et utilisés par le déclenchement MIDI après déplacement et reload.
+  - Tests automatisés couvrent les conversions temps/pixel, les bornes, le nudging et les noms de notes; smoke tests DAW notés dans la checklist.
+  - L'absence de miniatures et l'absence d'API frame-rate exploitable restent explicites.
 
 ## Non-objectifs explicites
 

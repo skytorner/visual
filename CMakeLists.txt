@@ -92,6 +92,7 @@ if(APPLE)
         PRIVATE
             Source/AVSamplerProcessor.cpp
             Source/AVSamplerEditor.cpp
+            Source/CueTimelineComponent.cpp
     )
 
     target_compile_features(AVSampler PRIVATE cxx_std_17)
@@ -120,6 +121,11 @@ if(BUILD_TESTING)
     target_include_directories(CueRoutingTests PRIVATE Source)
     target_compile_features(CueRoutingTests PRIVATE cxx_std_17)
     add_test(NAME CueRoutingTests COMMAND CueRoutingTests)
+
+    add_executable(TimelineMathTests tests/TimelineMathTests.cpp)
+    target_include_directories(TimelineMathTests PRIVATE Source)
+    target_compile_features(TimelineMathTests PRIVATE cxx_std_17)
+    add_test(NAME TimelineMathTests COMMAND TimelineMathTests)
 
     if(APPLE)
         add_executable(AVSamplerCoreTests tests/AVSamplerCoreTests.cpp)
