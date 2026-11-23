@@ -232,7 +232,7 @@ Status: POC valide fonctionnellement sur les scénarios audio testés, correctio
 
 ## VISUAL-004 — Tests de l'analyse audio (2026-11-21)
 
-Status: Needs verification (PR isolée, pas encore distribuée).
+Status: Done — PR #3 fusionnée dans `main` par le commit `d83663e`; branche distante supprimée. Les validations pluginval fournies sont strictness 4; strictness 5 et le SHA source du journal ne sont pas documentés.
 
 - Extraction minimale de `analyseAudio` (RMS/peak multi-canal) et `nextEnvelope` vers un en-tête C++17 sans dépendance JUCE, utilisé par `processBlock`.
 - Le calcul suit les mêmes équations; aucune modification intentionnelle des buffers, paramètres JUCE, versions et identifiants du plugin.
