@@ -106,7 +106,7 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 
 | Vérification | Statut | Portée |
 | --- | --- | --- |
-| Build Release AU et suites CTest | PASS automatisé | `AVSampler_AU`, `TimelineMathTests`, `AVSamplerCoreTests`, `CueRoutingTests`; CTest 3/3 sur cette branche. |
+| Build, installation AU et suites CTest | PASS binaire / hôte NOT TESTED | AU installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; SHA identique au binaire construit (`6588d64c…e351`). CTest 3/3. |
 | Ordre des cinq zones et composants FX inactifs | PASS statique / UI NOT TESTED | Barre globale, aperçu, timeline, FX « Coming soon », Assigned Pads; la barre FX n'a pas de liaison au moteur/état. |
 | Sélection croisée timeline/pad | PASS statique / Logic NOT TESTED | Les deux composants mettent à jour le même index; aucune action play/seek n'est liée à la sélection. |
 | Notes, Cue IDs et positions des pads | PASS statique | Quatre pads issus des quatre index; libellés A–D, notes du mapping fixe et positions du `ProjectState`. |
