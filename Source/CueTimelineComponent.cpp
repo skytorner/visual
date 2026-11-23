@@ -1,5 +1,5 @@
 #include "CueTimelineComponent.h"
-#include "CueRouting.h"
+#include "SamplerUiComponents.h"
 #include "TimelineMath.h"
 
 #include <algorithm>
@@ -9,11 +9,6 @@ namespace
 {
 constexpr juce::uint32 background = 0xff11151d;
 constexpr juce::uint32 trackFill = 0xff263246;
-const std::array<juce::Colour, CueTimelineComponent::cueCount> cueColours {
-    juce::Colour(0xff42dc86), juce::Colour(0xff3bd5df),
-    juce::Colour(0xffb676f4), juce::Colour(0xffffa04e)
-};
-
 juce::String formatTime(double seconds)
 {
     return juce::String(juce::jmax(0.0, seconds), 2) + " s";
@@ -77,16 +72,7 @@ void CueTimelineComponent::selectCue(int cueIndex)
 
 juce::Rectangle<float> CueTimelineComponent::trackBounds() const
 {
-    return getLocalBounds().toFloat().reduced(14.0f, 0.0f).withY(55.0f).withHeight(52.0f);
-}
-
-juce::Rectangle<float> CueTimelineComponent::cardBounds(int cueIndex) const
-{
-    auto cards = getLocalBounds().toFloat().reduced(8.0f, 0.0f)
-        .withY(static_cast<float>(getHeight()) - 45.0f).withHeight(40.0f);
-    const auto width = cards.getWidth() / static_cast<float>(cueCount);
-    return cards.withX(cards.getX() + width * static_cast<float>(cueIndex))
-        .withWidth(width).reduced(3.0f, 0.0f);
+    return getLocalBounds().toFloat().reduced(14.0f, 0.0f).withY(46.0f).withHeight(42.0f);
 }
 
 std::array<float, CueTimelineComponent::cueCount> CueTimelineComponent::markerLabelCentres(
@@ -147,7 +133,6 @@ void CueTimelineComponent::drawTimeRuler(juce::Graphics& graphics, juce::Rectang
 
 void CueTimelineComponent::paint(juce::Graphics& graphics)
 {
-    auto bounds = getLocalBounds().toFloat();
     graphics.fillAll(juce::Colour(background));
 
     graphics.setColour(juce::Colour(0xffd4dbe7));
@@ -155,10 +140,13 @@ void CueTimelineComponent::paint(juce::Graphics& graphics)
     graphics.drawText("TIMELINE", 10, 4, 120, 24, juce::Justification::centredLeft);
     graphics.setColour(juce::Colour(0xff8793a6));
     graphics.setFont(12.0f);
-    auto summary = juce::String("4 CUE POINTS");
-    if (duration > 0.0)
-        summary += "  ·  " + juce::String(duration, 2) + " s";
-    graphics.drawText(summary, getWidth() - 190, 4, 180, 24, juce::Justification::centredRight);
+    const auto selectedIndex = static_cast<std::size_t>(selectedCue);
+    const auto selectedLabel = juce::String::charToString(
+        static_cast<juce::juce_wchar>('A' + selectedCue));
+    auto summary = "NOW " + formatTime(playhead) + "  ·  CUE " + selectedLabel
+        + " " + formatTime(cuePositions[selectedIndex]);
+    graphics.drawFittedText(summary, getWidth() - 300, 4, 290, 24,
+                            juce::Justification::centredRight, 1);
 
     const auto track = trackBounds();
     graphics.setColour(duration > 0.0 ? juce::Colour(trackFill) : juce::Colour(0xff202630));
@@ -179,7 +167,7 @@ void CueTimelineComponent::paint(juce::Graphics& graphics)
         {
             auto segment = track.withX(track.getX() + track.getWidth() * static_cast<float>(i) / cueCount)
                 .withWidth(track.getWidth() / cueCount);
-            graphics.setColour(cueColours[static_cast<std::size_t>(i)].withAlpha(0.10f));
+            graphics.setColour(avsampler::ui::cueColours[static_cast<std::size_t>(i)].withAlpha(0.10f));
             graphics.fillRect(segment.reduced(1.0f));
         }
 
@@ -190,7 +178,7 @@ void CueTimelineComponent::paint(juce::Graphics& graphics)
         {
             const auto x = static_cast<float>(avsampler::timeline::xAtTime(
                 cuePositions[static_cast<std::size_t>(i)], track.getX(), track.getWidth(), duration));
-            const auto colour = cueColours[static_cast<std::size_t>(i)];
+            const auto colour = avsampler::ui::cueColours[static_cast<std::size_t>(i)];
             const auto labelCentreX = labelCentres[static_cast<std::size_t>(i)];
             auto marker = juce::Rectangle<float>(labelCentreX - 17.0f, 27.0f, 34.0f, 26.0f);
             graphics.setColour(colour);
@@ -220,28 +208,6 @@ void CueTimelineComponent::paint(juce::Graphics& graphics)
                                      playheadX, 33.0f);
         graphics.fillPath(playheadTriangle);
     }
-
-    for (int i = 0; i < cueCount; ++i)
-    {
-        auto card = cardBounds(i);
-        const auto colour = cueColours[static_cast<std::size_t>(i)];
-        graphics.setColour(juce::Colour(0xff1b2636));
-        graphics.fillRoundedRectangle(card, 7.0f);
-        graphics.setColour(i == selectedCue ? colour : colour.withAlpha(0.6f));
-        graphics.drawRoundedRectangle(card, 7.0f, i == selectedCue ? 2.0f : 1.0f);
-        graphics.setColour(colour);
-        graphics.setFont(juce::FontOptions(16.0f).withStyle("Bold"));
-        graphics.drawText(juce::String(avsampler::timeline::midiNoteName(
-                              avsampler::defaultCueMidiNotes[static_cast<std::size_t>(i)])),
-                          static_cast<int>(card.getX()), static_cast<int>(card.getY() + 3.0f),
-                          static_cast<int>(card.getWidth()), 19, juce::Justification::centred);
-        graphics.setColour(juce::Colour(0xffc1cad8));
-        graphics.setFont(12.0f);
-        graphics.drawText(formatTime(cuePositions[static_cast<std::size_t>(i)]),
-                          static_cast<int>(card.getX()), static_cast<int>(card.getY() + 22.0f),
-                          static_cast<int>(card.getWidth()), 16, juce::Justification::centred);
-    }
-    juce::ignoreUnused(bounds);
 }
 
 int CueTimelineComponent::cueAtPoint(juce::Point<float> point, float maximumDistance) const
@@ -284,16 +250,6 @@ void CueTimelineComponent::setCuePositionFromX(int cueIndex, float x)
 void CueTimelineComponent::mouseDown(const juce::MouseEvent& event)
 {
     const auto point = event.position;
-    for (int i = 0; i < cueCount; ++i)
-    {
-        if (cardBounds(i).contains(point))
-        {
-            selectCue(i);
-            grabKeyboardFocus();
-            return;
-        }
-    }
-
     if (duration <= 0.0)
         return;
 
@@ -321,10 +277,7 @@ void CueTimelineComponent::mouseUp(const juce::MouseEvent& event)
 
 void CueTimelineComponent::mouseMove(const juce::MouseEvent& event)
 {
-    auto overCard = false;
-    for (int i = 0; i < cueCount; ++i)
-        overCard = overCard || cardBounds(i).contains(event.position);
-    setMouseCursor(overCard || cueAtPoint(event.position, 20.0f) >= 0
+    setMouseCursor(cueAtPoint(event.position, 20.0f) >= 0
         ? juce::MouseCursor::PointingHandCursor : juce::MouseCursor::NormalCursor);
 }
 

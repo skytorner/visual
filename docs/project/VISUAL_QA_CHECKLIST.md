@@ -100,6 +100,22 @@ La nouvelle direction vidéo/MIDI est autorisée le 2026-11-23. Les validations 
 | Relink/remplacement en état Pause/Loop | NOT TESTED | Vérifier le chargement, Play/Pause conservé, Loop/sélection et cues au temps existant. |
 | Composition UI hôte | NOT TESTED | Header session, barre média/transport, aperçu, timeline et cartes; aucune reprise graphique propriétaire. |
 
+Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, sans rapport de chaque scénario séparé; garder les limites de preuve détaillées ci-dessus.
+
+## VISUAL-012 — Composition UI et pads assignés
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Build Release AU et suites CTest | PASS automatisé | `AVSampler_AU`, `TimelineMathTests`, `AVSamplerCoreTests`, `CueRoutingTests`; CTest 3/3 sur cette branche. |
+| Ordre des cinq zones et composants FX inactifs | PASS statique / UI NOT TESTED | Barre globale, aperçu, timeline, FX « Coming soon », Assigned Pads; la barre FX n'a pas de liaison au moteur/état. |
+| Sélection croisée timeline/pad | PASS statique / Logic NOT TESTED | Les deux composants mettent à jour le même index; aucune action play/seek n'est liée à la sélection. |
+| Notes, Cue IDs et positions des pads | PASS statique | Quatre pads issus des quatre index; libellés A–D, notes du mapping fixe et positions du `ProjectState`. |
+| Eject | PASS automatisé de préservation d'état / UI Logic NOT TESTED | Test processeur vérifie qu'effacer le chemin ne modifie pas Cue timings, Loop, sélection ni préférence de lecture; action visuelle à confirmer. |
+| Ratio du preview | PASS source JUCE / média réel NOT TESTED | `juce::VideoComponent` centre la taille native dans le rectangle fourni, sans étirement. |
+| Nom long, durée et états média dans l'hôte | NOT TESTED | À vérifier avec une vidéo, un nom long, un fichier absent et une erreur de lecture. |
+| Resize, captures avant/après même taille | NOT TESTED | Comparaison demandée; la nouvelle build doit être capturée dans un hôte réel. |
+| Play/Pause, Loop, MIDI, relink, sauvegarde et reload | NOT TESTED sur build VISUAL-012 | Contrats laissés inchangés; retester le build exact dans Logic avant de revendiquer la QA UI. |
+
 ## VISUAL-003 — Branche corrective : résultats intermédiaires
 
 La condition de layouts a été modifiée pour annoncer mono->mono et stereo->stereo, sans modification de `processBlock()` ni identifiants plugin/paramètres. La compilation locale AU/VST3/Standalone a été rapportée réussie, avec warnings JUCE/SDK non bloquants. L'utilisateur confirme désormais que Logic Pro 13 **propose/accepte Stéréo, Dual Mono et Mono**. Le « Dual Mono » est un mode de traitement/instanciation de l'hôte Logic, **pas** un troisième layout JUCE ajouté au plugin : le code n'accepte explicitement que mono/mono et stéréo/stéréo.

@@ -22,7 +22,7 @@ Le plugin `AudioReactiveImagePOC` conserve l'analyse RMS/peak/envelope, le passt
 
 ## Phase 2 — Video Sampler UX
 
-Première étape : timeline interactive et déplacement des quatre Cue Points existants (VISUAL-010). Les 16 pads, le mapping éditable et MIDI Learn restent des étapes ultérieures, après validation de cette UX.
+VISUAL-010 fournit la timeline interactive pour déplacer les quatre Cue Points; VISUAL-011 conserve l'état de session et permet de relier un média; VISUAL-012 organise l'instrument en barre globale, aperçu, timeline, emplacements FX désactivés et quatre pads assignés. Les 16 pads, le mapping éditable, MIDI Learn et les effets actifs restent des étapes ultérieures.
 
 ## Phase 3 — MIDI Effects
 

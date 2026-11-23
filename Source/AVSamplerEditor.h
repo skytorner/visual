@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "AVSamplerProcessor.h"
 #include "CueTimelineComponent.h"
+#include "SamplerUiComponents.h"
 
 class AVSamplerAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                              private juce::Timer
@@ -17,19 +18,23 @@ public:
 private:
     void timerCallback() override;
     void chooseVideo();
+    void ejectVideo();
     void loadVideoAtPath(const juce::String& path, bool resumePlayback);
-    void updateMediaPresentation(const juce::String& path);
+    void updateMediaPresentation(const juce::String& path, double durationSeconds = 0.0);
     void updateLoopButtonAppearance(bool enabled);
 
     AVSamplerAudioProcessor& audioProcessor;
     juce::VideoComponent videoComponent { false };
     CueTimelineComponent timelineComponent;
+    FxControlBar fxControlBar;
+    AssignedPadsComponent assignedPadsComponent;
     juce::Label titleLabel;
     juce::Label sessionInfoLabel;
     juce::Label mediaInfoLabel;
-    juce::TextButton loadButton { "Load Media" };
-    juce::TextButton playButton { "Play" };
-    juce::TextButton loopButton { "Loop" };
+    juce::TextButton loadButton { "Load" };
+    SamplerIconButton playButton { "Playback", SamplerIconButton::Icon::play };
+    SamplerIconButton loopButton { "Loop", SamplerIconButton::Icon::loop };
+    SamplerIconButton ejectButton { "Eject Media", SamplerIconButton::Icon::eject };
     juce::Label positionLabel;
     juce::Label statusLabel;
     std::unique_ptr<juce::FileChooser> fileChooser;

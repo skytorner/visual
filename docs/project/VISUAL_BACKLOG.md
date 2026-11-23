@@ -88,13 +88,14 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 - **Phase 2 — Video Sampler UX:** VISUAL-010 ajoute la timeline et le déplacement des quatre Cue Points existants. 16 pads, mapping éditable et MIDI Learn restent des tickets ultérieurs.
 - **Phase 2b — Session et médias:** VISUAL-011 organise les contrôles de session/média, restaure les états de lecture/Loop et facilite le relink sans déplacer les Cue Points.
+- **Phase 2c — Composition de l'instrument:** VISUAL-012 réorganise les commandes, l'aperçu, la timeline, les emplacements FX inactifs et les quatre pads déjà assignés.
 - **Phase 3 — MIDI Effects:** effet(s) simples, CC, vélocité, Hold/Toggle/One Shot et lissage (tickets séparés).
 - **Phase 4 — Validation produit:** beat réel, mesures de réactivité, VST3 et DAW additionnels.
 - VISUAL-004 à VISUAL-007 restent des tickets de maintenance du plugin audio, priorité secondaire.
 
 ### VISUAL-010 — Timeline interactive et Cue Points déplaçables
 
-- Status: Needs verification — l'utilisateur confirme le parcours principal dans Logic (timeline/cartes, drag des quatre cues, lecture continue, nouveaux déclenchements MIDI, save/reload, état Loop ON/OFF). Restent les tests clavier, tailles étroite/large et média absent/remplacé; branche `codex/VISUAL-010-interactive-cue-timeline`, empilée sur VISUAL-009 non intégré à `main`.
+- Status: Done — parcours principal confirmé par l'utilisateur dans Logic puis fusionné à `main`; la composition UI VISUAL-012 traite séparément la présentation des pads. Raccourcis clavier, petites tailles et quelques cas média restent hors de la QA rapportée.
 - Priority: P1.
 - Scope: afficher sous la vidéo la durée complète, une règle en secondes, le playhead indépendant et quatre Cue Points colorés; sélectionner et déplacer chaque Cue Point; montrer les quatre cartes avec nom de note et temps; déplacer au clavier.
 - Mapping visible des cartes: MIDI 36/38/40/41 affichés C1/D1/E1/F1 selon le nom d'octave présenté par Logic de l'utilisateur. Les marqueurs de timeline restent A/B/C/D.
@@ -110,7 +111,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-011 — Session et gestion du média
 
-- Status: In progress — branche `codex/VISUAL-011-session-media-management`, empilée sur VISUAL-010.
+- Status: Done — session/média validés par l'utilisateur et fusionnés à `main`.
 - Priority: P1.
 - Scope: organiser l'éditeur avec un en-tête AV Sampler/session, une barre média/transport, l'aperçu vidéo et la timeline/Cues existants; afficher le média courant ou son état manquant; charger, relier ou remplacer le média.
 - Persistance: chemin média, Cue Points, Loop ON/OFF, lecture demandée (Pause/Play) et Cue sélectionné restent dans l'état du projet hôte. Une ancienne session sans champ lecture démarre automatiquement la vidéo lors de l'ouverture de l'éditeur.
@@ -122,6 +123,24 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
   - Tests couvrent save/reload des nouveaux champs, rétrocompatibilité des anciens états et préservation des Cue timings au relink.
   - QA Logic vérifie ouverture/réouverture, Play/Pause, Loop, déplacement/relink média et sauvegarde/réouverture.
 - Exclusions: session autonome/fichier `.avsampler`, plusieurs vidéos simultanées, banque de médias, 16 pads, waveform/audio slicing, tempo/sync et reproduction du design propriétaire des captures.
+
+### VISUAL-012 — Composition UI de l'instrument vidéo
+
+- Status: In progress — branche `codex/VISUAL-012-serato-inspired-ui`, créée depuis `main` après fusion de VISUAL-009/010/011.
+- Priority: P1.
+- Scope: réorganiser l'éditeur JUCE en cinq zones ordonnées: Global Control Bar, Video Preview, Timeline + Cue Points, FX / Pad Controls Bar, Assigned Pads. Reprendre les groupes et la densité fonctionnelle des références, garder l'identité AV Sampler.
+- Media: afficher le vrai nom de fichier et la durée disponible; tronquer les noms longs avec tooltip; ajouter Eject uniquement avec une sémantique non destructive (retirer la référence active sans effacer les Cue Points ni les autres états).
+- Timeline/pads: conserver quatre Cue Points A–D, MIDI 36/38/40/41 affiché C1/D1/E1/F1, positions et état partagés. Sélectionner depuis timeline ou pad met en évidence les deux sans déclencher la vidéo.
+- FX: afficher des emplacements « Coming soon » inactifs et purement présentatifs; ne pas ajouter paramètres, fausses valeurs, comportements ou propriétés de persistance.
+- Acceptance:
+  - Cinq zones visibles et dans le bon ordre, dans une fenêtre redimensionnable sans scroll interne superflu; l'aperçu conserve le ratio/rendu vidéo existant.
+  - Play/Pause, Loop, chargement, relink/remplacement, déplacement Cue, déclenchement MIDI et persistance gardent les contrats VISUAL-009/010/011.
+  - Eject ferme le média actif et vide seulement son chemin sauvegardé; les Cue timings, Loop, Cue sélectionné et préférence de lecture sont préservés.
+  - Chaque pad expose Cue A–D, note MIDI, position temporelle et sélection; la sélection timeline/pad reste synchronisée et ne déclenche pas la lecture.
+  - La zone FX ne modifie pas le moteur ni l'état du projet.
+  - Build/tests JUCE exécutés; QA Logic réelle distingue ce qui est observé de ce qui reste à tester.
+  - Rapport avec captures avant/après à dimensions comparables et mise à jour des documents de suivi.
+- Exclusions: nouveaux effets, 16 pads, MIDI Learn, changement de notes, mapping éditable, nouveau moteur vidéo, création d'un nouveau thème ou copie des logos/icônes/style propriétaire.
 
 ## Non-objectifs explicites
 

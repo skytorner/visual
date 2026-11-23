@@ -178,6 +178,15 @@ Non versionne:
 - Build finale installée dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; SHA-256 `8b39418aa3877e8750ca0ea34a0269911b36633d131624ef6e72b8b939ddc4ef`. La build intermédiaire VISUAL-011 est sauvegardée dans `/private/tmp/AVSampler.component.pre-visual011-r2`; VISUAL-010 reste dans `/private/tmp/AVSampler.component.pre-visual011-session`.
 - QA visuelle Logic de l'ouverture/autoplay, pause restaurée, bouton Relink, timings après remplacement et nouvelle composition: NOT TESTED après cette installation.
 
+## VISUAL-012 — Composition UI et pads assignés
+
+- Cadrage créé depuis les références fournies : cinq zones dans cet ordre, design AV Sampler conservé; aucun effet actif, 16 pads ni MIDI Learn.
+- Branche dédiée `codex/VISUAL-012-serato-inspired-ui` depuis `main` à `f76d6f2`.
+- JUCE natif : barre Play/Pause/Loop/média/durée/Eject, VideoComponent existant, timeline sans cartes, `FxControlBar` inertiel et `AssignedPadsComponent` à quatre pads liés au même index Cue.
+- Eject ferme le média et retire sa référence de session sans modifier Cue timings, Loop, Cue sélectionné ou lecture demandée. Relink/remplacement reste le chemin VISUAL-011.
+- Validation exécutée : `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU TimelineMathTests AVSamplerCoreTests CueRoutingTests -j 4` PASS; CTest 3/3; `git diff --check` PASS. SHA-256 build AU: `6588d64c5b99ef69b73be1c1a8621ccae5a1dca851f28a9773780342b3eee351`.
+- UI visuelle dans Logic, états de média, sélection croisée, Eject, redimensionnement et captures avant/après de taille comparable : NOT TESTED. L'accès CUA à Logic a expiré (`-10005 timeoutReached`); aucune fausse capture de maquette n'est substituée à une capture réelle.
+
 ## QA baseline Audio Reactive — 2026-11-20
 
 Status: POC valide fonctionnellement sur les scénarios audio testés, corrections requises avant MVP.
