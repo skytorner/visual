@@ -126,7 +126,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-012 — Composition UI de l'instrument vidéo
 
-- Status: In progress — branche `codex/VISUAL-012-serato-inspired-ui`, créée depuis `main` après fusion de VISUAL-009/010/011.
+- Status: Done — l'utilisateur confirme que Logic charge la mise à jour visuelle et que tout fonctionne. Les captures avant/après comparables ne sont pas archivées; les contrôles manuels détaillés ne sont pas itemisés dans son retour.
 - Priority: P1.
 - Scope: réorganiser l'éditeur JUCE en cinq zones ordonnées: Global Control Bar, Video Preview, Timeline + Cue Points, FX / Pad Controls Bar, Assigned Pads. Reprendre les groupes et la densité fonctionnelle des références, garder l'identité AV Sampler.
 - Media: afficher le vrai nom de fichier et la durée disponible; tronquer les noms longs avec tooltip; ajouter Eject uniquement avec une sémantique non destructive (retirer la référence active sans effacer les Cue Points ni les autres états).

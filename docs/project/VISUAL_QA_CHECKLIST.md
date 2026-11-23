@@ -106,15 +106,15 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 
 | Vérification | Statut | Portée |
 | --- | --- | --- |
-| Build, installation AU et suites CTest | PASS binaire / hôte NOT TESTED | AU installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; SHA identique au binaire construit (`6588d64c…e351`). CTest 3/3. |
-| Ordre des cinq zones et composants FX inactifs | PASS statique / UI NOT TESTED | Barre globale, aperçu, timeline, FX « Coming soon », Assigned Pads; la barre FX n'a pas de liaison au moteur/état. |
-| Sélection croisée timeline/pad | PASS statique / Logic NOT TESTED | Les deux composants mettent à jour le même index; aucune action play/seek n'est liée à la sélection. |
+| Build, installation AU et suites CTest | PASS build/install; Logic PASS rapporté | AU installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; SHA identique au binaire construit (`6588d64c…e351`). CTest 3/3. L'utilisateur confirme que Logic charge la mise à jour et que tout fonctionne. |
+| Ordre des cinq zones et composants FX inactifs | PASS statique + confirmation visuelle utilisateur | L'utilisateur confirme voir la mise à jour visuelle dans Logic; aucun détail zone par zone ni capture d'écran archivée. |
+| Sélection croisée timeline/pad | PASS code + confirmation globale utilisateur | Les deux composants mettent à jour le même index; le retour « tout fonctionne » n'énumère pas séparément ce contrôle. |
 | Notes, Cue IDs et positions des pads | PASS statique | Quatre pads issus des quatre index; libellés A–D, notes du mapping fixe et positions du `ProjectState`. |
 | Eject | PASS automatisé de préservation d'état / UI Logic NOT TESTED | Test processeur vérifie qu'effacer le chemin ne modifie pas Cue timings, Loop, sélection ni préférence de lecture; action visuelle à confirmer. |
 | Ratio du preview | PASS source JUCE / média réel NOT TESTED | `juce::VideoComponent` centre la taille native dans le rectangle fourni, sans étirement. |
 | Nom long, durée et états média dans l'hôte | NOT TESTED | À vérifier avec une vidéo, un nom long, un fichier absent et une erreur de lecture. |
-| Resize, captures avant/après même taille | NOT TESTED | Comparaison demandée; la nouvelle build doit être capturée dans un hôte réel. |
-| Play/Pause, Loop, MIDI, relink, sauvegarde et reload | NOT TESTED sur build VISUAL-012 | Contrats laissés inchangés; retester le build exact dans Logic avant de revendiquer la QA UI. |
+| Resize, captures avant/après même taille | CAPTURES NOT ARCHIVED | L'utilisateur confirme l'UI mise à jour; aucune paire avant/après de taille comparable n'est archivée. |
+| Play/Pause, Loop, MIDI, relink, sauvegarde et reload | PASS global rapporté, pas itemisé | L'utilisateur dit que tout fonctionne sur la mise à jour; les essais individuels ne sont pas détaillés. |
 
 ## VISUAL-003 — Branche corrective : résultats intermédiaires
 
