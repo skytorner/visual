@@ -87,6 +87,19 @@ La nouvelle direction vidéo/MIDI est autorisée le 2026-11-23. Les validations 
 | Tailles d'éditeur étroite et large | NOT TESTED | Vérifier limites 560–1400 px et lisibilité des cartes. |
 | Aucun média / média remplacé / cues aux bornes et proches | NOT TESTED | Smoke test visuel et absence d'erreur/crash. |
 
+## VISUAL-011 — Session et gestion du média
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Persistance Play/Pause/Loop et Cue sélectionné | PASS automatisé | `AVSamplerCoreTests`: round-trip de Loop, Pause, sélection et Cue timings. |
+| Ancien état sans préférence de lecture | PASS automatisé / UI NOT TESTED | Restauration par défaut `playbackRequested=true`, Cue 1 sélectionné; autoplay réel au premier ouverture à confirmer dans Logic. |
+| Restauration d'une session en Pause | PASS automatisé / UI NOT TESTED | L'état Pause est restauré par sérialisation; vérifier ensuite l'éditeur dans Logic. |
+| Changement de chemin sans perte de timings | PASS automatisé | `AVSamplerCoreTests` remplace le chemin média et vérifie que les quatre Cue timings restent identiques. |
+| Build et copie AU macOS VISUAL-011 | PASS build/install | Bundle installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; SHA `8b39418aa3877e8750ca0ea34a0269911b36633d131624ef6e72b8b939ddc4ef` identique à l'artefact. |
+| Média déplacé/absent et action Relink | NOT TESTED | Vérifier l'état visuel Missing media et le sélecteur de relink dans Logic. |
+| Relink/remplacement en état Pause/Loop | NOT TESTED | Vérifier le chargement, Play/Pause conservé, Loop/sélection et cues au temps existant. |
+| Composition UI hôte | NOT TESTED | Header session, barre média/transport, aperçu, timeline et cartes; aucune reprise graphique propriétaire. |
+
 ## VISUAL-003 — Branche corrective : résultats intermédiaires
 
 La condition de layouts a été modifiée pour annoncer mono->mono et stereo->stereo, sans modification de `processBlock()` ni identifiants plugin/paramètres. La compilation locale AU/VST3/Standalone a été rapportée réussie, avec warnings JUCE/SDK non bloquants. L'utilisateur confirme désormais que Logic Pro 13 **propose/accepte Stéréo, Dual Mono et Mono**. Le « Dual Mono » est un mode de traitement/instanciation de l'hôte Logic, **pas** un troisième layout JUCE ajouté au plugin : le code n'accepte explicitement que mono/mono et stéréo/stéréo.

@@ -87,6 +87,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 ### Roadmap après VISUAL-009
 
 - **Phase 2 — Video Sampler UX:** VISUAL-010 ajoute la timeline et le déplacement des quatre Cue Points existants. 16 pads, mapping éditable et MIDI Learn restent des tickets ultérieurs.
+- **Phase 2b — Session et médias:** VISUAL-011 organise les contrôles de session/média, restaure les états de lecture/Loop et facilite le relink sans déplacer les Cue Points.
 - **Phase 3 — MIDI Effects:** effet(s) simples, CC, vélocité, Hold/Toggle/One Shot et lissage (tickets séparés).
 - **Phase 4 — Validation produit:** beat réel, mesures de réactivité, VST3 et DAW additionnels.
 - VISUAL-004 à VISUAL-007 restent des tickets de maintenance du plugin audio, priorité secondaire.
@@ -106,6 +107,21 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
   - Les nouveaux temps sont persistés par l'état existant et utilisés par le déclenchement MIDI après déplacement et reload.
   - Tests automatisés couvrent les conversions temps/pixel, les bornes, le nudging et les noms de notes; smoke tests DAW notés dans la checklist.
   - L'absence de miniatures et l'absence d'API frame-rate exploitable restent explicites.
+
+### VISUAL-011 — Session et gestion du média
+
+- Status: In progress — branche `codex/VISUAL-011-session-media-management`, empilée sur VISUAL-010.
+- Priority: P1.
+- Scope: organiser l'éditeur avec un en-tête AV Sampler/session, une barre média/transport, l'aperçu vidéo et la timeline/Cues existants; afficher le média courant ou son état manquant; charger, relier ou remplacer le média.
+- Persistance: chemin média, Cue Points, Loop ON/OFF, lecture demandée (Pause/Play) et Cue sélectionné restent dans l'état du projet hôte. Une ancienne session sans champ lecture démarre automatiquement la vidéo lors de l'ouverture de l'éditeur.
+- Acceptance:
+  - Le nouvel éditeur conserve le design AV Sampler; seules les positions/groupes d'éléments s'inspirent des références jointes.
+  - Réouvrir une session restaure Loop, sélection, état Play/Pause; par défaut compatible aux anciens états, la vidéo démarre dès l'ouverture si aucun état lecture n'existe.
+  - Un chemin manquant est signalé avec le nom du fichier et une action Relink; choisir le bon fichier ou un média de remplacement actualise le chemin et garde les temps absolus des Cue Points.
+  - Remplacer un média respecte l'état de lecture actuel; il ne réinitialise pas Loop ni les Cue Points.
+  - Tests couvrent save/reload des nouveaux champs, rétrocompatibilité des anciens états et préservation des Cue timings au relink.
+  - QA Logic vérifie ouverture/réouverture, Play/Pause, Loop, déplacement/relink média et sauvegarde/réouverture.
+- Exclusions: session autonome/fichier `.avsampler`, plusieurs vidéos simultanées, banque de médias, 16 pads, waveform/audio slicing, tempo/sync et reproduction du design propriétaire des captures.
 
 ## Non-objectifs explicites
 

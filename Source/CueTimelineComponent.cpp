@@ -55,6 +55,26 @@ void CueTimelineComponent::setActiveCue(int cueIndex)
     repaint();
 }
 
+void CueTimelineComponent::setSelectedCue(int cueIndex)
+{
+    if (cueIndex < 0 || cueIndex >= cueCount || selectedCue == cueIndex)
+        return;
+
+    selectedCue = cueIndex;
+    repaint();
+}
+
+void CueTimelineComponent::selectCue(int cueIndex)
+{
+    if (cueIndex < 0 || cueIndex >= cueCount)
+        return;
+
+    selectedCue = cueIndex;
+    if (onCueSelected)
+        onCueSelected(cueIndex);
+    repaint();
+}
+
 juce::Rectangle<float> CueTimelineComponent::trackBounds() const
 {
     return getLocalBounds().toFloat().reduced(14.0f, 0.0f).withY(55.0f).withHeight(52.0f);
@@ -268,9 +288,8 @@ void CueTimelineComponent::mouseDown(const juce::MouseEvent& event)
     {
         if (cardBounds(i).contains(point))
         {
-            selectedCue = i;
+            selectCue(i);
             grabKeyboardFocus();
-            repaint();
             return;
         }
     }
@@ -281,10 +300,9 @@ void CueTimelineComponent::mouseDown(const juce::MouseEvent& event)
     const auto hitCue = cueAtPoint(point, 20.0f);
     if (hitCue >= 0)
     {
-        selectedCue = hitCue;
+        selectCue(hitCue);
         draggedCue = hitCue;
         grabKeyboardFocus();
-        repaint();
     }
 }
 
