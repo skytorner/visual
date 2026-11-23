@@ -21,11 +21,12 @@ ctest --test-dir build-tests --output-on-failure
 
 The standalone test CMake project does not fetch JUCE and does not change the plugin build. CI runs the same command on Linux.
 
+On macOS, the repository's root CMake project also builds `AudioReactiveImageProcessorTests`. This JUCE-linked integration test passes real mono/stereo buffers through `processBlock()` and checks bit-identical samples, reported RMS/peak levels, and restoration of APVTS parameters plus `imagePath`.
+
 ## What this does NOT prove
 
-- The **full plugin** audio passthrough and bus layout, including host-specific mono/stereo negotiation.
-- Saved-state / image-path restoration in JUCE; previous pluginval state checks apply only to the earlier build.
-- Mac AU/VST3 compilation of this change; re-run the normal macOS build and pluginval before merging.
+- Host-specific mono/stereo negotiation and end-to-end DAW output are not proven by the processor test.
+- Pluginval on the newly built AU/VST3 remains a separate check.
 - Real-time attack/release invariance across different sample rates and buffer durations (VISUAL-005).
 - Native MIDI input, currently out of scope.
 

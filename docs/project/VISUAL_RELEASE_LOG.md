@@ -249,3 +249,13 @@ Status: Needs verification (PR isolée, pas encore distribuée).
 - Ajout d'un `Makefile` versionné pour `make` (test + build), `make test`, `make plugin`, `make status`, `make install[-au|-vst3]`, `make package` et `make help`.
 - Installation DAW explicitement séparée du build, uniquement sur macOS dans `~/Library/Audio/Plug-Ins/`; elle ne s'exécute jamais via `make` seul.
 - Contrôle de la syntaxe et des commandes Make sur Linux local : `make help` PASS, `make -n` PASS, `make -n install` PASS; `make install-au CMAKE=true` rejette correctement Linux. Les actions réelles macOS d'installation / de build restent NOT RUN.
+
+### VISUAL-004 — Validation d'intégration macOS (2026-11-23)
+
+- La PR #3 est actualisée avec le `main` courant (VISUAL-009 à 012); le merge Git local est sans conflit. La PR reste ouverte.
+- Tests autonomes macOS : `cmake -S tests -B /private/tmp/visual-004-tests -DCMAKE_BUILD_TYPE=Release`, build, puis CTest : PASS, 1/1.
+- Build JUCE Release : `AudioReactiveImagePOC_AU`, `AudioReactiveImagePOC_VST3`, `AudioReactiveImagePOC_Standalone`, `AVSampler_AU`, `AudioReactiveImageProcessorTests`, `TimelineMathTests`, `AVSamplerCoreTests`, `CueRoutingTests` : PASS.
+- CTest JUCE : PASS, 4/4. Le nouveau `AudioReactiveImageProcessorTests` vérifie l'égalité bit-à-bit entrée/sortie de `processBlock()` en mono et stéréo, les valeurs RMS/peak, ainsi que la restauration des six paramètres APVTS et de `imagePath`.
+- Les seuls warnings de compilation observés viennent de JUCE / SDK Apple (Metal déprécié et énumération AppKit); aucun warning du test ajouté après correction de sa comparaison.
+- pluginval du nouveau build : NOT RUN sur le plugin. Le binaire local s'arrête au code 134 avec `--version`, avant toute validation ou chargement; aucune installation AU/VST3 ni QA DAW n'a été faite.
+- Le run GitHub Actions PASS historique (#44947982385) concerne l'ancien head de PR; un nouveau run doit valider le head actualisé avant de marquer la CI courante PASS.
