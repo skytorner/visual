@@ -1,5 +1,28 @@
 # Visual Release Log
 
+## VISUAL-013 — Premier effet vidéo piloté par MIDI CC
+
+Date : 2026-11-23. Branche : `codex/VISUAL-013-midi-speed-cc`.
+
+### Portée
+
+- Speed est le premier slot FX actif. MIDI CC1 est mappé sur 0,5×–1,5×, valeur 64 = 1×.
+- Le processeur publie la valeur CC via un atomique; l'éditeur applique `VideoComponent::setPlaySpeed()` sur le thread message, y compris après chargement asynchrone.
+- La valeur est incluse dans l'état du projet; les sessions anciennes sans propriété démarrent à 1×. Les autres slots restent désactivés.
+
+### Vérifications
+
+| Date | Commande / QA | Résultat | Notes |
+| --- | --- | --- | --- |
+| 2026-11-23 | `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU CueRoutingTests AVSamplerCoreTests TimelineMathTests AudioReactiveImageProcessorTests -j 4` | PASS | Cibles AU et tests compilées; avertissements non bloquants du SDK macOS dans les modules JUCE Metal/AppKit. |
+| 2026-11-23 | `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release` | PASS, 4/4 | CueRoutingTests, TimelineMathTests, AudioReactiveImageProcessorTests et AVSamplerCoreTests. |
+| 2026-11-23 | `git diff --check` | PASS | Aucun problème whitespace détecté. |
+| 2026-11-23 | Logic Pro : modulation du clavier intégré pilote la vitesse du Cue en cours | PASS manuel rapporté | L'utilisateur confirme que jouer sur la modulation change la vitesse du pad en cours. |
+| 2026-11-24 | Logic Pro : CC1 aux extrêmes 0 et 127 | PASS manuel rapporté | L'utilisateur confirme les réponses très lente / très rapide. En fermant le clavier intégré, la modulation revient à 0 et le mapping place Speed à 0,5×. |
+| — | Logic Pro : neutralité CC1 à 64 et save/reload | NOT TESTED | Le comportement principal et les extrêmes sont confirmés; ces cas restent à vérifier séparément. |
+
+pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefact AU est généré dans `/private/tmp/visual-009-build/AVSampler_artefacts/Release/AU/AVSampler.component`; l'installation locale n'est pas consignée ici.
+
 ## Initial Setup
 
 Status: Planning.

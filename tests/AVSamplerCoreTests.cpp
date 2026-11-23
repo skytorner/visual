@@ -25,6 +25,7 @@ int main()
     midi.addEvent(juce::MidiMessage::noteOn(1, 36, static_cast<juce::uint8>(100)), 0);
     midi.addEvent(juce::MidiMessage::noteOn(1, 38, static_cast<juce::uint8>(100)), 4);
     midi.addEvent(juce::MidiMessage::noteOff(1, 38), 8);
+    midi.addEvent(juce::MidiMessage::controllerEvent(1, 1, 100), 12);
     processor.processBlock(audio, midi);
     if (! check(processor.consumePendingCue() == 1, "NoteOn/last Cue priority failed"))
         return 1;
@@ -39,6 +40,10 @@ int main()
     midi.addEvent(juce::MidiMessage::noteOn(1, 37, static_cast<juce::uint8>(100)), 4);
     processor.processBlock(audio, midi);
     if (! check(processor.consumePendingCue() == -1, "NoteOff/unassigned note triggered a Cue"))
+        return 1;
+
+    if (! check(processor.getProjectState().speedMidiCcValue == 100,
+                "MIDI CC 1 did not update the video speed state"))
         return 1;
 
     processor.setVideoPath("/tmp/av-sampler-reference.mov");
@@ -63,6 +68,8 @@ int main()
     if (! check(! state.playbackRequested, "Paused playback state did not restore"))
         return 1;
     if (! check(state.selectedCueIndex == 2, "Selected Cue did not restore"))
+        return 1;
+    if (! check(state.speedMidiCcValue == 100, "Video speed MIDI CC did not restore"))
         return 1;
 
     constexpr double expectedPositions[] { 0.25, 1.5, 3.75, 8.0 };
@@ -113,7 +120,10 @@ int main()
     if (! check(legacyProjectState.playbackRequested && legacyProjectState.selectedCueIndex == 0,
                 "Legacy session did not default to autoplay with the first Cue selected"))
         return 1;
+    if (! check(legacyProjectState.speedMidiCcValue == avsampler::defaultVideoSpeedControllerValue,
+                "Legacy session did not default video speed to 1x"))
+        return 1;
 
-    std::cout << "AV Sampler MIDI processing and state tests passed\n";
+    std::cout << "AV Sampler MIDI processing, speed CC, and state tests passed\n";
     return 0;
 }

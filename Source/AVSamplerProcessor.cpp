@@ -33,15 +33,21 @@ void AVSamplerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     juce::ignoreUnused(noDenormals);
 
     auto latestCueIndex = -1;
+    auto latestSpeedCcValue = speedMidiCcValue.load(std::memory_order_relaxed);
     for (const auto metadata : midiMessages)
     {
         const auto& message = metadata.getMessage();
         latestCueIndex = avsampler::latestCueForMidiEvent(
             latestCueIndex, message.getNoteNumber(), message.isNoteOn());
+
+        if (message.isController())
+            latestSpeedCcValue = avsampler::videoSpeedValueForMidiEvent(
+                latestSpeedCcValue, message.getControllerNumber(), message.getControllerValue());
     }
 
     if (latestCueIndex >= 0)
         pendingCueIndex.store(latestCueIndex, std::memory_order_release);
+    speedMidiCcValue.store(latestSpeedCcValue, std::memory_order_release);
 
     // This is a visual instrument; it never generates or passes audio.
     buffer.clear();
@@ -113,6 +119,7 @@ void AVSamplerAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
     state.setProperty("loopEnabled", snapshot.loopEnabled, nullptr);
     state.setProperty("playbackRequested", snapshot.playbackRequested, nullptr);
     state.setProperty("selectedCueIndex", snapshot.selectedCueIndex, nullptr);
+    state.setProperty("speedMidiCcValue", snapshot.speedMidiCcValue, nullptr);
 
     for (int i = 0; i < cueCount; ++i)
         state.setProperty("cue" + juce::String(i + 1), snapshot.cuePositionsSeconds[static_cast<std::size_t>(i)], nullptr);
@@ -135,6 +142,9 @@ void AVSamplerAudioProcessor::setStateInformation(const void* data, int sizeInBy
         newState.playbackRequested = static_cast<bool>(restored.getProperty("playbackRequested", true));
         newState.selectedCueIndex = juce::jlimit(0, cueCount - 1,
             static_cast<int>(restored.getProperty("selectedCueIndex", 0)));
+        newState.speedMidiCcValue = juce::jlimit(0, 127,
+            static_cast<int>(restored.getProperty("speedMidiCcValue",
+                avsampler::defaultVideoSpeedControllerValue)));
 
         for (int i = 0; i < cueCount; ++i)
         {
@@ -144,6 +154,7 @@ void AVSamplerAudioProcessor::setStateInformation(const void* data, int sizeInBy
                 std::isfinite(seconds) && seconds >= 0.0 ? seconds : 0.0;
         }
 
+        speedMidiCcValue.store(newState.speedMidiCcValue, std::memory_order_release);
         const juce::ScopedLock lock(projectStateLock);
         projectState = std::move(newState);
     }
@@ -152,7 +163,9 @@ void AVSamplerAudioProcessor::setStateInformation(const void* data, int sizeInBy
 AVSamplerAudioProcessor::ProjectState AVSamplerAudioProcessor::getProjectState() const
 {
     const juce::ScopedLock lock(projectStateLock);
-    return projectState;
+    auto snapshot = projectState;
+    snapshot.speedMidiCcValue = speedMidiCcValue.load(std::memory_order_acquire);
+    return snapshot;
 }
 
 void AVSamplerAudioProcessor::setVideoPath(const juce::String& path)

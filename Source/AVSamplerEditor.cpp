@@ -128,6 +128,8 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     const auto state = audioProcessor.getProjectState();
     displayedLoopState = state.loopEnabled;
     displayedPlaybackRequested = state.playbackRequested;
+    fxControlBar.setSpeedMultiplier(
+        avsampler::videoSpeedMultiplierForControllerValue(state.speedMidiCcValue));
     updateLoopButtonAppearance(displayedLoopState);
     timelineComponent.setSelectedCue(state.selectedCueIndex);
     assignedPadsComponent.setCueData(state.cuePositionsSeconds, state.selectedCueIndex);
@@ -181,6 +183,15 @@ void AVSamplerAudioProcessorEditor::resized()
 void AVSamplerAudioProcessorEditor::timerCallback()
 {
     const auto state = audioProcessor.getProjectState();
+    if (state.speedMidiCcValue != lastAppliedSpeedMidiCcValue)
+    {
+        const auto speedMultiplier = avsampler::videoSpeedMultiplierForControllerValue(state.speedMidiCcValue);
+        fxControlBar.setSpeedMultiplier(speedMultiplier);
+        if (videoComponent.isVideoOpen())
+            videoComponent.setPlaySpeed(speedMultiplier);
+        lastAppliedSpeedMidiCcValue = state.speedMidiCcValue;
+    }
+
     if (state.videoPath != loadedVideoPath)
         loadVideoAtPath(state.videoPath, state.playbackRequested);
 
@@ -401,6 +412,8 @@ void AVSamplerAudioProcessorEditor::loadVideoAtPath(const juce::String& path, bo
         }
 
         safeThis->videoComponent.setAudioVolume(0.0f);
+        safeThis->videoComponent.setPlaySpeed(avsampler::videoSpeedMultiplierForControllerValue(
+            safeThis->audioProcessor.getProjectState().speedMidiCcValue));
         if (resumePlayback)
             safeThis->videoComponent.play();
         safeThis->previousVideoPosition = 0.0;

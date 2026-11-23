@@ -26,7 +26,7 @@ VISUAL-010 fournit la timeline interactive pour déplacer les quatre Cue Points;
 
 ## Phase 3 — MIDI Effects
 
-Premiers effets simples, contrôles MIDI CC, mapping de vélocité, modes Hold/Toggle/One Shot et lissage.
+VISUAL-013 active le premier effet visuel : Speed piloté par MIDI CC 1, entre 0,5× et 1,5× avec 1× à la valeur 64. La valeur est restaurée avec la session. Level, Color et Glitch restent des emplacements inactifs; vélocité, Hold/Toggle/One Shot et lissage restent à cadrer séparément.
 
 ## Phase 4 — Validation produit
 
