@@ -136,4 +136,6 @@ La condition de layouts a été modifiée pour annoncer mono->mono et stereo->st
 - [x] Test du `processBlock()` complet en mono et stéréo : chaque échantillon de sortie est identique bit à bit à l'entrée, RMS et peak attendus; CTest JUCE 4/4.
 - [x] Tests d'intégration des paramètres APVTS et du `imagePath` après sauvegarde-restauration; CTest JUCE 4/4.
 
+Validation propriétaire : l'utilisateur confirme globalement « on validé » après communication des emplacements de build. Scénarios DAW précis non énumérés; pluginval reste non exécuté (voir ci-dessus).
+
 La formule de lissage **par bloc** n'est pas changée intentionnellement ici : sa dépendance à la taille du buffer reste traitée par VISUAL-005.

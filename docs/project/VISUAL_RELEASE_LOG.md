@@ -259,3 +259,4 @@ Status: Needs verification (PR isolée, pas encore distribuée).
 - Les seuls warnings de compilation observés viennent de JUCE / SDK Apple (Metal déprécié et énumération AppKit); aucun warning du test ajouté après correction de sa comparaison.
 - pluginval du nouveau build : NOT RUN sur le plugin. Le binaire local s'arrête au code 134 avec `--version`, avant toute validation ou chargement; aucune installation AU/VST3 ni QA DAW n'a été faite.
 - Run GitHub Actions `Audio analysis tests` sur le head `75a327d19a3bb680e444f0c803da171f67d64089` : PASS, run `45275406778`. L'ancien run `44947982385` concerne le head précédent.
+- Après communication des chemins d'artefacts, l'utilisateur confirme globalement : « on validé ». Les scénarios individuels de DAW ne sont pas détaillés; pluginval demeure NOT RUN et le binaire local échoue avant chargement du plugin.
