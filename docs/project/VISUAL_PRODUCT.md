@@ -44,7 +44,7 @@ Distribution ciblée : POC macOS/AU -> validation Logic Pro -> VST3 et autres DA
 
 ## Média
 
-Le plugin sauvegarde la référence (chemin) de la vidéo, pas ses pixels. Si le fichier est absent, afficher un état récupérable et permettre de sélectionner un nouveau média. Ne jamais promettre la portabilité du média entre machines.
+Le plugin sauvegarde la référence (chemin) de la vidéo, pas ses pixels. Si le fichier est absent, afficher un état récupérable et permettre de relier le fichier déplacé ou sélectionner un remplacement sans modifier les Cue timings. Le projet hôte conserve aussi l'état Loop, l'état Play/Pause demandé et le Cue sélectionné; les anciens états sans préférence de lecture démarrent la vidéo à l'ouverture de l'éditeur. Ne jamais promettre la portabilité du média entre machines.
 
 ## Source de vérité
 

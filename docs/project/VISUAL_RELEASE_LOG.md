@@ -168,6 +168,16 @@ Non versionne:
 - Cela supersède le statut antérieur « QA visuelle après installation non exécutée » pour ce parcours. Les tests clavier, tailles d'éditeur, absence/remplacement de média et les logs restent à vérifier.
 - CTest reste PASS 3/3 et build AU PASS (SHA `c15b3f0c95f4a6f1338992b404d91f52f4977694fab5b567412155717100cd66`). La vérification `auval` antérieure n'avait pas trouvé le composant; Logic confirme maintenant le chargement réel.
 
+## VISUAL-011 — Session et gestion du média
+
+- Branche dédiée `codex/VISUAL-011-session-media-management`, empilée sur VISUAL-010.
+- Composition principale: titre AV SAMPLER et mention de session hôte, barre Load/Relink/Replace Media + Play/Pause/Loop + média courant/durée, aperçu vidéo, timeline/Cues existants; palette conservée.
+- L'état JUCE inclut désormais `playbackRequested` et `selectedCueIndex`; les états antérieurs à ces propriétés se restaurent en autoplay/Cue 1. Loop, position des quatre cues et chemin média conservent le même schéma.
+- Un chemin absent affiche le fichier manquant et le bouton Relink Media. Choisir le fichier met à jour seulement la référence; Cue timings, Loop et préférence lecture ne sont pas réinitialisés.
+- `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU TimelineMathTests AVSamplerCoreTests CueRoutingTests -j 4`: PASS; `ctest --test-dir /private/tmp/visual-009-build --output-on-failure`: PASS, 3/3; `git diff --check`: PASS.
+- Build finale installée dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; SHA-256 `8b39418aa3877e8750ca0ea34a0269911b36633d131624ef6e72b8b939ddc4ef`. La build intermédiaire VISUAL-011 est sauvegardée dans `/private/tmp/AVSampler.component.pre-visual011-r2`; VISUAL-010 reste dans `/private/tmp/AVSampler.component.pre-visual011-session`.
+- QA visuelle Logic de l'ouverture/autoplay, pause restaurée, bouton Relink, timings après remplacement et nouvelle composition: NOT TESTED après cette installation.
+
 ## QA baseline Audio Reactive — 2026-11-20
 
 Status: POC valide fonctionnellement sur les scénarios audio testés, corrections requises avant MVP.

@@ -20,13 +20,16 @@ public:
     void setTimelineData(double durationSeconds, double playheadSeconds,
                          const std::array<double, cueCount>& positions);
     void setActiveCue(int cueIndex);
+    void setSelectedCue(int cueIndex);
     std::function<void(int, double)> onCuePositionChanged;
+    std::function<void(int)> onCueSelected;
 
 private:
     juce::Rectangle<float> trackBounds() const;
     juce::Rectangle<float> cardBounds(int cueIndex) const;
     std::array<float, cueCount> markerLabelCentres(juce::Rectangle<float> track) const;
     int cueAtPoint(juce::Point<float> point, float maximumDistance) const;
+    void selectCue(int cueIndex);
     void setCuePositionFromX(int cueIndex, float x);
     void drawTimeRuler(juce::Graphics& graphics, juce::Rectangle<float> track) const;
 

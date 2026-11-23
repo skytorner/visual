@@ -17,13 +17,17 @@ public:
 private:
     void timerCallback() override;
     void chooseVideo();
-    void loadVideoAtPath(const juce::String& path);
+    void loadVideoAtPath(const juce::String& path, bool resumePlayback);
+    void updateMediaPresentation(const juce::String& path);
     void updateLoopButtonAppearance(bool enabled);
 
     AVSamplerAudioProcessor& audioProcessor;
     juce::VideoComponent videoComponent { false };
     CueTimelineComponent timelineComponent;
-    juce::TextButton loadButton { "Load Video" };
+    juce::Label titleLabel;
+    juce::Label sessionInfoLabel;
+    juce::Label mediaInfoLabel;
+    juce::TextButton loadButton { "Load Media" };
     juce::TextButton playButton { "Play" };
     juce::TextButton loopButton { "Loop" };
     juce::Label positionLabel;
@@ -37,6 +41,7 @@ private:
     bool loopRestartPending = false;
     int loopRestartWaitTicks = 0;
     int activeCueIndex = -1;
+    bool displayedPlaybackRequested = true;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AVSamplerAudioProcessorEditor)
 };

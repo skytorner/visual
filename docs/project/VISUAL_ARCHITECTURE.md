@@ -19,7 +19,7 @@ Logic Pro (piano roll / MIDI)
   -> timer UI consomme le Cue, seek puis reprend la vidéo
   -> juce::VideoComponent / module juce_video / backend vidéo natif macOS
 
-État JUCE : chemin vidéo, positions Cue, boucle
+État JUCE : chemin vidéo, positions Cue, boucle, lecture demandée, Cue sélectionné
 ```
 
 - `processBlock()` ne décode ni ne charge un média, ne seek pas et n'appelle pas l'UI. Les actions vidéo sont exécutées sur le thread message.
@@ -31,6 +31,8 @@ Logic Pro (piano roll / MIDI)
 - La Phase 1 utilise une mailbox atomique latest-cue : si plusieurs cues arrivent avant le tick UI suivant, seul le plus récent est appliqué. Le séquencement rapide et les pertes éventuelles sont à évaluer en Logic; un tampon fixe sera un ticket séparé si cette limite gêne le scénario réel.
 - VISUAL-010 ajoute `CueTimelineComponent` comme représentation/interactions de timeline; il réutilise l'état des quatre Cue Points existants via `setCuePosition`, sans état de Cue parallèle ni commande de seek lors d'un drag. Les flèches ajustent le Cue sélectionné par pas nominal de 1/30 s (Maj = 10 pas), car `juce::VideoComponent` ne fournit pas de frame rate du média dans l'API utilisée.
 - Les cartes gardent les marqueurs A–D sur la timeline et affichent les noms de note attendus dans Logic pour les notes fixes actuelles: C1/D1/E1/F1. Aucun pad/mapping supplémentaire n'est introduit.
+- VISUAL-011 compose l'éditeur en en-tête session/média, commandes de transport, aperçu vidéo et timeline/Cues. L'état reste un seul `ProjectState` dans le preset/projet du DAW, sans fichier de session parallèle.
+- Les nouvelles propriétés `playbackRequested` et `selectedCueIndex` sont rétrocompatibles: absence de propriété lecture dans un ancien état signifie autoplay et sélection Cue 1. Un chemin média absent reste mémorisé; le relink change seulement le chemin et préserve les Cue timings absolus, Loop et préférence de lecture.
 
 ## Plugin audio existant
 
@@ -49,7 +51,7 @@ DAW (effet audio) -> processBlock() -> RMS / Peak / Envelope -> atomics
 1. Aucun mutex, I/O, décodage vidéo, seek bloquant, allocation dynamique ou appel UI dans `processBlock()`.
 2. Routage MIDI par mapping fixe et communication audio -> UI bornée/non bloquante; métriques séparées pour demande et arrivée visible.
 3. Instance isolation : lecteur, vidéo et état indépendants.
-4. État sauvegardé via les callbacks JUCE; référence vidéo externe, Cue Points et loop restaurés.
+4. État sauvegardé via les callbacks JUCE; référence vidéo externe, Cue Points, Loop, préférence de lecture et Cue sélectionné restaurés.
 5. Erreur de média : fichier absent ou illisible ne fait pas planter le plugin et reste remplaçable.
 6. Ne pas modifier l'identité ni l'état du POC audio.
 

@@ -111,6 +111,8 @@ void AVSamplerAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
     juce::ValueTree state("AVSamplerState");
     state.setProperty("videoPath", snapshot.videoPath, nullptr);
     state.setProperty("loopEnabled", snapshot.loopEnabled, nullptr);
+    state.setProperty("playbackRequested", snapshot.playbackRequested, nullptr);
+    state.setProperty("selectedCueIndex", snapshot.selectedCueIndex, nullptr);
 
     for (int i = 0; i < cueCount; ++i)
         state.setProperty("cue" + juce::String(i + 1), snapshot.cuePositionsSeconds[static_cast<std::size_t>(i)], nullptr);
@@ -130,6 +132,9 @@ void AVSamplerAudioProcessor::setStateInformation(const void* data, int sizeInBy
         ProjectState newState;
         newState.videoPath = restored.getProperty("videoPath").toString();
         newState.loopEnabled = static_cast<bool>(restored.getProperty("loopEnabled", false));
+        newState.playbackRequested = static_cast<bool>(restored.getProperty("playbackRequested", true));
+        newState.selectedCueIndex = juce::jlimit(0, cueCount - 1,
+            static_cast<int>(restored.getProperty("selectedCueIndex", 0)));
 
         for (int i = 0; i < cueCount; ++i)
         {
@@ -169,6 +174,21 @@ void AVSamplerAudioProcessor::setLoopEnabled(bool shouldLoop)
 {
     const juce::ScopedLock lock(projectStateLock);
     projectState.loopEnabled = shouldLoop;
+}
+
+void AVSamplerAudioProcessor::setPlaybackRequested(bool shouldPlay)
+{
+    const juce::ScopedLock lock(projectStateLock);
+    projectState.playbackRequested = shouldPlay;
+}
+
+void AVSamplerAudioProcessor::setSelectedCueIndex(int cueIndex)
+{
+    if (cueIndex < 0 || cueIndex >= cueCount)
+        return;
+
+    const juce::ScopedLock lock(projectStateLock);
+    projectState.selectedCueIndex = cueIndex;
 }
 
 int AVSamplerAudioProcessor::consumePendingCue() noexcept

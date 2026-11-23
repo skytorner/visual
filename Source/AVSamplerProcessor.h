@@ -14,6 +14,8 @@ public:
         juce::String videoPath;
         std::array<double, cueCount> cuePositionsSeconds {};
         bool loopEnabled = false;
+        bool playbackRequested = true;
+        int selectedCueIndex = 0;
     };
 
     AVSamplerAudioProcessor();
@@ -46,6 +48,8 @@ public:
     void setVideoPath(const juce::String& path);
     void setCuePosition(int cueIndex, double positionSeconds);
     void setLoopEnabled(bool shouldLoop);
+    void setPlaybackRequested(bool shouldPlay);
+    void setSelectedCueIndex(int cueIndex);
     int consumePendingCue() noexcept;
 
 private:
