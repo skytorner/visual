@@ -1,63 +1,51 @@
 # AV Sampler — Vision produit et périmètre
 
-Date de cadrage : 2026-11-20. Dépôt de travail : `skytorner/visual`.
+Date de cadrage : 2026-11-23. Dépôt : `skytorner/visual`.
 
 ## Vision
 
-AV Sampler est un instrument visuel pour les musiciens et beatmakers travaillant dans un DAW. Il transforme des événements musicaux en réactions graphiques. Le but est d'obtenir un résultat visuel dès la première minute, sans quitter l'environnement musical.
+**AV Sampler — Play video like an instrument.** AV Sampler est un instrument visuel natif JUCE pour les musiciens et beatmakers travaillant dans un DAW. Les notes MIDI déclenchent des Cue Points d'une vidéo locale; le DAW enregistre et rejoue la performance. Le premier produit ne génère pas de son.
 
-L'approche produit est **progressive** et repose sur le POC JUCE/C++ déjà fonctionnel.
+La direction évolue volontairement du POC audio vers un sampler vidéo MIDI natif. Le plugin audio existant est conservé comme cible distincte pendant la transition; ses identifiants, paramètres et projets ne changent pas.
 
-### Phase A — Audio Reactive MVP (priorité actuelle)
+## Phase 1 — Native MIDI Video POC (priorité actuelle)
 
-Parcours : piste audio/instrument produisant du son -> plugin d'effet audio -> analyse RMS/peak/envelope -> animation d'une image PNG/JPG -> sauvegarde/réouverture dans le projet DAW.
+Parcours : instrument AU dans Logic Pro -> vidéo locale -> lecture continue et boucle -> quatre Cue Points configurables -> notes MIDI du piano roll qui déclenchent les Cue Points.
 
-Fonctions existantes à préserver :
-- Analyse audio RMS, peak et enveloppe; audio passthrough.
-- Image unique chargée localement, transformations scale/rotation/opacity et six contrôles existants.
-- Sauvegarde des paramètres et du chemin d'image; message explicite lorsque l'image n'est plus accessible.
-- Plusieurs instances indépendantes dans un projet; AU/VST3/Standalone générés par CMake.
+Critère de réussite : une région de quatre notes jouée dans Logic déclenche successivement les quatre moments configurés de la vidéo.
 
-Périmètre MVP :
-- Stabilisation de l'entrée mono et stéréo sans altérer le signal.
-- Tests reproductibles du traitement DSP, paramètres et cycle de vie du plugin.
-- Vérification de la cohérence de l'enveloppe selon taille de buffer et sample rate; correction ciblée si le test démontre un problème.
-- Packaging/documentation suffisamment robustes pour une bêta macOS limitée.
-- Conserver le rendu natif JUCE tant qu'il est adéquat.
+Une seule vidéo et une seule tête de lecture. Ne pas revendiquer une précision frame-perfect ni une faible latence de seek sans mesures sur des codecs et hôtes représentatifs.
 
-Non-objectifs de ce MVP :
-- Réception MIDI native, mapping note/pad, 4/16 pads, MIDI Learn.
-- Export vidéo synchronisé, FFT/bandes, onset/beat detection, scènes, marketplace, VJ stage, Web/cloud.
-- TouchDesigner comme runtime, WebView React/TypeScript, moteur GPU/shaders et nouveau backend.
-- Compatibilité Windows ou avec tous les DAW revendiquée sans preuve.
+## POC audio conservé
 
-### Phase B — MIDI et pads (après stabilisation)
+Le plugin `AudioReactiveImagePOC` conserve l'analyse RMS/peak/envelope, le passthrough, le rendu d'image et ses contrôles. Son identité et son comportement restent séparés d'AV Sampler; il n'est pas la cible produit prioritaire.
 
-Cible : Note On/Off, velocity, mapping de notes vers 4 pads, images distinctes et réglages indépendants. Le mode Audio Reactive reste disponible. Valider d'abord un vertical slice MIDI DAW -> événement -> rendu, sans déclarer que le POC actuel traite déjà le MIDI.
+## Phase 2 — Video Sampler UX
 
-### Phases ultérieures (à requalifier selon usages)
+VISUAL-010 fournit la timeline interactive pour déplacer les quatre Cue Points; VISUAL-011 conserve l'état de session et permet de relier un média; VISUAL-012 organise l'instrument en barre globale, aperçu, timeline, emplacements FX désactivés et quatre pads assignés. Les 16 pads, le mapping éditable, MIDI Learn et les effets actifs restent des étapes ultérieures.
 
-16 pads, scènes/presets riches, export vidéo, FFT, animations avancées, éventuellement Web/desktop. TouchDesigner est acceptable comme laboratoire créatif externe, non comme dépendance obligatoire du plugin.
+## Phase 3 — MIDI Effects
 
-## Utilisateur et proposition de valeur
+Premiers effets simples, contrôles MIDI CC, mapping de vélocité, modes Hold/Toggle/One Shot et lissage.
 
-Utilisateur initial : beatmaker/producteur sur macOS, notamment Logic Pro. Premier succès : charger une image sur une piste, écouter et constater un rendu qui suit le son sans changer la musique.
+## Phase 4 — Validation produit
 
-Distribution ciblée : POC local -> MVP stable -> bêta macOS sur quelques DAW effectivement validés -> éventuel élargissement Windows/cross-platform.
+Tester sur un beat réel la vidéo, la région MIDI, les Cue Points, un effet déclenché par note et un effet piloté par contrôleur. Mesurer la réactivité avant d'annoncer des propriétés temporelles.
 
-## Définition de fini de l'Audio Reactive MVP
+## Hors périmètre initial
 
-- Insertion sur pistes mono et stéréo des hôtes ciblés, sans modification intentionnelle du son.
-- Les paramètres et le comportement visuel se restaurent dans la limite des règles de média documentées.
-- Les problèmes connus d'image manquante donnent un état propre et récupérable.
-- Tests automatiques DSP et validation AU/VST3 de base passent; QA manuelle pertinente documentée.
-- Aucun crash, lock ou opération de fichiers dans le thread audio; avertissements et limitations connus explicités.
-- Les validations sont faites sur la version exacte distribuée, sans confondre POC historique et nouveau build.
+Polyphonie vidéo, plusieurs lecteurs, moteur 3D, export vidéo, séquenceur MIDI interne, synchronisation frame-perfect, marketplace et gestion de plugins tiers.
 
-## Média : décision temporaire
+## Utilisateur et distribution
 
-Le POC enregistre le **chemin**, pas les pixels de l'image. Une image déplacée ou supprimée produit un message et peut être remplacée. C'est acceptable provisoirement pour une bêta limitée avec limitation explicite; la portabilité des projets entre machines et l'embarquement/recopie des images sont différés, et ne doivent pas être présentés comme résolus.
+Utilisateur initial : beatmaker/producteur sur macOS, notamment Logic Pro. Premier succès : programmer quatre notes dans une région MIDI et rejouer la performance visuelle correspondante.
+
+Distribution ciblée : POC macOS/AU -> validation Logic Pro -> VST3 et autres DAW qualifiés ensuite -> éventuel élargissement multiplateforme.
+
+## Média
+
+Le plugin sauvegarde la référence (chemin) de la vidéo, pas ses pixels. Si le fichier est absent, afficher un état récupérable et permettre de relier le fichier déplacé ou sélectionner un remplacement sans modifier les Cue timings. Le projet hôte conserve aussi l'état Loop, l'état Play/Pause demandé et le Cue sélectionné; les anciens états sans préférence de lecture démarrent la vidéo à l'ouverture de l'éditeur. Ne jamais promettre la portabilité du média entre machines.
 
 ## Source de vérité
 
-Les décisions durables sont dans `VISUAL_DECISIONS.md`, les tickets dans `VISUAL_BACKLOG.md`, les preuves et limites des tests dans `VISUAL_QA_CHECKLIST.md`. Les contenus locaux `.codex/` peuvent aider Codex mais ne font pas autorité pour un clone neuf.
+Décisions durables : `VISUAL_DECISIONS.md`; tickets : `VISUAL_BACKLOG.md`; preuves de tests : `VISUAL_QA_CHECKLIST.md`.

@@ -1,61 +1,62 @@
 # AV Sampler — Architecture minimale
 
-Cadrage : 2026-11-20. État : POC AudioReactiveImagePOC existant, pas refonte.
+Cadrage : 2026-11-23. L'ancien plugin audio est conservé; AV Sampler est une cible instrument JUCE distincte.
 
-## Stack conservé
+## Stack et identité
 
-- JUCE 8.0.8 (référence épinglée dans CMake), C++17, CMake.
-- Builds AU macOS, VST3 et Standalone; aucun changement de stack imposé.
-- UI JUCE native : pas de WebView, React, TypeScript, TouchDesigner ou rendu GPU dans le MVP.
-- Ne pas changer les identifiants de plugin, manufacturer, bundle, ni IDs de paramètres existants sans plan de migration des projets DAW. Ne pas renommer le binaire existant dans les corrections de stabilité.
+- JUCE 8.0.8, C++17 et CMake restent la stack.
+- `AudioReactiveImagePOC` garde ses identifiants, paramètres, formats et état historiques.
+- AV Sampler utilise une nouvelle identité et commence comme instrument AU macOS. La qualification VST3/Standalone et des autres hôtes est ultérieure.
+- Interface JUCE native; pas de WebView, React, TouchDesigner ou nouveau runtime.
 
-## Contrats actuels
+## Architecture Phase 1
 
 ```text
-DAW (audio effect) -> AudioProcessor::processBlock()
-                   -> RMS / Peak / Envelope -> atomics
-                   -> AudioProcessorEditor (timer UI) -> image / transforms
+Logic Pro (piano roll / MIDI)
+  -> AVSamplerAudioProcessor::processBlock (instrument, sortie audio silencieuse)
+  -> mapping NoteOn: MIDI 36, 38, 40, 41 -> Cue 1..4
+  -> publication bornée sans verrou/allocation vers l'éditeur
+  -> timer UI consomme le Cue, seek puis reprend la vidéo
+  -> juce::VideoComponent / module juce_video / backend vidéo natif macOS
 
-State APVTS + imagePath -> sauvegarde/restauration du projet DAW
+État JUCE : chemin vidéo, positions Cue, boucle, lecture demandée, Cue sélectionné
 ```
 
-- Le MIDI est explicitement désactivé (`NEEDS_MIDI_INPUT FALSE`, `acceptsMidi() == false`), et les messages MIDI sont ignorés. Un instrument MIDI déclenche un son *avant* l'effet; le POC réagit à l'audio produit, pas aux notes MIDI.
-- Le buffer audio reste inchangé, sauf nécessité technique avec canaux supplémentaires; le traitement audio n'appelle ni interface, ni chargement de fichiers, ni mutex.
-- `PluginProcessor` traite les données et expose les métriques; `PluginEditor` charge/dessine l'image et affiche les contrôles.
-- Les paramètres JUCE/APVTS et l'extension média sont restaurés depuis l'état; la portabilité des chemins externes n'est pas garantie.
+- `processBlock()` ne décode ni ne charge un média, ne seek pas et n'appelle pas l'UI. Les actions vidéo sont exécutées sur le thread message.
+- NoteOff n'arrête pas le lecteur. Notes non assignées ignorées. Le Cue valide le plus récent est prioritaire.
+- Une seule vidéo, un lecteur et une tête de lecture. `CueTimelineComponent` est la vue éditable des quatre Cue existants; elle n'introduit pas d'état de Cue parallèle.
+- Lecture continue, boucle et restauration passent par le composant JUCE. Le média reste externe; chemin absent récupérable.
+- La documentation JUCE expose chargement, lecture et seek sur macOS, mais ne garantit ni latence de seek, ni frame présentation, ni rendu fiable dans chaque vue AU. Mesurer en Logic avant de figer le backend.
+- Granularité effective = blocs MIDI du DAW + ordonnanceur UI + comportement du décodeur/codec; aucune promesse frame-perfect ou sample-accurate.
+- La Phase 1 utilise une mailbox atomique latest-cue : si plusieurs cues arrivent avant le tick UI suivant, seul le plus récent est appliqué. Le séquencement rapide et les pertes éventuelles sont à évaluer en Logic; un tampon fixe sera un ticket séparé si cette limite gêne le scénario réel.
+- VISUAL-010 ajoute `CueTimelineComponent` comme représentation/interactions de timeline; il réutilise l'état des quatre Cue Points existants via `setCuePosition`, sans état de Cue parallèle ni commande de seek lors d'un drag. Les flèches ajustent le Cue sélectionné par pas nominal de 1/30 s (Maj = 10 pas), car `juce::VideoComponent` ne fournit pas de frame rate du média dans l'API utilisée.
+- Les cartes gardent les marqueurs A–D sur la timeline et affichent les noms de note attendus dans Logic pour les notes fixes actuelles: C1/D1/E1/F1. Aucun pad/mapping supplémentaire n'est introduit.
+- VISUAL-011 compose l'éditeur en en-tête session/média, commandes de transport, aperçu vidéo et timeline/Cues. L'état reste un seul `ProjectState` dans le preset/projet du DAW, sans fichier de session parallèle.
+- Les nouvelles propriétés `playbackRequested` et `selectedCueIndex` sont rétrocompatibles: absence de propriété lecture dans un ancien état signifie autoplay et sélection Cue 1. Un chemin média absent reste mémorisé; le relink change seulement le chemin et préserve les Cue timings absolus, Loop et préférence de lecture.
+- VISUAL-012 garde les responsabilités d'éditeur dans JUCE natif. `CueTimelineComponent` ne dessine plus les cartes de notes; `AssignedPadsComponent` lit le même `ProjectState` et sélectionne le même index sans envoyer de NoteOn ni seek. `FxControlBar` est une vue sans callback ou propriété moteur. `SamplerIconButton` ne commande que Play/Pause, Loop et Eject. Le composant vidéo JUCE centre la taille native dans son rectangle avec `RectanglePlacement::centred`, sans étirement.
+- Eject ferme le `VideoComponent` et vide seulement `videoPath`. Cue positions, Loop, playback demandé et Cue sélectionné sont inchangés; remplacer ou relier un média garde le comportement de VISUAL-011.
 
-## Invariants à préserver
+## Plugin audio existant
 
-1. Audio transparency : un effet de visualisation n'ajoute pas volontairement de traitement audio ni de latence.
-2. Temps réel : pas de verrou, allocation dynamique, accès disque, appel UI ou opération bloquante dans `processBlock()`.
-3. UI asynchrone : fermer l'éditeur pendant une sélection de fichier ne doit pas créer d'accès à un objet détruit.
-4. Instance isolation : toutes les instances et leurs médias/paramètres restent indépendants.
-5. Persistence : paramètres existants lisibles dans les projets créés avec le POC; ne pas casser les IDs sans migration.
-6. Dépendances reproductibles : version JUCE épinglée, builds CMake et checks automatisés.
-7. Erreur média : chemin inaccessible traité sans crash et avec possibilité de remplacement.
+```text
+DAW (effet audio) -> processBlock() -> RMS / Peak / Envelope -> atomics
+                  -> éditeur JUCE timer -> image / transformations
+État APVTS + imagePath -> projet DAW
+```
 
-## Points techniques issus de l'audit statique, non régressions démontrées
+- MIDI explicitement désactivé; l'effet réagit à l'audio, pas aux notes.
+- Préserver le passthrough, les IDs, les paramètres et le chargement d'image.
+- Les fichiers `PluginProcessor.*` et `PluginEditor.*` restent distincts du nouveau sampler pour limiter le risque de régression.
 
-- `isBusesLayoutSupported()` accepte uniquement stereo->stereo : insertion mono impossible (échec manuel confirmé).
-- `processBlock()` calcule un lissage de l'enveloppe par bloc plutôt qu'en temps réel : la vitesse peut dépendre de la taille du buffer; écrire un test et corriger si nécessaire en préservant le rendu de référence.
-- Le `FileChooser::launchAsync` capture `this` : examiner le cycle de vie pendant la fermeture de l'éditeur.
-- Les chemins d'images ne sont pas portables entre ordinateurs; comportement de remplacement testé.
-- Les formats / versions AU et VST3 affichés par pluginval diffèrent (AU 0.1.0; VST3 1.0.0) : vérifier les binaires réellement installés avant de modifier les métadonnées.
-- Vérifier les nombres de canaux réels à partir du layout négocié avant toute modification du DSP.
+## Invariants temps réel et persistance
 
-## Refactoring autorisé, uniquement motivé
+1. Aucun mutex, I/O, décodage vidéo, seek bloquant, allocation dynamique ou appel UI dans `processBlock()`.
+2. Routage MIDI par mapping fixe et communication audio -> UI bornée/non bloquante; métriques séparées pour demande et arrivée visible.
+3. Instance isolation : lecteur, vidéo et état indépendants.
+4. État sauvegardé via les callbacks JUCE; référence vidéo externe, Cue Points, Loop, préférence de lecture et Cue sélectionné restaurés.
+5. Erreur de média : fichier absent ou illisible ne fait pas planter le plugin et reste remplaçable.
+6. Ne pas modifier l'identité ni l'état du POC audio.
 
-Ne pas changer l'organisation des 4 fichiers C++ pour l'esthétique. Extraire par exemple un `AudioEnvelope` indépendant uniquement pour rendre les calculs testables, sans introduire manager, event bus, framework ou couches abstraites sans usage vérifié.
+## Évolutions hors Phase 1
 
-Règles :
-- KISS d'abord; DRY pour la logique métier répétée, pas pour chaque ligne commune.
-- Responsabilité unique là où elle permet de tester ou faire évoluer le composant.
-- Préférer des fonctions pures pour le calcul DSP et le mapping visuel; adapter progressivement.
-- Chaque ticket apporte tests, justification de la modification, compatibilité d'état et compte rendu QA.
-- Documenter la dette acceptée et le moment de la revoir.
-
-## Extension future MIDI (pas dans le MVP Audio Reactive)
-
-Nouveau contrat interne de contrôle visuel : sources AudioEnvelope ou MidiTrigger -> paramètres visuels par scène/pad -> Renderer JUCE. Vérifier la disponibilité des événements MIDI selon type de plugin et DAW avant d'implémenter; ne pas présumer qu'un AU FX reçoit automatiquement les notes MIDI de l'instrument. Isoler les événements temps réel du rendu UI avec échange lock-free adapté.
-
-Le premier prototype MIDI devra démontrer la réception de notes distinctes et velocity dans l'hôte cible, puis seulement généraliser à quatre pads. Le renderer existant doit rester réutilisable.
+Timeline 16 pads, mapping éditable/MIDI Learn, CC, vélocité et comportements Hold/Toggle/One Shot seront ajoutés après validation du routage MIDI -> vidéo dans Logic. Ne pas introduire d'architecture générique avant un besoin concret.

@@ -1,4 +1,29 @@
-# AudioReactiveImagePOC
+# AV Sampler / AudioReactiveImagePOC
+
+`AVSampler` is the new macOS-first visual MIDI instrument target. Phase 1 is a silent AU instrument: load one local video, set four Cue positions, then trigger them with MIDI notes 36, 38, 40, and 41 from the DAW. Its saved state contains the video path, Cue positions, and loop setting; the video itself stays external.
+
+`AudioReactiveImagePOC` remains a separate audio effect target with its existing plugin identity and saved projects. It is preserved during the product transition and is not the AV Sampler MIDI instrument.
+
+The first AV Sampler slice uses JUCE `VideoComponent` and does not promise frame-perfect timing. Logic Pro behavior, seek latency, supported codecs, and playback when the editor is closed still need manual qualification.
+
+## AV Sampler Phase 1 quick start (macOS)
+
+Build the AU target with CMake, install it using the steps below, open Logic Pro, and rescan Audio Units if necessary. Insert `AVSampler` as a software instrument and open its editor. Load a local MOV/MP4/M4V video; playback starts after it loads. Press each `Set Cue` button while the video plays to store its current position. Create MIDI notes 36, 38, 40, and 41 in a region and play the region. The displayed note numbers are raw MIDI values; DAWs can label octave numbers differently.
+
+This is a Phase 1 validation path, not a release or compatibility claim. Installation into Logic's Components folder is a separate, explicit step.
+
+To install the locally built AU after closing Logic Pro:
+
+```bash
+mkdir -p "$HOME/Library/Audio/Plug-Ins/Components"
+cp -R build/AVSampler_artefacts/Release/AU/AVSampler.component "$HOME/Library/Audio/Plug-Ins/Components/"
+```
+
+Then reopen Logic Pro, rescan Audio Units if needed, add `AVSampler` as a software instrument, and open its editor. The DAW installation and Logic verification are manual; the build does not install the plugin.
+
+---
+
+## AudioReactiveImagePOC — legacy audio effect
 
 `AudioReactiveImagePOC` is a JUCE/C++ proof-of-concept audio effect plugin.
 
@@ -35,6 +60,12 @@ Source/
   PluginProcessor.cpp
   PluginEditor.h
   PluginEditor.cpp
+  AVSamplerProcessor.h/.cpp
+  AVSamplerEditor.h/.cpp
+  CueRouting.h
+tests/
+  CueRoutingTests.cpp
+  AVSamplerCoreTests.cpp
 README.md
 ```
 

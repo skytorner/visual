@@ -1,6 +1,6 @@
 # Agent Instructions — visual / AV Sampler
 
-Le dépôt `skytorner/visual` est le POC JUCE/C++17 du futur AV Sampler. Priorité : Audio Reactive MVP fiable avant MIDI et pads.
+Le dépôt `skytorner/visual` conserve le POC audio JUCE/C++17 et développe AV Sampler comme instrument visuel MIDI natif. Priorité actuelle : le vertical slice vidéo/MIDI macOS; préserver le plugin audio et ses identifiants existants.
 
 ## Lire avant de coder (sources versionnées)
 
@@ -21,7 +21,7 @@ Le répertoire `.codex/` est **local et ignoré par Git**. S'il existe, ses fich
 - Conserver JUCE natif/C++/CMake et les identifiants plugin/paramètres pour le MVP sauf décision explicite.
 - `processBlock()` : pas de mutex, I/O, chargement de média, allocation dynamique ou opération UI; ne pas changer le son.
 - Tester la régression des projets DAW, des paramètres, de la stéréo et du chargement d'image.
-- Ne pas prétendre que le POC reçoit du MIDI; il réagit à l'audio.
+- Ne pas prétendre que `AudioReactiveImagePOC` reçoit du MIDI; seul le nouveau `AVSampler` instrument est configuré pour le MIDI, et sa réception hôte reste à valider dans Logic.
 - N'annoncer PASS qu'avec une preuve et distinguer manuels, outils et non exécutés.
 
 ## Hygiène / livraison
