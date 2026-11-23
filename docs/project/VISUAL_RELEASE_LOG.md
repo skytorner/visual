@@ -123,6 +123,13 @@ Non versionne:
 - `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU` : PASS. Tests automatisés non relancés; retest fonctionnel Logic du nouveau build NOT RUN.
 - AU 0.1.0 corrigé installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; ancienne copie conservée dans `/private/tmp/AVSampler.component.pre-loopfix`. Logic doit rescanner/redémarrer pour charger le binaire mis à jour.
 
+### Suivi QA supplémentaire — 2026-11-23
+
+- L'utilisateur rapporte que le Loop s'arrête toujours à la fin avec l'AU mis à jour. La tentative de correction n'est donc **pas validée**; statut FAIL rapporté. Conformément à sa demande, l'investigation Loop est différée.
+- CTest sur le build courant : PASS, 2/2 (`CueRoutingTests`, `AVSamplerCoreTests`). Ces tests couvrent le routage pur et l'état, pas le backend vidéo macOS ni l'hôte Logic.
+- Inspection statique en Piano Roll de la session Logic déjà ouverte : la région sélectionnée sur une piste AVSampler contient C1, D1, E1 et F1. La lecture live et l'arrivée visible des quatre cues n'ont pas été observées; aucune modification de région/projet n'a été faite.
+- Suite de QA hors Loop : vérifier la réception NoteOn/Cues en lecture, puis sauvegarde/réouverture de projet et relink d'un média absent. La boucle musicale Logic reste rapportée sans latence audible.
+
 ## QA baseline Audio Reactive — 2026-11-20
 
 Status: POC valide fonctionnellement sur les scénarios audio testés, corrections requises avant MVP.
