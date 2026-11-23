@@ -98,6 +98,49 @@ Non versionne:
 | 2026-06-28 | `cmake --build build --config Release --target AudioReactiveImagePOC_VST3` | Pass | Verification locale macOS de la cible VST3 apres correctif; seul warning restant issu de JUCE. |
 | 2026-06-28 | GitHub Release automation | Prepared | Le workflow telecharge les ZIPs macOS/Windows et cree ou met a jour automatiquement la GitHub Release quand un tag `v*` est pousse. |
 
+## VISUAL-009 — Native MIDI Video POC (2026-11-23)
+
+- Direction produit confirmée explicitement par l'utilisateur : instrument MIDI vidéo JUCE natif sans génération audio. AudioReactiveImagePOC reste conservé dans une cible distincte.
+- Audit : le dépôt ne contenait pas de lecteur vidéo ni de routage MIDI. JUCE 8.0.8 inclut `juce_video`/`VideoComponent` pour chargement, lecture et seek macOS; la documentation ne garantit pas la latence ni la vue AU, qui restent à mesurer.
+- Branche dédiée : `codex/VISUAL-009-native-midi-video-poc`, créée depuis `main` GitHub vérifié `741f4b6252cc4514c5e5ffcc38a92d7d41875527`.
+- Phase 1 seulement : une vidéo, 4 cues, notes fixes, boucle, état JUCE et tests MIDI pur. Résultats build/tests et QA Logic à compléter; les anciens résultats audio ne s'appliquent pas.
+
+### Vérifications locales VISUAL-009
+
+- CMake configure en Release avec tests activés et `FETCHCONTENT_SOURCE_DIR_JUCE` pointant vers le cache local JUCE 8.0.8 : PASS.
+- `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU` : PASS; bundle AU `AVSampler.component` généré. Quatre avertissements compilateur viennent de JUCE/SDK Apple (API Metal dépréciées et switch d'événement); aucun avertissement restant dans le code AV Sampler après renommage du paramètre masquant.
+- `cmake --build /private/tmp/visual-009-build --config Release --target AudioReactiveImagePOC_All` : PASS; AU, VST3 et Standalone audio construits depuis cette branche.
+- `ctest --test-dir /private/tmp/visual-009-build --output-on-failure` : PASS, 2/2. Couvre mapping MIDI, NoteOff, notes non assignées, priorité du dernier cue, sortie silencieuse et restauration du chemin/Cues/loop.
+- Inspection de `AVSampler.component/Contents/Info.plist` avec `plutil` : type AU `aumu`, subtype `AVsm`, manufacturer `Vpoc`, version AU encodée 256 (0.1.0); génération CMake indique `JucePlugin_WantsMidiInput=1`.
+- Tentative pluginval 1.0.4 : **non exécutée sur le plugin**; le processus s'aborte dans `AppKit` lors de `NSApplication`/`_RegisterApplication`, confirmé par le rapport utilisateur (SIGABRT). Aucun résultat fonctionnel pluginval.
+- `git diff --check` final : PASS. QA Logic reste NOT RUN; aucune installation/écriture dans les dossiers Audio Units n'a été faite.
+
+### Suivi Loop vidéo — 2026-11-23
+
+- Retour manuel Logic de l'utilisateur : la vidéo locale se lit; boucler la région dans Logic ne produit pas de latence musicale perceptible. Le bouton Loop d'AVSampler, lui, ramène l'image au début puis laisse la vidéo arrêtée.
+- Cause identifiée dans JUCE 8.0.8 macOS : la notification de fin arrête AVPlayer et déclenche déjà un seek vers 0; le timer AVSampler attendait encore une position de fin et appelait play trop tôt pour le seek asynchrone.
+- Correctif : détecter le passage lecture→arrêt à proximité de la fin, attendre que la position soit revenue à 0 puis démarrer la lecture; la relance est répétée jusqu'à confirmation de reprise. Un arrêt manuel dans l'éditeur n'est pas traité comme une fin de média.
+- `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU` : PASS. Tests automatisés non relancés; retest fonctionnel Logic du nouveau build NOT RUN.
+- AU 0.1.0 corrigé installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; ancienne copie conservée dans `/private/tmp/AVSampler.component.pre-loopfix`. Logic doit rescanner/redémarrer pour charger le binaire mis à jour.
+
+### Suivi QA supplémentaire — 2026-11-23
+
+- L'utilisateur rapporte que le Loop s'arrête toujours à la fin avec l'AU mis à jour. La tentative de correction n'est donc **pas validée**; statut FAIL rapporté. Conformément à sa demande, l'investigation Loop est différée.
+- CTest sur le build courant : PASS, 2/2 (`CueRoutingTests`, `AVSamplerCoreTests`). Ces tests couvrent le routage pur et l'état, pas le backend vidéo macOS ni l'hôte Logic.
+- Inspection statique en Piano Roll de la session Logic déjà ouverte : la région sélectionnée sur une piste AVSampler contient C1, D1, E1 et F1. La lecture live et l'arrivée visible des quatre cues n'ont pas été observées; aucune modification de région/projet n'a été faite.
+- Suite de QA hors Loop : vérifier la réception NoteOn/Cues en lecture, puis sauvegarde/réouverture de projet et relink d'un média absent. La boucle musicale Logic reste rapportée sans latence audible.
+
+### Confirmation QA Logic — 2026-11-23
+
+- L'utilisateur confirme que les quatre cues MIDI se déclenchent en lecture, que le cycle Logic rejoue les notes correctement et que la sauvegarde/réouverture du projet fonctionne.
+- La boucle musicale de Logic reste sans latence perceptible selon l'utilisateur. Ceci ne valide pas le bouton Loop vidéo d'AVSampler, toujours en échec et différé.
+- Ces résultats sont des confirmations manuelles de l'utilisateur; aucune mesure instrumentée de latence ou capture de lecture n'a été faite.
+
+### Correction QA Loop et reload — 2026-11-23
+
+- Correction utilisateur : Loop vidéo et sauvegarde/réouverture sont tous deux bons dans le scénario actuellement utilisé. Cette confirmation supersède les anciens signalements d'échec Loop et le statut d'investigation différée; aucun problème de reload n'est à suivre.
+- Le statut PASS reste une confirmation manuelle rapportée. Les limites séparées (pluginval bloqué avant chargement, latence non mesurée, lecture éditeur fermé non testée) restent inchangées.
+
 ## QA baseline Audio Reactive — 2026-11-20
 
 Status: POC valide fonctionnellement sur les scénarios audio testés, corrections requises avant MVP.

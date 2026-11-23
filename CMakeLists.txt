@@ -66,3 +66,80 @@ target_link_libraries(AudioReactiveImagePOC
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags
 )
+
+# Phase 1 is macOS/AU-first. Keep the existing audio effect as a separate
+# target so its plugin identity and saved projects remain compatible.
+if(APPLE)
+    juce_add_plugin(AVSampler
+        COMPANY_NAME "Visual POC"
+        BUNDLE_ID "com.visual.avsampler"
+        IS_SYNTH TRUE
+        NEEDS_MIDI_INPUT TRUE
+        NEEDS_MIDI_OUTPUT FALSE
+        IS_MIDI_EFFECT FALSE
+        EDITOR_WANTS_KEYBOARD_FOCUS FALSE
+        COPY_PLUGIN_AFTER_BUILD FALSE
+        PLUGIN_MANUFACTURER_CODE Vpoc
+        PLUGIN_CODE AVsm
+        VERSION 0.1.0
+        FORMATS AU
+        PRODUCT_NAME "AVSampler"
+    )
+
+    juce_generate_juce_header(AVSampler)
+
+    target_sources(AVSampler
+        PRIVATE
+            Source/AVSamplerProcessor.cpp
+            Source/AVSamplerEditor.cpp
+    )
+
+    target_compile_features(AVSampler PRIVATE cxx_std_17)
+    target_compile_definitions(AVSampler
+        PUBLIC
+            JUCE_WEB_BROWSER=0
+            JUCE_USE_CURL=0
+            JUCE_VST3_CAN_REPLACE_VST2=0
+    )
+
+    target_link_libraries(AVSampler
+        PRIVATE
+            juce::juce_audio_utils
+            juce::juce_gui_extra
+            juce::juce_video
+        PUBLIC
+            juce::juce_recommended_config_flags
+            juce::juce_recommended_lto_flags
+            juce::juce_recommended_warning_flags
+    )
+endif()
+
+include(CTest)
+if(BUILD_TESTING)
+    add_executable(CueRoutingTests tests/CueRoutingTests.cpp)
+    target_include_directories(CueRoutingTests PRIVATE Source)
+    target_compile_features(CueRoutingTests PRIVATE cxx_std_17)
+    add_test(NAME CueRoutingTests COMMAND CueRoutingTests)
+
+    if(APPLE)
+        add_executable(AVSamplerCoreTests tests/AVSamplerCoreTests.cpp)
+        target_include_directories(AVSamplerCoreTests PRIVATE
+            Source
+            "${CMAKE_CURRENT_BINARY_DIR}/AVSampler_artefacts/JuceLibraryCode"
+            "${JUCE_MODULES_DIR}"
+        )
+        target_compile_features(AVSamplerCoreTests PRIVATE cxx_std_17)
+        target_compile_definitions(AVSamplerCoreTests PRIVATE
+            JUCE_WEB_BROWSER=0
+            JUCE_USE_CURL=0
+            JUCE_VST3_CAN_REPLACE_VST2=0
+        )
+        target_link_libraries(AVSamplerCoreTests PRIVATE
+            AVSampler
+            juce::juce_audio_utils
+            juce::juce_gui_extra
+            juce::juce_video
+        )
+        add_test(NAME AVSamplerCoreTests COMMAND AVSamplerCoreTests)
+    endif()
+endif()
