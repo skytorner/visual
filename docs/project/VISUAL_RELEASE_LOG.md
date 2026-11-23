@@ -136,6 +136,11 @@ Non versionne:
 - La boucle musicale de Logic reste sans latence perceptible selon l'utilisateur. Ceci ne valide pas le bouton Loop vidéo d'AVSampler, toujours en échec et différé.
 - Ces résultats sont des confirmations manuelles de l'utilisateur; aucune mesure instrumentée de latence ou capture de lecture n'a été faite.
 
+### Correction QA Loop et reload — 2026-11-23
+
+- Correction utilisateur : Loop vidéo et sauvegarde/réouverture sont tous deux bons dans le scénario actuellement utilisé. Cette confirmation supersède les anciens signalements d'échec Loop et le statut d'investigation différée; aucun problème de reload n'est à suivre.
+- Le statut PASS reste une confirmation manuelle rapportée. Les limites séparées (pluginval bloqué avant chargement, latence non mesurée, lecture éditeur fermé non testée) restent inchangées.
+
 ## QA baseline Audio Reactive — 2026-11-20
 
 Status: POC valide fonctionnellement sur les scénarios audio testés, corrections requises avant MVP.

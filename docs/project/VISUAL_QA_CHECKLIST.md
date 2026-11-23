@@ -63,10 +63,9 @@ La nouvelle direction vidéo/MIDI est autorisée le 2026-11-23. Les validations 
 | Plugin audio historique AU/VST3/Standalone | PASS build | `AudioReactiveImagePOC_All` compile depuis cette branche; pas de pluginval/regression DAW sur le nouveau build. |
 | Métadonnées AU instrument/MIDI | PASS statique | `Info.plist` indique le type `aumu`; la config JUCE inclut `JucePlugin_WantsMidiInput=1`. Ce n'est pas un test Logic. |
 | Chargement/lecture vidéo et cycle musical de Logic | PASS manuel rapporté | L'utilisateur confirme que sa vidéo légère se lit, que les cues MIDI fonctionnent et que le cycle Logic rejoue les notes correctement sans latence musicale perceptible. |
-| Loop vidéo intégré — build initial | FAIL rapporté | À la fin, la vidéo revient à 0 mais reste arrêtée dans Logic. |
-| Loop vidéo intégré — build corrigé | FAIL rapporté à nouveau | L'utilisateur confirme que la lecture s'arrête toujours après le retour à 0 avec l'AU mis à jour; investigation différée à sa demande. |
+| Loop vidéo intégré | PASS manuel rapporté | L'utilisateur confirme que le Loop vidéo fonctionne dans le build utilisé actuellement. Les anciens échecs concernaient des essais antérieurs et sont supersédés. |
 | Logic Pro: instrument, piano roll et déclenchement des cues | PASS manuel rapporté | L'utilisateur confirme les quatre cues en lecture et que la boucle de région Logic rejoue correctement leurs notes. Ce retour n'est pas une mesure de latence MIDI image. |
-| Sauvegarde/réouverture du projet et média | PASS manuel rapporté + PASS unitaire | L'utilisateur confirme le scénario save/reload dans Logic; le test C++ de sérialisation/restauration passe également. |
+| Sauvegarde/réouverture du projet et média | PASS manuel rapporté + PASS unitaire | L'utilisateur confirme que tout fonctionne après sauvegarde et reload dans Logic; le test C++ de sérialisation/restauration passe également. |
 | pluginval strictness 5 | BLOCKED BEFORE PLUGIN LOAD | pluginval 1.0.4 s'aborte à l'initialisation `NSApplication`/AppKit (`_RegisterApplication`, SIGABRT); aucun test plugin ne démarre. Rapport reçu le 2026-11-23. |
 | Latence MIDI → nouvelle image | NOT MEASURED | Aucune précision temporelle revendiquée. |
 | Lecture avec éditeur fermé | NOT TESTED | Dépendance éventuelle du rendu au composant UI à qualifier. |
