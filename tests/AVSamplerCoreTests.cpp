@@ -76,9 +76,29 @@ int main()
     if (! check(relinkedState.videoPath == "/tmp/av-sampler-relocated.mov",
                 "Relinked media path did not update"))
         return 1;
+    if (! check(relinkedState.loopEnabled, "Relinking media changed Loop state"))
+        return 1;
+    if (! check(! relinkedState.playbackRequested, "Relinking media changed playback preference"))
+        return 1;
+    if (! check(relinkedState.selectedCueIndex == 2, "Relinking media changed Cue selection"))
+        return 1;
     for (int i = 0; i < AVSamplerAudioProcessor::cueCount; ++i)
         if (! check(std::abs(relinkedState.cuePositionsSeconds[static_cast<std::size_t>(i)] - expectedPositions[i]) < 1.0e-9,
                     "Relinking media changed the saved Cue timing"))
+            return 1;
+
+    restored.setVideoPath({});
+    const auto ejectedState = restored.getProjectState();
+    if (! check(ejectedState.videoPath.isEmpty(), "Eject did not clear the active media path"))
+        return 1;
+    if (! check(ejectedState.loopEnabled && ! ejectedState.playbackRequested
+                    && ejectedState.selectedCueIndex == 2,
+                "Eject changed Loop, playback preference, or Cue selection"))
+        return 1;
+    for (int i = 0; i < AVSamplerAudioProcessor::cueCount; ++i)
+        if (! check(std::abs(ejectedState.cuePositionsSeconds[static_cast<std::size_t>(i)]
+                             - expectedPositions[i]) < 1.0e-9,
+                    "Eject changed a saved Cue timing"))
             return 1;
 
     juce::ValueTree legacyState("AVSamplerState");

@@ -26,7 +26,6 @@ public:
 
 private:
     juce::Rectangle<float> trackBounds() const;
-    juce::Rectangle<float> cardBounds(int cueIndex) const;
     std::array<float, cueCount> markerLabelCentres(juce::Rectangle<float> track) const;
     int cueAtPoint(juce::Point<float> point, float maximumDistance) const;
     void selectCue(int cueIndex);

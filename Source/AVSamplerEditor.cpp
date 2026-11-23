@@ -3,12 +3,31 @@
 
 namespace
 {
-constexpr int editorWidth = 820;
-constexpr int editorHeight = 740;
+constexpr int editorWidth = 900;
+constexpr int editorHeight = 760;
 constexpr double videoEndDetectionWindowSeconds = 0.25;
 constexpr double loopStartPositionToleranceSeconds = 0.1;
 constexpr int loopRestartDelayTicks = 3;
 constexpr int loopSeekRetryTicks = 30;
+
+juce::String fitMediaName(const juce::String& value, float availableWidth)
+{
+    auto text = value;
+    const juce::Font font(juce::FontOptions(14.0f));
+    const auto ellipsis = juce::String::fromUTF8("…");
+    const auto widthOf = [&font](const juce::String& candidate)
+    {
+        juce::GlyphArrangement glyphs;
+        glyphs.addLineOfText(font, candidate, 0.0f, 0.0f);
+        return glyphs.getBoundingBox(0, glyphs.getNumGlyphs(), true).getWidth();
+    };
+    if (widthOf(text) <= availableWidth)
+        return text;
+
+    while (text.isNotEmpty() && widthOf(text + ellipsis) > availableWidth)
+        text = text.dropLastCharacters(1);
+    return text + ellipsis;
+}
 }
 
 AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProcessor& samplerProcessor)
@@ -16,19 +35,27 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
 {
     setSize(editorWidth, editorHeight);
     setResizable(true, true);
-    setResizeLimits(560, 540, 1400, 1000);
+    setResizeLimits(560, 600, 1400, 1000);
     addAndMakeVisible(videoComponent);
     addAndMakeVisible(timelineComponent);
+    addAndMakeVisible(fxControlBar);
+    addAndMakeVisible(assignedPadsComponent);
     addAndMakeVisible(titleLabel);
     addAndMakeVisible(sessionInfoLabel);
     addAndMakeVisible(mediaInfoLabel);
     addAndMakeVisible(loadButton);
     addAndMakeVisible(playButton);
     addAndMakeVisible(loopButton);
+    addAndMakeVisible(ejectButton);
     addAndMakeVisible(positionLabel);
     addAndMakeVisible(statusLabel);
 
     loadButton.onClick = [this] { chooseVideo(); };
+    loadButton.setTooltip("Load, replace, or relink a local video");
+    ejectButton.setTooltip("Eject the current video. Cue points and session settings are kept.");
+    playButton.setTooltip("Play or pause the video");
+    loopButton.setTooltip("Toggle video looping");
+    ejectButton.onClick = [this] { ejectVideo(); };
     playButton.onClick = [this]
     {
         if (! videoComponent.isVideoOpen())
@@ -40,6 +67,7 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
             videoComponent.stop();
             displayedPlaybackRequested = false;
             audioProcessor.setPlaybackRequested(false);
+            statusLabel.setText("Ready · Paused", juce::dontSendNotification);
         }
         else
         {
@@ -47,6 +75,7 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
             videoComponent.play();
             displayedPlaybackRequested = true;
             audioProcessor.setPlaybackRequested(true);
+            statusLabel.setText("Ready · Playing", juce::dontSendNotification);
         }
     };
 
@@ -60,7 +89,9 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
 
     positionLabel.setJustificationType(juce::Justification::centredRight);
     statusLabel.setJustificationType(juce::Justification::centredLeft);
-    statusLabel.setColour(juce::Label::textColourId, juce::Colours::lightgrey);
+    statusLabel.setColour(juce::Label::textColourId, juce::Colour(0xffd4dbe7));
+    statusLabel.setColour(juce::Label::backgroundColourId, juce::Colour(0xdd111217));
+    statusLabel.setOpaque(true);
 
     timelineComponent.onCuePositionChanged = [this](int cueIndex, double positionSeconds)
     {
@@ -69,6 +100,12 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     timelineComponent.onCueSelected = [this](int cueIndex)
     {
         audioProcessor.setSelectedCueIndex(cueIndex);
+        assignedPadsComponent.setSelectedCue(cueIndex);
+    };
+    assignedPadsComponent.onCueSelected = [this](int cueIndex)
+    {
+        audioProcessor.setSelectedCueIndex(cueIndex);
+        timelineComponent.setSelectedCue(cueIndex);
     };
 
     titleLabel.setText("AV SAMPLER", juce::dontSendNotification);
@@ -79,6 +116,7 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     sessionInfoLabel.setColour(juce::Label::textColourId, juce::Colour(0xff8793a6));
     mediaInfoLabel.setJustificationType(juce::Justification::centredLeft);
     mediaInfoLabel.setColour(juce::Label::textColourId, juce::Colour(0xffd4dbe7));
+    mediaInfoLabel.setFont(juce::FontOptions(14.0f));
 
     videoComponent.onErrorOccurred = [safeThis = juce::Component::SafePointer<AVSamplerAudioProcessorEditor>(this)]
         (const juce::String& message)
@@ -92,7 +130,7 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     displayedPlaybackRequested = state.playbackRequested;
     updateLoopButtonAppearance(displayedLoopState);
     timelineComponent.setSelectedCue(state.selectedCueIndex);
-    playButton.setButtonText(displayedPlaybackRequested ? "Pause" : "Play");
+    assignedPadsComponent.setCueData(state.cuePositionsSeconds, state.selectedCueIndex);
     loadVideoAtPath(state.videoPath, displayedPlaybackRequested);
     startTimerHz(60);
 }
@@ -107,27 +145,37 @@ void AVSamplerAudioProcessorEditor::paint(juce::Graphics& graphics)
 void AVSamplerAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds().reduced(12);
-    auto header = bounds.removeFromTop(28);
-    titleLabel.setBounds(header.removeFromLeft(160));
+    auto header = bounds.removeFromTop(22);
+    titleLabel.setBounds(header.removeFromLeft(190));
     sessionInfoLabel.setBounds(header);
     bounds.removeFromTop(5);
-    auto toolbar = bounds.removeFromTop(36);
-    loadButton.setBounds(toolbar.removeFromLeft(118));
-    toolbar.removeFromLeft(5);
-    playButton.setBounds(toolbar.removeFromLeft(70));
-    toolbar.removeFromLeft(5);
-    loopButton.setBounds(toolbar.removeFromLeft(88));
+    auto toolbar = bounds.removeFromTop(40);
+    playButton.setBounds(toolbar.removeFromLeft(38));
     toolbar.removeFromLeft(6);
-    positionLabel.setBounds(toolbar.removeFromRight(115));
+    loopButton.setBounds(toolbar.removeFromLeft(38));
+    toolbar.removeFromLeft(8);
+    loadButton.setBounds(toolbar.removeFromRight(76));
+    toolbar.removeFromRight(5);
+    ejectButton.setBounds(toolbar.removeFromRight(34));
+    toolbar.removeFromRight(6);
+    positionLabel.setBounds(toolbar.removeFromRight(82));
+    toolbar.removeFromRight(8);
     mediaInfoLabel.setBounds(toolbar);
 
-    bounds.removeFromTop(8);
-    auto timelineArea = bounds.removeFromBottom(178);
+    bounds.removeFromTop(7);
+    auto pads = bounds.removeFromBottom(78);
     bounds.removeFromBottom(6);
-    statusLabel.setBounds(bounds.removeFromBottom(26));
+    auto effects = bounds.removeFromBottom(74);
+    bounds.removeFromBottom(6);
+    auto timelineArea = bounds.removeFromBottom(122);
     bounds.removeFromBottom(6);
     videoComponent.setBounds(bounds);
+    statusLabel.setBounds(bounds.reduced(8).withY(bounds.getBottom() - 26).withHeight(18));
     timelineComponent.setBounds(timelineArea);
+    fxControlBar.setBounds(effects);
+    assignedPadsComponent.setBounds(pads);
+    updateMediaPresentation(loadedVideoPath, videoComponent.isVideoOpen()
+        ? videoComponent.getVideoDuration() : 0.0);
 }
 
 void AVSamplerAudioProcessorEditor::timerCallback()
@@ -143,6 +191,7 @@ void AVSamplerAudioProcessorEditor::timerCallback()
     }
 
     timelineComponent.setSelectedCue(state.selectedCueIndex);
+    assignedPadsComponent.setSelectedCue(state.selectedCueIndex);
 
     if (videoComponent.isVideoOpen())
     {
@@ -154,9 +203,12 @@ void AVSamplerAudioProcessorEditor::timerCallback()
                 videoComponent.play();
             else
                 videoComponent.stop();
+            statusLabel.setText(state.playbackRequested ? "Ready · Playing" : "Ready · Paused",
+                                juce::dontSendNotification);
         }
 
         const auto pendingCue = audioProcessor.consumePendingCue();
+        const auto selectedCueForDisplay = pendingCue >= 0 ? pendingCue : state.selectedCueIndex;
         if (pendingCue >= 0 && pendingCue < AVSamplerAudioProcessor::cueCount)
         {
             loopRestartPending = false;
@@ -172,6 +224,7 @@ void AVSamplerAudioProcessorEditor::timerCallback()
             timelineComponent.setActiveCue(activeCueIndex);
             timelineComponent.setSelectedCue(pendingCue);
             audioProcessor.setSelectedCueIndex(pendingCue);
+            assignedPadsComponent.setSelectedCue(pendingCue);
 
             statusLabel.setText("Triggered Cue " + juce::String(pendingCue + 1)
                 + " (MIDI " + juce::String(avsampler::defaultCueMidiNotes[static_cast<std::size_t>(pendingCue)]) + ")",
@@ -234,19 +287,24 @@ void AVSamplerAudioProcessorEditor::timerCallback()
         isPlaying = videoComponent.isPlaying();
         previousVideoPosition = position;
         previousVideoWasPlaying = isPlaying;
-        positionLabel.setText(juce::String(position, 2) + " / " + juce::String(duration, 2) + " s",
-                              juce::dontSendNotification);
-        playButton.setButtonText(isPlaying ? "Pause" : "Play");
+        updateMediaPresentation(loadedVideoPath, duration);
+        playButton.setIcon(isPlaying ? SamplerIconButton::Icon::pause : SamplerIconButton::Icon::play);
+        playButton.setEnabled(true);
         timelineComponent.setTimelineData(duration, position, state.cuePositionsSeconds);
+        assignedPadsComponent.setCueData(state.cuePositionsSeconds, selectedCueForDisplay);
     }
     else
     {
         previousVideoWasPlaying = false;
         loopRestartPending = false;
         loopRestartWaitTicks = 0;
-        positionLabel.setText("-- / -- s", juce::dontSendNotification);
-        playButton.setButtonText("Play");
+        updateMediaPresentation(loadedVideoPath, 0.0);
+        playButton.setIcon(SamplerIconButton::Icon::play);
+        playButton.setEnabled(false);
+        if (loadedVideoPath.isEmpty())
+            statusLabel.setText("No video loaded · Cue points are kept", juce::dontSendNotification);
         timelineComponent.setTimelineData(0.0, 0.0, state.cuePositionsSeconds);
+        assignedPadsComponent.setCueData(state.cuePositionsSeconds, state.selectedCueIndex);
     }
 }
 
@@ -276,6 +334,28 @@ void AVSamplerAudioProcessorEditor::chooseVideo()
         });
 }
 
+void AVSamplerAudioProcessorEditor::ejectVideo()
+{
+    if (loadedVideoPath.isEmpty() && ! videoComponent.isVideoOpen())
+        return;
+
+    videoComponent.closeVideo();
+    loadedVideoPath.clear();
+    audioProcessor.setVideoPath({});
+    previousVideoPosition = 0.0;
+    previousVideoWasPlaying = false;
+    loopRestartPending = false;
+    loopRestartWaitTicks = 0;
+    updateMediaPresentation({}, 0.0);
+    statusLabel.setText("Media ejected · Cue points and session settings kept",
+                        juce::dontSendNotification);
+    playButton.setIcon(SamplerIconButton::Icon::play);
+    playButton.setEnabled(false);
+    timelineComponent.setTimelineData(0.0, 0.0, audioProcessor.getProjectState().cuePositionsSeconds);
+    assignedPadsComponent.setCueData(audioProcessor.getProjectState().cuePositionsSeconds,
+                                     audioProcessor.getProjectState().selectedCueIndex);
+}
+
 void AVSamplerAudioProcessorEditor::loadVideoAtPath(const juce::String& path, bool resumePlayback)
 {
     loadedVideoPath = path;
@@ -286,11 +366,13 @@ void AVSamplerAudioProcessorEditor::loadVideoAtPath(const juce::String& path, bo
     loopRestartPending = false;
     loopRestartWaitTicks = 0;
     videoComponent.closeVideo();
+    playButton.setEnabled(false);
 
     if (path.isEmpty())
     {
-        statusLabel.setText("Load local media. Drag timeline markers A–D to position Cue Points.",
-                            juce::dontSendNotification);
+        audioProcessor.setVideoPath({});
+        statusLabel.setText("No video loaded · Cue points are kept", juce::dontSendNotification);
+        playButton.setEnabled(false);
         return;
     }
 
@@ -314,6 +396,7 @@ void AVSamplerAudioProcessorEditor::loadVideoAtPath(const juce::String& path, bo
         {
             safeThis->statusLabel.setText("Could not open video: " + result.getErrorMessage(),
                                           juce::dontSendNotification);
+            safeThis->playButton.setEnabled(false);
             return;
         }
 
@@ -324,19 +407,29 @@ void AVSamplerAudioProcessorEditor::loadVideoAtPath(const juce::String& path, bo
         safeThis->previousVideoWasPlaying = false;
         safeThis->manualPauseRequested = false;
         safeThis->displayedPlaybackRequested = resumePlayback;
-        safeThis->playButton.setButtonText(resumePlayback ? "Pause" : "Play");
-        safeThis->statusLabel.setText(resumePlayback
-                ? "Video playing. Cue timings are stored with the host session."
-                : "Video ready. Playback is paused in the host session.",
+        safeThis->playButton.setIcon(resumePlayback ? SamplerIconButton::Icon::pause
+                                                    : SamplerIconButton::Icon::play);
+        safeThis->playButton.setEnabled(true);
+        safeThis->updateMediaPresentation(safeThis->loadedVideoPath,
+                                          safeThis->videoComponent.getVideoDuration());
+        safeThis->statusLabel.setText(resumePlayback ? "Ready · Playing" : "Ready · Paused",
                                       juce::dontSendNotification);
     });
 }
 
-void AVSamplerAudioProcessorEditor::updateMediaPresentation(const juce::String& path)
+void AVSamplerAudioProcessorEditor::updateMediaPresentation(const juce::String& path,
+                                                             double durationSeconds)
 {
+    ejectButton.setEnabled(path.isNotEmpty());
+    const auto durationText = durationSeconds > 0.0
+        ? juce::String(durationSeconds, 2) + " s" : juce::String("-- s");
+    if (positionLabel.getText() != durationText)
+        positionLabel.setText(durationText, juce::dontSendNotification);
+
     if (path.isEmpty())
     {
-        loadButton.setButtonText("Load Media");
+        if (loadButton.getButtonText() != "Load")
+            loadButton.setButtonText("Load");
         mediaInfoLabel.setText("No media loaded", juce::dontSendNotification);
         mediaInfoLabel.setColour(juce::Label::textColourId, juce::Colour(0xff8793a6));
         mediaInfoLabel.setTooltip("Choose a local video file for this host session.");
@@ -347,24 +440,34 @@ void AVSamplerAudioProcessorEditor::updateMediaPresentation(const juce::String& 
     mediaInfoLabel.setTooltip(path);
     if (! mediaFile.existsAsFile())
     {
-        loadButton.setButtonText("Relink Media");
-        mediaInfoLabel.setText("Missing media  ·  " + mediaFile.getFileName(), juce::dontSendNotification);
+        if (loadButton.getButtonText() != "Relink")
+            loadButton.setButtonText("Relink");
+        const auto text = fitMediaName("Missing · " + mediaFile.getFileName(),
+                                       static_cast<float>(mediaInfoLabel.getWidth() - 8));
+        if (mediaInfoLabel.getText() != text)
+            mediaInfoLabel.setText(text, juce::dontSendNotification);
         mediaInfoLabel.setColour(juce::Label::textColourId, juce::Colour(0xffff8f79));
+        mediaInfoLabel.setTooltip(path);
         return;
     }
 
-    loadButton.setButtonText("Replace Media");
-    mediaInfoLabel.setText(mediaFile.getFileName(), juce::dontSendNotification);
+    if (loadButton.getButtonText() != "Replace")
+        loadButton.setButtonText("Replace");
+    auto mediaDescription = mediaFile.getFileName();
+    const auto nativeSize = videoComponent.getVideoNativeSize();
+    if (! nativeSize.isEmpty())
+        mediaDescription += " · " + juce::String(nativeSize.getWidth())
+            + " × " + juce::String(nativeSize.getHeight());
+    const auto text = fitMediaName(mediaDescription,
+                                   static_cast<float>(mediaInfoLabel.getWidth() - 8));
+    if (mediaInfoLabel.getText() != text)
+        mediaInfoLabel.setText(text, juce::dontSendNotification);
     mediaInfoLabel.setColour(juce::Label::textColourId, juce::Colour(0xffd4dbe7));
+    mediaInfoLabel.setTooltip(path);
 }
 
 void AVSamplerAudioProcessorEditor::updateLoopButtonAppearance(bool enabled)
 {
     loopButton.setToggleState(enabled, juce::dontSendNotification);
-    loopButton.setButtonText(enabled ? "Loop ON" : "Loop OFF");
-    loopButton.setColour(juce::TextButton::buttonColourId,
-                         enabled ? juce::Colour(0xff254a38) : juce::Colour(0xff292d38));
-    loopButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff42dc86));
-    loopButton.setColour(juce::TextButton::textColourOffId, juce::Colour(0xffc4ccd8));
-    loopButton.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
+    loopButton.setTooltip(enabled ? "Loop on · click to turn off" : "Loop off · click to turn on");
 }

@@ -93,6 +93,7 @@ if(APPLE)
             Source/AVSamplerProcessor.cpp
             Source/AVSamplerEditor.cpp
             Source/CueTimelineComponent.cpp
+            Source/SamplerUiComponents.cpp
     )
 
     target_compile_features(AVSampler PRIVATE cxx_std_17)

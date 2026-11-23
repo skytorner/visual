@@ -24,7 +24,7 @@ Logic Pro (piano roll / MIDI)
 
 - `processBlock()` ne décode ni ne charge un média, ne seek pas et n'appelle pas l'UI. Les actions vidéo sont exécutées sur le thread message.
 - NoteOff n'arrête pas le lecteur. Notes non assignées ignorées. Le Cue valide le plus récent est prioritaire.
-- Une seule vidéo, un lecteur et une tête de lecture. Les Cue peuvent être réglés depuis la position courante; pas encore de timeline éditable.
+- Une seule vidéo, un lecteur et une tête de lecture. `CueTimelineComponent` est la vue éditable des quatre Cue existants; elle n'introduit pas d'état de Cue parallèle.
 - Lecture continue, boucle et restauration passent par le composant JUCE. Le média reste externe; chemin absent récupérable.
 - La documentation JUCE expose chargement, lecture et seek sur macOS, mais ne garantit ni latence de seek, ni frame présentation, ni rendu fiable dans chaque vue AU. Mesurer en Logic avant de figer le backend.
 - Granularité effective = blocs MIDI du DAW + ordonnanceur UI + comportement du décodeur/codec; aucune promesse frame-perfect ou sample-accurate.
@@ -33,6 +33,8 @@ Logic Pro (piano roll / MIDI)
 - Les cartes gardent les marqueurs A–D sur la timeline et affichent les noms de note attendus dans Logic pour les notes fixes actuelles: C1/D1/E1/F1. Aucun pad/mapping supplémentaire n'est introduit.
 - VISUAL-011 compose l'éditeur en en-tête session/média, commandes de transport, aperçu vidéo et timeline/Cues. L'état reste un seul `ProjectState` dans le preset/projet du DAW, sans fichier de session parallèle.
 - Les nouvelles propriétés `playbackRequested` et `selectedCueIndex` sont rétrocompatibles: absence de propriété lecture dans un ancien état signifie autoplay et sélection Cue 1. Un chemin média absent reste mémorisé; le relink change seulement le chemin et préserve les Cue timings absolus, Loop et préférence de lecture.
+- VISUAL-012 garde les responsabilités d'éditeur dans JUCE natif. `CueTimelineComponent` ne dessine plus les cartes de notes; `AssignedPadsComponent` lit le même `ProjectState` et sélectionne le même index sans envoyer de NoteOn ni seek. `FxControlBar` est une vue sans callback ou propriété moteur. `SamplerIconButton` ne commande que Play/Pause, Loop et Eject. Le composant vidéo JUCE centre la taille native dans son rectangle avec `RectanglePlacement::centred`, sans étirement.
+- Eject ferme le `VideoComponent` et vide seulement `videoPath`. Cue positions, Loop, playback demandé et Cue sélectionné sont inchangés; remplacer ou relier un média garde le comportement de VISUAL-011.
 
 ## Plugin audio existant
 
