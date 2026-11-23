@@ -70,7 +70,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-009 — Native MIDI Video POC
 
-- Status: Needs verification — vidéo et cycle Logic rapportés fonctionnels sans latence musicale perceptible; Loop du plugin toujours en échec après la tentative de correctif, investigation différée à la demande de l'utilisateur; QA MIDI/runtime et restauration Logic restent à valider; branche `codex/VISUAL-009-native-midi-video-poc`, issue de `main` `741f4b6`.
+- Status: Needs verification — utilisateur confirme les quatre cues MIDI, le cycle Logic qui rejoue les notes et le save/reload; Loop vidéo intégré toujours en échec après la tentative de correctif, investigation différée à sa demande; branche `codex/VISUAL-009-native-midi-video-poc`, issue de `main` `741f4b6`.
 - Priority: P0.
 - Scope: ajouter une cible instrument AU silencieuse; charger une vidéo locale; lecture/pause continue et boucle; quatre Cue Points réglables à la position courante; MIDI 36, 38, 40, 41 déclenche les cues; sauvegarder chemin, positions et loop; tests du mapping pur.
 - Exclusions: timeline éditable, mappings personnalisés, 16 pads, MIDI Learn, CC, effets vélocité, export vidéo, transport sync et moteur vidéo personnalisé.

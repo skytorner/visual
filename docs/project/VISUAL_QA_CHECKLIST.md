@@ -62,11 +62,11 @@ La nouvelle direction vidéo/MIDI est autorisée le 2026-11-23. Les validations 
 | Build macOS AU `AVSampler_AU` | PASS | Cible instrument AU compilée; bundle `AVSampler.component` généré. |
 | Plugin audio historique AU/VST3/Standalone | PASS build | `AudioReactiveImagePOC_All` compile depuis cette branche; pas de pluginval/regression DAW sur le nouveau build. |
 | Métadonnées AU instrument/MIDI | PASS statique | `Info.plist` indique le type `aumu`; la config JUCE inclut `JucePlugin_WantsMidiInput=1`. Ce n'est pas un test Logic. |
-| Chargement/lecture vidéo et cycle musical de Logic | PASS manuel partiel | L'utilisateur confirme que sa vidéo légère se lit et que la boucle de Logic ne crée pas de latence musicale perceptible. MIDI/cues et autres codecs ne sont pas couverts par ce retour. |
+| Chargement/lecture vidéo et cycle musical de Logic | PASS manuel rapporté | L'utilisateur confirme que sa vidéo légère se lit, que les cues MIDI fonctionnent et que le cycle Logic rejoue les notes correctement sans latence musicale perceptible. |
 | Loop vidéo intégré — build initial | FAIL rapporté | À la fin, la vidéo revient à 0 mais reste arrêtée dans Logic. |
 | Loop vidéo intégré — build corrigé | FAIL rapporté à nouveau | L'utilisateur confirme que la lecture s'arrête toujours après le retour à 0 avec l'AU mis à jour; investigation différée à sa demande. |
-| Logic Pro: instrument et piano roll | PARTIAL — inspection statique | La région MIDI sélectionnée sur la piste AVSampler contient les notes C1, D1, E1 et F1. Le déclenchement visuel en lecture (NoteOn/NoteOff) n'a pas été observé. |
-| Sauvegarde/réouverture du projet et média | PASS unitaire / NOT RUN DAW | Test C++ de sérialisation/restauration passe; scénario projet Logic et chemin externe non testé. |
+| Logic Pro: instrument, piano roll et déclenchement des cues | PASS manuel rapporté | L'utilisateur confirme les quatre cues en lecture et que la boucle de région Logic rejoue correctement leurs notes. Ce retour n'est pas une mesure de latence MIDI image. |
+| Sauvegarde/réouverture du projet et média | PASS manuel rapporté + PASS unitaire | L'utilisateur confirme le scénario save/reload dans Logic; le test C++ de sérialisation/restauration passe également. |
 | pluginval strictness 5 | BLOCKED BEFORE PLUGIN LOAD | pluginval 1.0.4 s'aborte à l'initialisation `NSApplication`/AppKit (`_RegisterApplication`, SIGABRT); aucun test plugin ne démarre. Rapport reçu le 2026-11-23. |
 | Latence MIDI → nouvelle image | NOT MEASURED | Aucune précision temporelle revendiquée. |
 | Lecture avec éditeur fermé | NOT TESTED | Dépendance éventuelle du rendu au composant UI à qualifier. |
