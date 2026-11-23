@@ -110,7 +110,8 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | MIDI CC1 capturé dans `processBlock()` avec cues NoteOn inchangés | PASS automatisé | `AVSamplerCoreTests` confirme l'état CC; les tests de Cue continuent à passer. |
 | Sauvegarde/restauration CC1 et valeur neutre d'un état historique | PASS automatisé | `AVSamplerCoreTests` valide le round-trip et le défaut 64 (1×). |
 | Build macOS AU et CTest | PASS build/test | `AVSampler_AU`, les quatre suites CTest et `git diff --check` passent; warnings du SDK JUCE Metal/AppKit seulement. |
-| Logic: plage CC1, 64 neutre, affichage Speed et réouverture de session | NOT TESTED | QA humaine requise sur l'artefact local exact; aucune latence mesurée. |
+| Modulation du clavier intégré de Logic contrôle la vitesse du Cue en cours | PASS manuel rapporté | L'utilisateur confirme que jouer sur la modulation change bien la vitesse du pad en cours. |
+| Extrêmes CC1, neutralité à 64, affichage Speed et réouverture de session dans Logic | PARTIEL / NOT TESTED | Le contrôle par modulation est confirmé; le détail des valeurs extrêmes, du neutre et du save/reload n'a pas été rapporté. Aucune latence mesurée. |
 | Autres emplacements FX | PASS statique | Level, Color, Glitch restent inactifs dans le code de l'éditeur. |
 
 ## VISUAL-012 — Composition UI et pads assignés

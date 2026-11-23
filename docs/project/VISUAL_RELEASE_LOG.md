@@ -17,9 +17,10 @@ Date : 2026-11-23. Branche : `codex/VISUAL-013-midi-speed-cc`.
 | 2026-11-23 | `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU CueRoutingTests AVSamplerCoreTests TimelineMathTests AudioReactiveImageProcessorTests -j 4` | PASS | Cibles AU et tests compilées; avertissements non bloquants du SDK macOS dans les modules JUCE Metal/AppKit. |
 | 2026-11-23 | `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release` | PASS, 4/4 | CueRoutingTests, TimelineMathTests, AudioReactiveImageProcessorTests et AVSamplerCoreTests. |
 | 2026-11-23 | `git diff --check` | PASS | Aucun problème whitespace détecté. |
-| — | Logic Pro : CC1, états extrêmes et sauvegarde/réouverture | NOT TESTED | Validation humaine nécessaire après build; pas d'installation automatique. |
+| 2026-11-23 | Logic Pro : modulation du clavier intégré pilote la vitesse du Cue en cours | PASS manuel rapporté | L'utilisateur confirme que jouer sur la modulation change la vitesse du pad en cours. |
+| — | Logic Pro : valeurs extrêmes/neutre CC1 et save/reload | NOT TESTED | Le comportement principal est confirmé; ces cas restent à vérifier séparément. |
 
-pluginval sur le nouvel artefact, installation et test hôte Logic ne sont pas exécutés dans cette tâche. L'artefact AU est généré dans `/private/tmp/visual-009-build/AVSampler_artefacts/Release/AU/AVSampler.component`; il n'est pas installé.
+pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefact AU est généré dans `/private/tmp/visual-009-build/AVSampler_artefacts/Release/AU/AVSampler.component`; l'installation locale n'est pas consignée ici.
 
 ## Initial Setup
 
