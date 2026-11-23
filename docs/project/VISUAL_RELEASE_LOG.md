@@ -258,4 +258,4 @@ Status: Needs verification (PR isolée, pas encore distribuée).
 - CTest JUCE : PASS, 4/4. Le nouveau `AudioReactiveImageProcessorTests` vérifie l'égalité bit-à-bit entrée/sortie de `processBlock()` en mono et stéréo, les valeurs RMS/peak, ainsi que la restauration des six paramètres APVTS et de `imagePath`.
 - Les seuls warnings de compilation observés viennent de JUCE / SDK Apple (Metal déprécié et énumération AppKit); aucun warning du test ajouté après correction de sa comparaison.
 - pluginval du nouveau build : NOT RUN sur le plugin. Le binaire local s'arrête au code 134 avec `--version`, avant toute validation ou chargement; aucune installation AU/VST3 ni QA DAW n'a été faite.
-- Le run GitHub Actions PASS historique (#44947982385) concerne l'ancien head de PR; un nouveau run doit valider le head actualisé avant de marquer la CI courante PASS.
+- Run GitHub Actions `Audio analysis tests` sur le head `75a327d19a3bb680e444f0c803da171f67d64089` : PASS, run `45275406778`. L'ancien run `44947982385` concerne le head précédent.

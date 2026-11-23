@@ -130,7 +130,7 @@ La condition de layouts a été modifiée pour annoncer mono->mono et stereo->st
 - [x] Tests C++17 autonomes sur mono, stéréo, silence, buffers vides, tailles 32/64/128/256/512/1024, enveloppe et paramètres extrêmes.
 - [x] Les tests vérifient que `analyseAudio()` ne modifie pas les tableaux sources.
 - [x] Tests locaux Linux : configuration CMake, compilation, CTest 1/1 PASS; compilation avec `-Wall -Wextra -Werror -pedantic` sans erreur.
-- [ ] Vérification GitHub Actions sur le head actualisé de la PR avec `.github/workflows/audio-tests.yml` (le run PASS précédent portait sur l'ancien head).
+- [x] Vérification GitHub Actions sur le head actualisé de la PR avec `.github/workflows/audio-tests.yml` : run `45275406778`, conclusion success.
 - [x] Recompiler AU/VST3/Standalone macOS après ce refactoring; AVSampler_AU compile également.
 - [ ] Relancer pluginval strictness 5 sur le build modifié. L'exécutable local s'arrête avec le code 134 sur `--version`, avant de charger un plugin; aucun résultat pluginval.
 - [x] Test du `processBlock()` complet en mono et stéréo : chaque échantillon de sortie est identique bit à bit à l'entrée, RMS et peak attendus; CTest JUCE 4/4.
