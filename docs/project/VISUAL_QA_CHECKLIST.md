@@ -132,10 +132,10 @@ La condition de layouts a été modifiée pour annoncer mono->mono et stereo->st
 - [x] Tests locaux Linux : configuration CMake, compilation, CTest 1/1 PASS; compilation avec `-Wall -Wextra -Werror -pedantic` sans erreur.
 - [x] Vérification GitHub Actions sur le head actualisé de la PR avec `.github/workflows/audio-tests.yml` : run `45275406778`, conclusion success.
 - [x] Recompiler AU/VST3/Standalone macOS après ce refactoring; AVSampler_AU compile également.
-- [ ] Relancer pluginval strictness 5 sur le build modifié. L'exécutable local s'arrête avec le code 134 sur `--version`, avant de charger un plugin; aucun résultat pluginval.
+- [x] pluginval strictness 4 rapporté PASS par l'utilisateur pour AudioReactive VST3 et AU et AVSampler AU (`log audio react3.txt`); strictness 5 non exécuté/documenté. L'AU mentionne le warning existant `Current program is -1`; le journal ne donne pas le SHA source du build.
 - [x] Test du `processBlock()` complet en mono et stéréo : chaque échantillon de sortie est identique bit à bit à l'entrée, RMS et peak attendus; CTest JUCE 4/4.
 - [x] Tests d'intégration des paramètres APVTS et du `imagePath` après sauvegarde-restauration; CTest JUCE 4/4.
 
-Validation propriétaire : l'utilisateur confirme globalement « on validé » après communication des emplacements de build. Scénarios DAW précis non énumérés; pluginval reste non exécuté (voir ci-dessus).
+Validation propriétaire : l'utilisateur confirme globalement « on validé » après communication des emplacements de build et fournit ensuite un journal pluginval. Scénarios DAW précis non énumérés; strictness 5 et correspondance SHA du rapport restent non vérifiées.
 
 La formule de lissage **par bloc** n'est pas changée intentionnellement ici : sa dépendance à la taille du buffer reste traitée par VISUAL-005.
