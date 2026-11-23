@@ -141,6 +141,33 @@ Non versionne:
 - Correction utilisateur : Loop vidéo et sauvegarde/réouverture sont tous deux bons dans le scénario actuellement utilisé. Cette confirmation supersède les anciens signalements d'échec Loop et le statut d'investigation différée; aucun problème de reload n'est à suivre.
 - Le statut PASS reste une confirmation manuelle rapportée. Les limites séparées (pluginval bloqué avant chargement, latence non mesurée, lecture éditeur fermé non testée) restent inchangées.
 
+## VISUAL-010 — Timeline interactive et Cue Points déplaçables
+
+- Corrections QA VISUAL-009 enregistrées dans le commit `acc79a4`; la branche VISUAL-009 reste séparée de `main`.
+- Branche de travail dédiée: `codex/VISUAL-010-interactive-cue-timeline`, créée au-dessus de VISUAL-009 pour conserver l'instrument vidéo qui n'est pas encore intégré à `main`.
+- Implémentation locale: `CueTimelineComponent` avec règle en secondes, durée, playhead indépendant, quatre marqueurs déplaçables, cartes C1/D1/E1/F1, sélection et nudging clavier nominal. Aucun média ni moteur parallèle n'est introduit.
+- `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU TimelineMathTests AVSamplerCoreTests CueRoutingTests -j 4`: PASS après correction d'une erreur de compile initiale; la build finale a terminé sans avertissement dans les fichiers AVSampler.
+- `ctest --test-dir /private/tmp/visual-009-build --output-on-failure`: PASS, 3/3 (`CueRoutingTests`, `TimelineMathTests`, `AVSamplerCoreTests`).
+- `git diff --check`: PASS sur l'état final inspecté après les dernières corrections de layout.
+- Installation utilisateur: bundle copié dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; l'ancienne version est sauvegardée dans `/private/tmp/AVSampler.component.pre-visual010`. Le SHA-256 de l'exécutable installé correspond à l'artefact: `1111e39b3ce57f2c1c5c3ab3952570a63f80b07ca27656783256a6e7c6cb4155`.
+- `auval -v aumu AVsm Vpoc`: NOT FOUND après la copie; le registre Audio Unit ne voit pas encore le composant. Cette tentative a eu lieu après le premier rescan/redémarrage rapporté par l'utilisateur, mais avant un nouveau scan Logic post-install.
+- QA visuelle/manuelle dans Logic après installation non exécutée. Restent drag/playhead, raccourcis clavier dans l'hôte, lecture/trigger après déplacement, petites/grandes tailles, remplacement/absence média et contrôle des logs.
+- Limite: l'API JUCE `VideoComponent` utilisée expose la durée mais pas la fréquence d'images de la source; le nudging est à 30 fps nominales et les miniatures vidéo sont différées.
+
+### Clarification état du bouton Loop — 2026-11-23
+
+- L'utilisateur annule le signalement de régression: la lecture Loop vidéo fonctionne. La confusion vient du style de bouton, qui donne l'impression d'être activé quand le paramètre est désactivé.
+- Le correctif candidat du moteur Loop/repaint a été annulé. La build timeline précédente (SHA `1111e39b3ce57f2c1c5c3ab3952570a63f80b07ca27656783256a6e7c6cb4155`) a été restaurée; le candidat Loop (SHA `644e63eca2ccd0d2539316aff5869521c7d6ecc99ec0246f7e3d17aa2c7199fd`) est conservé à `/private/tmp/AVSampler.component.post-loopstate-candidate`.
+- Correction UI: labels `Loop ON`/`Loop OFF` et couleurs explicites; aucune modification moteur Loop conservée.
+- Build/install: `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU TimelineMathTests AVSamplerCoreTests CueRoutingTests -j 4`: PASS; CTest PASS 3/3; `git diff --check`: PASS. L'AU à SHA `c15b3f0c95f4a6f1338992b404d91f52f4977694fab5b567412155717100cd66` est installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; la version précédente est sauvegardée dans `/private/tmp/AVSampler.component.pre-loop-button-state`.
+- Affichage de la nouvelle distinction ON/OFF dans Logic: QA manuelle à confirmer après redémarrage/scan post-install.
+
+### Confirmation QA utilisateur VISUAL-010 — 2026-11-23
+
+- Après l'installation et le redémarrage de Logic, l'utilisateur confirme que tout le parcours vérifié fonctionne: timeline et noms de notes, Loop ON/OFF, déplacement des quatre Cue Points, lecture continue, déclenchement MIDI aux nouvelles positions et sauvegarde/réouverture.
+- Cela supersède le statut antérieur « QA visuelle après installation non exécutée » pour ce parcours. Les tests clavier, tailles d'éditeur, absence/remplacement de média et les logs restent à vérifier.
+- CTest reste PASS 3/3 et build AU PASS (SHA `c15b3f0c95f4a6f1338992b404d91f52f4977694fab5b567412155717100cd66`). La vérification `auval` antérieure n'avait pas trouvé le composant; Logic confirme maintenant le chargement réel.
+
 ## QA baseline Audio Reactive — 2026-11-20
 
 Status: POC valide fonctionnellement sur les scénarios audio testés, corrections requises avant MVP.

@@ -4,7 +4,7 @@
 namespace
 {
 constexpr int editorWidth = 820;
-constexpr int editorHeight = 610;
+constexpr int editorHeight = 700;
 constexpr double videoEndDetectionWindowSeconds = 0.25;
 constexpr double loopStartPositionToleranceSeconds = 0.1;
 constexpr int loopRestartDelayTicks = 3;
@@ -15,7 +15,10 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     : AudioProcessorEditor(&samplerProcessor), audioProcessor(samplerProcessor)
 {
     setSize(editorWidth, editorHeight);
+    setResizable(true, true);
+    setResizeLimits(560, 520, 1400, 1000);
     addAndMakeVisible(videoComponent);
+    addAndMakeVisible(timelineComponent);
     addAndMakeVisible(loadButton);
     addAndMakeVisible(playButton);
     addAndMakeVisible(loopButton);
@@ -45,28 +48,17 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     {
         displayedLoopState = loopButton.getToggleState();
         audioProcessor.setLoopEnabled(displayedLoopState);
+        updateLoopButtonAppearance(displayedLoopState);
     };
 
     positionLabel.setJustificationType(juce::Justification::centredRight);
     statusLabel.setJustificationType(juce::Justification::centredLeft);
     statusLabel.setColour(juce::Label::textColourId, juce::Colours::lightgrey);
 
-    for (int i = 0; i < AVSamplerAudioProcessor::cueCount; ++i)
+    timelineComponent.onCuePositionChanged = [this](int cueIndex, double positionSeconds)
     {
-        auto& button = cueButtons[static_cast<std::size_t>(i)];
-        auto& label = cueLabels[static_cast<std::size_t>(i)];
-        const auto midiNote = avsampler::defaultCueMidiNotes[static_cast<std::size_t>(i)];
-
-        button.setButtonText("Set Cue " + juce::String(i + 1) + " (MIDI " + juce::String(midiNote) + ")");
-        button.onClick = [this, i]
-        {
-            if (videoComponent.isVideoOpen())
-                audioProcessor.setCuePosition(i, videoComponent.getPlayPosition());
-        };
-        label.setJustificationType(juce::Justification::centred);
-        addAndMakeVisible(button);
-        addAndMakeVisible(label);
-    }
+        audioProcessor.setCuePosition(cueIndex, positionSeconds);
+    };
 
     videoComponent.onErrorOccurred = [safeThis = juce::Component::SafePointer<AVSamplerAudioProcessorEditor>(this)]
         (const juce::String& message)
@@ -77,8 +69,7 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
 
     const auto state = audioProcessor.getProjectState();
     displayedLoopState = state.loopEnabled;
-    loopButton.setToggleState(displayedLoopState, juce::dontSendNotification);
-    updateCueLabels(state);
+    updateLoopButtonAppearance(displayedLoopState);
     loadVideoAtPath(state.videoPath);
     startTimerHz(60);
 }
@@ -102,19 +93,12 @@ void AVSamplerAudioProcessorEditor::resized()
     positionLabel.setBounds(toolbar);
 
     bounds.removeFromTop(8);
-    auto cueArea = bounds.removeFromBottom(112);
+    auto timelineArea = bounds.removeFromBottom(178);
+    bounds.removeFromBottom(6);
     statusLabel.setBounds(bounds.removeFromBottom(26));
     bounds.removeFromBottom(6);
     videoComponent.setBounds(bounds);
-
-    const auto cellWidth = cueArea.getWidth() / AVSamplerAudioProcessor::cueCount;
-    for (int i = 0; i < AVSamplerAudioProcessor::cueCount; ++i)
-    {
-        auto cell = cueArea.removeFromLeft(cellWidth).reduced(4, 0);
-        cueButtons[static_cast<std::size_t>(i)].setBounds(cell.removeFromTop(38));
-        cell.removeFromTop(6);
-        cueLabels[static_cast<std::size_t>(i)].setBounds(cell.removeFromTop(28));
-    }
+    timelineComponent.setBounds(timelineArea);
 }
 
 void AVSamplerAudioProcessorEditor::timerCallback()
@@ -126,10 +110,8 @@ void AVSamplerAudioProcessorEditor::timerCallback()
     if (state.loopEnabled != displayedLoopState)
     {
         displayedLoopState = state.loopEnabled;
-        loopButton.setToggleState(displayedLoopState, juce::dontSendNotification);
+        updateLoopButtonAppearance(displayedLoopState);
     }
-
-    updateCueLabels(state);
 
     if (videoComponent.isVideoOpen())
     {
@@ -143,16 +125,8 @@ void AVSamplerAudioProcessorEditor::timerCallback()
             videoComponent.setPlayPosition(cuePosition);
             videoComponent.play();
 
-            if (pendingCue != activeCueIndex)
-            {
-                if (activeCueIndex >= 0)
-                    cueButtons[static_cast<std::size_t>(activeCueIndex)].setColour(
-                        juce::TextButton::buttonColourId, juce::Colour(0xff292d38));
-
-                activeCueIndex = pendingCue;
-                cueButtons[static_cast<std::size_t>(activeCueIndex)].setColour(
-                    juce::TextButton::buttonColourId, juce::Colour(0xffb14c2c));
-            }
+            activeCueIndex = pendingCue;
+            timelineComponent.setActiveCue(activeCueIndex);
 
             statusLabel.setText("Triggered Cue " + juce::String(pendingCue + 1)
                 + " (MIDI " + juce::String(avsampler::defaultCueMidiNotes[static_cast<std::size_t>(pendingCue)]) + ")",
@@ -210,6 +184,7 @@ void AVSamplerAudioProcessorEditor::timerCallback()
         positionLabel.setText(juce::String(position, 2) + " / " + juce::String(duration, 2) + " s",
                               juce::dontSendNotification);
         playButton.setButtonText(isPlaying ? "Pause" : "Play");
+        timelineComponent.setTimelineData(duration, position, state.cuePositionsSeconds);
     }
     else
     {
@@ -218,6 +193,7 @@ void AVSamplerAudioProcessorEditor::timerCallback()
         loopRestartWaitTicks = 0;
         positionLabel.setText("-- / -- s", juce::dontSendNotification);
         playButton.setButtonText("Play");
+        timelineComponent.setTimelineData(0.0, 0.0, state.cuePositionsSeconds);
     }
 }
 
@@ -289,13 +265,13 @@ void AVSamplerAudioProcessorEditor::loadVideoAtPath(const juce::String& path)
     });
 }
 
-void AVSamplerAudioProcessorEditor::updateCueLabels(const AVSamplerAudioProcessor::ProjectState& state)
+void AVSamplerAudioProcessorEditor::updateLoopButtonAppearance(bool enabled)
 {
-    for (int i = 0; i < AVSamplerAudioProcessor::cueCount; ++i)
-    {
-        const auto seconds = state.cuePositionsSeconds[static_cast<std::size_t>(i)];
-        cueLabels[static_cast<std::size_t>(i)].setText("MIDI "
-            + juce::String(avsampler::defaultCueMidiNotes[static_cast<std::size_t>(i)])
-            + "  ·  " + juce::String(seconds, 2) + " s", juce::dontSendNotification);
-    }
+    loopButton.setToggleState(enabled, juce::dontSendNotification);
+    loopButton.setButtonText(enabled ? "Loop ON" : "Loop OFF");
+    loopButton.setColour(juce::TextButton::buttonColourId,
+                         enabled ? juce::Colour(0xff254a38) : juce::Colour(0xff292d38));
+    loopButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff42dc86));
+    loopButton.setColour(juce::TextButton::textColourOffId, juce::Colour(0xffc4ccd8));
+    loopButton.setColour(juce::TextButton::textColourOnId, juce::Colours::black);
 }

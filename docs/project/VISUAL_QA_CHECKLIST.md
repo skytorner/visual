@@ -70,6 +70,23 @@ La nouvelle direction vidéo/MIDI est autorisée le 2026-11-23. Les validations 
 | Latence MIDI → nouvelle image | NOT MEASURED | Aucune précision temporelle revendiquée. |
 | Lecture avec éditeur fermé | NOT TESTED | Dépendance éventuelle du rendu au composant UI à qualifier. |
 
+## VISUAL-010 — Timeline interactive
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Conversion temps ↔ position et bornes vidéo | PASS automatisé | `TimelineMathTests`: round-trip temps/pixel et clamp aux bornes. |
+| Nom des notes MIDI affiché sur les cartes | PASS automatisé | `TimelineMathTests`: MIDI 36/38/40/41 -> C1/D1/E1/F1 selon la notation Logic observée. |
+| Build et copie AU macOS après timeline | PASS build/install | `AVSampler_AU` compilé puis copié dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; SHA du binaire installé identique à l'artefact. |
+| Hôte AU post-install | PASS Logic / `auval` NOT FOUND | Logic charge l'AU et l'utilisateur confirme le parcours visuel; la commande `auval -v aumu AVsm Vpoc` n'a pas trouvé le composant lors de son invocation antérieure. |
+| Régressions de routage MIDI/état | PASS automatisé | `CueRoutingTests` et `AVSamplerCoreTests` exécutés avec la nouvelle build. |
+| Loop vidéo avec VISUAL-010 | PASS manuel rapporté | L'utilisateur corrige son signalement: la vidéo boucle; l'apparence du bouton Loop faisait croire à tort qu'il était activé. |
+| État visuel du bouton Loop OFF/ON | PASS manuel rapporté | L'utilisateur confirme que le bouton distingue maintenant l'état et que le Loop vidéo fonctionne. |
+| Drag des quatre Cue Points et synchronisation d'état | PASS manuel rapporté | L'utilisateur confirme le déplacement des quatre cues, la mise à jour du temps, le déclenchement MIDI aux nouvelles positions et save/reload. |
+| Lecture pendant déplacement et playhead indépendant | PASS manuel rapporté | Inclus dans la confirmation utilisateur « tout fonctionne » après les vérifications du parcours Logic. |
+| Ajustement clavier une frame / dix frames | NOT TESTED | Pas nominal 1/30 s; la source JUCE ne fournit pas la cadence vidéo. |
+| Tailles d'éditeur étroite et large | NOT TESTED | Vérifier limites 560–1400 px et lisibilité des cartes. |
+| Aucun média / média remplacé / cues aux bornes et proches | NOT TESTED | Smoke test visuel et absence d'erreur/crash. |
+
 ## VISUAL-003 — Branche corrective : résultats intermédiaires
 
 La condition de layouts a été modifiée pour annoncer mono->mono et stereo->stereo, sans modification de `processBlock()` ni identifiants plugin/paramètres. La compilation locale AU/VST3/Standalone a été rapportée réussie, avec warnings JUCE/SDK non bloquants. L'utilisateur confirme désormais que Logic Pro 13 **propose/accepte Stéréo, Dual Mono et Mono**. Le « Dual Mono » est un mode de traitement/instanciation de l'hôte Logic, **pas** un troisième layout JUCE ajouté au plugin : le code n'accepte explicitement que mono/mono et stéréo/stéréo.

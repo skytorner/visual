@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "AVSamplerProcessor.h"
+#include "CueTimelineComponent.h"
 
 class AVSamplerAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                              private juce::Timer
@@ -17,17 +18,16 @@ private:
     void timerCallback() override;
     void chooseVideo();
     void loadVideoAtPath(const juce::String& path);
-    void updateCueLabels(const AVSamplerAudioProcessor::ProjectState& state);
+    void updateLoopButtonAppearance(bool enabled);
 
     AVSamplerAudioProcessor& audioProcessor;
     juce::VideoComponent videoComponent { false };
+    CueTimelineComponent timelineComponent;
     juce::TextButton loadButton { "Load Video" };
     juce::TextButton playButton { "Play" };
     juce::TextButton loopButton { "Loop" };
     juce::Label positionLabel;
     juce::Label statusLabel;
-    std::array<juce::TextButton, AVSamplerAudioProcessor::cueCount> cueButtons;
-    std::array<juce::Label, AVSamplerAudioProcessor::cueCount> cueLabels;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::String loadedVideoPath;
     double previousVideoPosition = 0.0;
