@@ -5,6 +5,10 @@ namespace
 {
 constexpr int editorWidth = 820;
 constexpr int editorHeight = 610;
+constexpr double videoEndDetectionWindowSeconds = 0.25;
+constexpr double loopStartPositionToleranceSeconds = 0.1;
+constexpr int loopRestartDelayTicks = 3;
+constexpr int loopSeekRetryTicks = 30;
 }
 
 AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProcessor& samplerProcessor)
@@ -25,9 +29,15 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
             return;
 
         if (videoComponent.isPlaying())
+        {
+            manualPauseRequested = true;
             videoComponent.stop();
+        }
         else
+        {
+            manualPauseRequested = false;
             videoComponent.play();
+        }
     };
 
     loopButton.setClickingTogglesState(true);
@@ -126,6 +136,9 @@ void AVSamplerAudioProcessorEditor::timerCallback()
         const auto pendingCue = audioProcessor.consumePendingCue();
         if (pendingCue >= 0 && pendingCue < AVSamplerAudioProcessor::cueCount)
         {
+            loopRestartPending = false;
+            loopRestartWaitTicks = 0;
+            manualPauseRequested = false;
             const auto cuePosition = state.cuePositionsSeconds[static_cast<std::size_t>(pendingCue)];
             videoComponent.setPlayPosition(cuePosition);
             videoComponent.play();
@@ -147,20 +160,62 @@ void AVSamplerAudioProcessorEditor::timerCallback()
         }
 
         const auto duration = videoComponent.getVideoDuration();
-        if (state.loopEnabled && duration > 0.0 && ! videoComponent.isPlaying()
-            && videoComponent.getPlayPosition() >= duration - 0.1)
+        auto position = videoComponent.getPlayPosition();
+        auto isPlaying = videoComponent.isPlaying();
+
+        // JUCE's macOS backend stops and seeks to zero at EOF. Use the last running
+        // position to distinguish that stop from a manual pause, then wait for the
+        // asynchronous seek to finish before starting playback again.
+        if (! state.loopEnabled)
         {
-            videoComponent.setPlayPosition(0.0);
-            videoComponent.play();
+            loopRestartPending = false;
+            loopRestartWaitTicks = 0;
+        }
+        else if (pendingCue < 0 && ! loopRestartPending && previousVideoWasPlaying
+                 && ! isPlaying && ! manualPauseRequested && duration > 0.0
+                 && previousVideoPosition >= duration - videoEndDetectionWindowSeconds)
+        {
+            loopRestartPending = true;
+            loopRestartWaitTicks = 0;
+            if (position > loopStartPositionToleranceSeconds)
+                videoComponent.setPlayPosition(0.0);
         }
 
-        const auto position = videoComponent.getPlayPosition();
+        if (loopRestartPending)
+        {
+            if (isPlaying)
+            {
+                loopRestartPending = false;
+                loopRestartWaitTicks = 0;
+            }
+            else if (position <= loopStartPositionToleranceSeconds)
+            {
+                if (++loopRestartWaitTicks >= loopRestartDelayTicks)
+                {
+                    videoComponent.play();
+                    loopRestartWaitTicks = 0;
+                }
+            }
+            else if (++loopRestartWaitTicks == loopSeekRetryTicks)
+            {
+                videoComponent.setPlayPosition(0.0);
+                loopRestartWaitTicks = 0;
+            }
+        }
+
+        position = videoComponent.getPlayPosition();
+        isPlaying = videoComponent.isPlaying();
+        previousVideoPosition = position;
+        previousVideoWasPlaying = isPlaying;
         positionLabel.setText(juce::String(position, 2) + " / " + juce::String(duration, 2) + " s",
                               juce::dontSendNotification);
-        playButton.setButtonText(videoComponent.isPlaying() ? "Pause" : "Play");
+        playButton.setButtonText(isPlaying ? "Pause" : "Play");
     }
     else
     {
+        previousVideoWasPlaying = false;
+        loopRestartPending = false;
+        loopRestartWaitTicks = 0;
         positionLabel.setText("-- / -- s", juce::dontSendNotification);
         playButton.setButtonText("Play");
     }
@@ -188,6 +243,11 @@ void AVSamplerAudioProcessorEditor::chooseVideo()
 void AVSamplerAudioProcessorEditor::loadVideoAtPath(const juce::String& path)
 {
     loadedVideoPath = path;
+    previousVideoPosition = 0.0;
+    previousVideoWasPlaying = false;
+    manualPauseRequested = false;
+    loopRestartPending = false;
+    loopRestartWaitTicks = 0;
     videoComponent.closeVideo();
 
     if (path.isEmpty())
@@ -221,6 +281,9 @@ void AVSamplerAudioProcessorEditor::loadVideoAtPath(const juce::String& path)
 
         safeThis->videoComponent.setAudioVolume(0.0f);
         safeThis->videoComponent.play();
+        safeThis->previousVideoPosition = 0.0;
+        safeThis->previousVideoWasPlaying = true;
+        safeThis->manualPauseRequested = false;
         safeThis->statusLabel.setText("Video playing. Set Cue buttons at the current position.",
                                       juce::dontSendNotification);
     });

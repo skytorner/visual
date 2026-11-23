@@ -62,7 +62,9 @@ La nouvelle direction vidéo/MIDI est autorisée le 2026-11-23. Les validations 
 | Build macOS AU `AVSampler_AU` | PASS | Cible instrument AU compilée; bundle `AVSampler.component` généré. |
 | Plugin audio historique AU/VST3/Standalone | PASS build | `AudioReactiveImagePOC_All` compile depuis cette branche; pas de pluginval/regression DAW sur le nouveau build. |
 | Métadonnées AU instrument/MIDI | PASS statique | `Info.plist` indique le type `aumu`; la config JUCE inclut `JucePlugin_WantsMidiInput=1`. Ce n'est pas un test Logic. |
-| Chargement, lecture, boucle, seek de vidéo | NOT RUN | Test manuel dans l'éditeur avec codecs représentatifs. |
+| Chargement/lecture vidéo et cycle musical de Logic | PASS manuel partiel | L'utilisateur confirme que sa vidéo légère se lit et que la boucle de Logic ne crée pas de latence musicale perceptible. MIDI/cues et autres codecs ne sont pas couverts par ce retour. |
+| Loop vidéo intégré — build initial | FAIL rapporté | À la fin, la vidéo revient à 0 mais reste arrêtée dans Logic. |
+| Loop vidéo intégré — build corrigé | NOT RUN | Correction compilée et AU local mis à jour; redémarrage/rescan et retest manuel Logic restent nécessaires. Vérifier aussi que Pause manuel ne relance pas la vidéo. |
 | Logic Pro: instrument, piano roll, NoteOn et NoteOff | NOT RUN | QA humaine nécessaire; compilation et Info.plist ne prouvent pas la réception effective. |
 | Sauvegarde/réouverture du projet et média | PASS unitaire / NOT RUN DAW | Test C++ de sérialisation/restauration passe; scénario projet Logic et chemin externe non testé. |
 | pluginval strictness 5 | BLOCKED BEFORE PLUGIN LOAD | pluginval 1.0.4 s'aborte à l'initialisation `NSApplication`/AppKit (`_RegisterApplication`, SIGABRT); aucun test plugin ne démarre. Rapport reçu le 2026-11-23. |

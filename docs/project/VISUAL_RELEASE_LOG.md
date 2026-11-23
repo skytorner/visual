@@ -115,6 +115,14 @@ Non versionne:
 - Tentative pluginval 1.0.4 : **non exécutée sur le plugin**; le processus s'aborte dans `AppKit` lors de `NSApplication`/`_RegisterApplication`, confirmé par le rapport utilisateur (SIGABRT). Aucun résultat fonctionnel pluginval.
 - `git diff --check` final : PASS. QA Logic reste NOT RUN; aucune installation/écriture dans les dossiers Audio Units n'a été faite.
 
+### Suivi Loop vidéo — 2026-11-23
+
+- Retour manuel Logic de l'utilisateur : la vidéo locale se lit; boucler la région dans Logic ne produit pas de latence musicale perceptible. Le bouton Loop d'AVSampler, lui, ramène l'image au début puis laisse la vidéo arrêtée.
+- Cause identifiée dans JUCE 8.0.8 macOS : la notification de fin arrête AVPlayer et déclenche déjà un seek vers 0; le timer AVSampler attendait encore une position de fin et appelait play trop tôt pour le seek asynchrone.
+- Correctif : détecter le passage lecture→arrêt à proximité de la fin, attendre que la position soit revenue à 0 puis démarrer la lecture; la relance est répétée jusqu'à confirmation de reprise. Un arrêt manuel dans l'éditeur n'est pas traité comme une fin de média.
+- `cmake --build /private/tmp/visual-009-build --config Release --target AVSampler_AU` : PASS. Tests automatisés non relancés; retest fonctionnel Logic du nouveau build NOT RUN.
+- AU 0.1.0 corrigé installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; ancienne copie conservée dans `/private/tmp/AVSampler.component.pre-loopfix`. Logic doit rescanner/redémarrer pour charger le binaire mis à jour.
+
 ## QA baseline Audio Reactive — 2026-11-20
 
 Status: POC valide fonctionnellement sur les scénarios audio testés, corrections requises avant MVP.

@@ -30,7 +30,12 @@ private:
     std::array<juce::Label, AVSamplerAudioProcessor::cueCount> cueLabels;
     std::unique_ptr<juce::FileChooser> fileChooser;
     juce::String loadedVideoPath;
+    double previousVideoPosition = 0.0;
     bool displayedLoopState = false;
+    bool manualPauseRequested = false;
+    bool previousVideoWasPlaying = false;
+    bool loopRestartPending = false;
+    int loopRestartWaitTicks = 0;
     int activeCueIndex = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AVSamplerAudioProcessorEditor)

@@ -70,7 +70,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-009 — Native MIDI Video POC
 
-- Status: Needs verification — implementation complete; Logic/codec/runtime checks pending; branche `codex/VISUAL-009-native-midi-video-poc`, issue de `main` `741f4b6`.
+- Status: Needs verification — vidéo et cycle Logic rapportés fonctionnels sans latence musicale perceptible; correctif du Loop vidéo intégré compilé et installé localement, retest Logic requis; branche `codex/VISUAL-009-native-midi-video-poc`, issue de `main` `741f4b6`.
 - Priority: P0.
 - Scope: ajouter une cible instrument AU silencieuse; charger une vidéo locale; lecture/pause continue et boucle; quatre Cue Points réglables à la position courante; MIDI 36, 38, 40, 41 déclenche les cues; sauvegarder chemin, positions et loop; tests du mapping pur.
 - Exclusions: timeline éditable, mappings personnalisés, 16 pads, MIDI Learn, CC, effets vélocité, export vidéo, transport sync et moteur vidéo personnalisé.
@@ -78,6 +78,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
   - Nouvelle cible et identité AV Sampler, sans modifier plugin audio, identifiants ni état.
   - Instrument AU accepte NoteOn et produit le silence; NoteOff/non-assignées ignorées; dernier cue valide prioritaire.
   - UI charge une vidéo locale, lit en continu, boucle, mémorise 4 points, seek puis reprend sur Cue.
+  - À la fin du média, Loop reprend la lecture au début; Pause manuel reste arrêté.
   - État vidéo/Cues/loop restauré; chemin absent récupérable.
   - Tests mapping, build AU macOS et QA Logic piano roll/lecture/projet réellement exécutés ou marqués NOT RUN.
   - Limites de latence, codecs, éditeur fermé et synchronisation documentées.
