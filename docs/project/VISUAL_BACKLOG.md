@@ -200,11 +200,12 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 
 ### VISUAL-017 — Qualification Windows et préparation Closed Alpha 1
 
-- Status: Deferred — démarrera après stabilisation du périmètre fonctionnel macOS. La compilation Windows est déjà automatisée; aucun test Windows n'est demandé pour l'instant.
+- Status: In progress — démarré le 2026-11-24 après validation utilisateur de Flash dans Logic; la compilation Windows est automatisée, l'artefact VST3 exact et sa QA REAPER restent à obtenir.
 - Priority: P0 pour une cohorte macOS/Windows.
 - Scope: valider le VST3 dans REAPER sur Windows, qualifier lecture/transport/MIDI/session et codecs, décider puis combler les écarts de rendu (dont RGB Split), établir les exigences système, puis fabriquer deux archives identifiées par SHA avec instructions d'installation/mise à jour/désinstallation et guide de feedback pour 3–5 testeurs.
 - Acceptance: Logic/AU sur Mac et REAPER/VST3 sur Windows vérifiés sur leurs artefacts exacts; vidéo/Cues/Loop, CC1, RGB Split, save/reopen et relink testés; pluginval effectué sur chaque artefact; versions, SHA, installation propre et limites documentés; aucune publication publique.
 - QA restante côté Mac avant Closed Alpha: pluginval strictness 4 sur l'artefact AU exact; strictness 5 n'est pas rapporté. CC1=64/save-reload et relink après déplacement sont confirmés manuellement, sans SHA d'artefact.
+- Première étape lancée: build VST3 x64 depuis le SHA de cette branche et test REAPER sur Windows du chargement vidéo, transport/Loop, MIDI Cues, CC1, save/reload et relink. RGB Split et Flash sont connus indisponibles sur le renderer Windows; noter le comportement visible et décider le portage avant alpha.
 
 ### VISUAL-018 — Clôture QA Logic CC1 et relink média
 

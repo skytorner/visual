@@ -5,8 +5,8 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 
 ## État AV Sampler sur main — résumé release readiness
 
-- `main` contient VISUAL-009 à VISUAL-014, y compris la timeline/session, CC1, le renderer Metal et RGB Split.
-- L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload et fonctionnement RGB Split; le dernier retour confirme aussi une lecture fluide en boucle. Résultats manuels rapportés, sans mesure chiffrée de latence, framerate ou CPU/GPU. Le journal pluginval récent ne relie pas le test à un SHA binaire.
+- `main` contient VISUAL-009 à VISUAL-019, y compris la timeline/session, CC1, le renderer Metal, RGB Split et Flash.
+- L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload, RGB Split, Flash et lecture fluide en boucle. Résultats manuels rapportés, sans mesure chiffrée de latence, framerate ou CPU/GPU.
 - L'utilisateur confirme dans Logic CC1 à 0/64/127 et la restauration de la valeur après save/reload; SHA exact de l'AU utilisé non consigné.
 - L'utilisateur confirme le déplacement puis le relink de la vidéo avec conservation des Cue timings et du Loop; refaire sur l'artefact candidat de distribution.
 - Un ancien lancement pluginval s'était interrompu avant chargement (code 134). Le nouveau journal utilisateur `log audio react4.txt` rapporte deux validations complètes de l'AU AV Sampler v0.1.0 à strictness 4, `ALL TESTS PASSED`. Le journal identifie le composant par `aumu,AVsm,Vpoc`, mais ne donne ni chemin du bundle ni SHA de l'exécutable; strictness 5 n'est pas rapporté. L'avertissement `Current program is -1` apparaît lors du changement de programme et n'empêche pas le résultat `SUCCESS`.
@@ -16,9 +16,9 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | Élément | Statut | Preuve / limite |
 | --- | --- | --- |
 | AU macOS et Logic | PASS manuel rapporté | Le parcours actuel charge et fonctionne dans Logic. Autres hôtes non qualifiés. |
-| Flash v1 (VISUAL-019) | EN COURS / NOT TESTED | Implémentation Mac sur la branche de travail; build/install et QA Logic restent à faire avant de revendiquer le nouvel effet fonctionnel. |
+| Flash v1 (VISUAL-019) | PASS manuel rapporté | Build/install AU identifié; l'utilisateur confirme que Flash et les essais associés fonctionnent parfaitement dans Logic. |
 | Processus build VST3 Windows x64 | PASS CI / EN PLACE | GitHub Actions run `45435924725` compile `AVSampler_VST3` depuis le commit source `7dbc2e3` et publie l'artefact QA `AVSampler-Windows-VST3-7dbc2e3...`, SHA256 archive `4450ceddcef0f67ee92244b248a5df55755b42dab194896b069ae22f86451037`, avec provenance du binaire. Cela prouve le build, pas le fonctionnement dans un hôte. |
-| VST3 Windows et REAPER | DEFERRED / NOT TESTED | La QA Windows est planifiée après stabilisation des fonctionnalités macOS. Le renderer prototype utilise JUCE `VideoComponent`; RGB Split y est indisponible. Ne pas annoncer Windows supporté avant qualification réelle dans REAPER. |
+| VST3 Windows et REAPER | IN PROGRESS / NOT TESTED | VISUAL-017 lancé. Le renderer prototype utilise JUCE `VideoComponent`; RGB Split et Flash y sont indisponibles. Aucun support Windows avant qualification REAPER réelle. |
 | Package installable sans environnement de développement | NOT AVAILABLE | Les scripts de release et le workflow versionnés package `AudioReactiveImagePOC`; `make install-avsampler-au` est une installation locale développeur qui compile sur la machine. |
 | Installation/mise à jour/désinstallation par des testeurs | NOT TESTED | Aucun package AV Sampler pour cohorte n'existe encore. |
 | Signature notarisation / provenance du package alpha | NOT TESTED | L'installation développeur applique une signature ad hoc; aucune notarisation ni signature de distribution établie. |
@@ -28,7 +28,7 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | CC1=64 et save/reload | PASS manuel rapporté, 2026-11-24 | L'utilisateur confirme la vitesse normale à 64 et la restauration après sauvegarde/réouverture dans Logic. SHA de l'AU testé non consigné; refaire sur le candidat de distribution. |
 | pluginval sur le package alpha exact | NOT TESTED | Strictness 4 passe sur l'AU de développement enregistré, mais le log ne donne pas le chemin ou SHA. Refaire et consigner le test sur l'artefact de cohorte. |
 
-**Décision actuelle : NO-GO pour envoyer une Closed Alpha multi-plateforme; GO pour le processus de build Windows de VISUAL-016. La QA REAPER/Windows est volontairement reportée pendant la poursuite du développement macOS.**
+**Décision actuelle : NO-GO pour envoyer une Closed Alpha multi-plateforme. VISUAL-017 démarre la qualification REAPER/Windows après stabilisation du parcours Mac.**
 
 ## Matrice AudioReactiveImagePOC (plugin audio historique seulement)
 
@@ -186,6 +186,19 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | Build et installation AU macOS | PASS build/install | Build Release local; CTest 5/5; AU installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; signature vérifiée. Exécutable installé après signature ad hoc SHA-256 `7f95d72f9054668f0d035d0fd90f6c107683831dd806d59d679c2e962afaba13`. |
 | Validation utilisateur dans Logic | PASS manuel rapporté | Après installation du build identifié ci-dessus, l'utilisateur confirme que Flash fonctionne parfaitement et que tous les essais sont concluants. |
 | Disponibilité VST3 Windows | Non disponible | L'UI doit signaler que Flash n'est pas porté au renderer Windows. |
+
+## VISUAL-017 — Qualification Windows / REAPER
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Build VST3 Windows x64 depuis la branche VISUAL-017 | À exécuter | Workflow `.github/workflows/avsampler-windows-build.yml`; relever SHA source, SHA256 du binaire et artefact téléchargé. |
+| Scan et insertion dans REAPER Windows | EN ATTENTE | Noter version de Windows et REAPER, chemin d'installation/scans, nom et version du plugin. |
+| Chargement vidéo, Play/Pause, Loop et Cue Points | EN ATTENTE | Charger un média local; vérifier les quatre notes MIDI dans une région puis le rejeu en boucle. |
+| CC1 / vitesse et MIDI simultané avec transport | EN ATTENTE | Vérifier les extrêmes et la valeur neutre à 64; noter tout saut ou perte de déclenchement. |
+| Save/reload, média déplacé et relink | EN ATTENTE | Recharger le projet hôte puis relier le fichier déplacé; vérifier les Cue timings et Loop. |
+| Formats vidéo et limites système | EN ATTENTE | Pour chaque essai, consigner conteneur, codec, résolution, durée et résultat; un média ne vaut pas matrice codecs. |
+| RGB Split et Flash dans le renderer Windows | Indisponibles connu | Windows emploie actuellement `juce::VideoComponent`; pas d'accès aux frames pour ces shaders. Décider et implémenter la parité avant Closed Alpha. |
+| pluginval / autre validator du VST3 Windows | NOT RUN | Exécuter sur l'artefact exact après obtention; consigner version, niveau, SHA source et binaire. |
 
 ## VISUAL-012 — Composition UI et pads assignés
 
