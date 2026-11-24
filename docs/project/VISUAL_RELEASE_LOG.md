@@ -86,6 +86,13 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 - Les exigences de notarisation/signature de distribution, minimum macOS, codecs acceptés, mise à jour/désinstallation, SHA/version du package AV Sampler restent à définir/tester.
 - Conclusion: NO-GO pour une distribution Closed Alpha sur l'état actuel; poursuivre avec VISUAL-016 après l'audit documentaire VISUAL-015. Aucun package, tag ou release n'est créé par cet audit.
 
+## VISUAL-016 — Premier build Windows VST3 — 2026-11-24
+
+- Le composant partagé conserve le renderer AVFoundation/Metal sur macOS et utilise `juce::VideoComponent` sur Windows pour ce premier parcours vidéo/transport. RGB Split est explicitement désactivé sur Windows, car cette vue n'expose pas les frames utilisées par le shader Metal.
+- Build local macOS Release: `AVSampler_AU` et `AVSampler_VST3` PASS depuis JUCE 8.0.8; seulement des warnings JUCE/SDK (Metal déprécié, enum AppKit); signature ad hoc ajoutée par JUCE au VST3 généré.
+- GitHub Actions Windows x64: run `45435924725`, configure + compile `AVSampler_VST3` PASS. Artefact de QA `AVSampler-Windows-VST3-7dbc2e3cfb1897762286dbc00bb73fb781b6c304`; SHA256 ZIP `4450ceddcef0f67ee92244b248a5df55755b42dab194896b069ae22f86451037`. Le fichier `AVSampler-windows-build-info.txt` inclus donne le SHA source et l'empreinte du binaire.
+- Aucune validation manuelle REAPER/Windows ni pluginval Windows n'est rapportée. L'artefact est un build de QA, pas un package d'alpha distribuable.
+
 ## Initial Setup
 
 Status: Planning.

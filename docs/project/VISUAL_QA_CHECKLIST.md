@@ -16,7 +16,7 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | Élément | Statut | Preuve / limite |
 | --- | --- | --- |
 | AU macOS et Logic | PASS manuel rapporté | Le parcours actuel charge et fonctionne dans Logic. Autres hôtes non qualifiés. |
-| VST3 Windows et REAPER | BUILD PASS / HOST NOT TESTED | GitHub Actions run `45433563198` configure et compile `AVSampler_VST3` en Windows x64. L'artefact SHA sera publié pour QA manuelle dans REAPER; RGB Split est indisponible sur cette vue prototype. |
+| VST3 Windows et REAPER | BUILD PASS / HOST NOT TESTED | GitHub Actions run `45435924725` compile `AVSampler_VST3` en Windows x64 depuis le commit source `7dbc2e3`. Artefact QA `AVSampler-Windows-VST3-7dbc2e3...`, SHA256 archive `4450ceddcef0f67ee92244b248a5df55755b42dab194896b069ae22f86451037`; le ZIP contient aussi le SHA du binaire. Test REAPER restant; RGB Split indisponible sur ce renderer prototype. |
 | Package installable sans environnement de développement | NOT AVAILABLE | Les scripts de release et le workflow versionnés package `AudioReactiveImagePOC`; `make install-avsampler-au` est une installation locale développeur qui compile sur la machine. |
 | Installation/mise à jour/désinstallation par des testeurs | NOT TESTED | Aucun package AV Sampler pour cohorte n'existe encore. |
 | Signature notarisation / provenance du package alpha | NOT TESTED | L'installation développeur applique une signature ad hoc; aucune notarisation ni signature de distribution établie. |

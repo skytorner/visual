@@ -65,7 +65,7 @@ DAW (effet audio) -> PluginProcessor::processBlock() -> RMS/Peak/Envelope -> ato
 ## Invariants et qualification restant à faire
 
 1. Aucun mutex, I/O, décodage, seek bloquant, allocation dynamique ou appel UI dans `processBlock()`.
-2. Le seul parcours actuellement qualifié reste l'AU macOS dans Logic; le prototype VST3 Windows doit encore passer le build Windows et un test réel REAPER.
+2. Le seul parcours actuellement qualifié dans un hôte reste l'AU macOS dans Logic. Le VST3 Windows compile maintenant en CI (run `45435924725`); son chargement/transport MIDI doit encore être validé dans REAPER.
 3. Le projet hôte conserve les paramètres/session; le fichier vidéo demeure externe.
 4. Un média absent ou illisible doit rester récupérable sans crash; valider relink/remplacement dans la version candidate de distribution.
 5. Ne pas modifier l'identité ni l'état du POC audio.
