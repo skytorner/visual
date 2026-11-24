@@ -1,6 +1,6 @@
 # AV Sampler — Vision produit et périmètre
 
-Date de cadrage : 2026-11-23. Dépôt : `skytorner/visual`.
+Date de cadrage : 2026-11-24. Dépôt : `skytorner/visual`.
 
 ## Vision
 
@@ -8,29 +8,55 @@ Date de cadrage : 2026-11-23. Dépôt : `skytorner/visual`.
 
 La direction évolue volontairement du POC audio vers un sampler vidéo MIDI natif. Le plugin audio existant est conservé comme cible distincte pendant la transition; ses identifiants, paramètres et projets ne changent pas.
 
-## Phase 1 — Native MIDI Video POC (priorité actuelle)
+## Produit livré sur `main` — prototype interne
 
-Parcours : instrument AU dans Logic Pro -> vidéo locale -> lecture continue et boucle -> quatre Cue Points configurables -> notes MIDI du piano roll qui déclenchent les Cue Points.
+Le prototype comprend une cible instrument AU macOS, un lecteur vidéo AVFoundation avec présentation Metal, une lecture/Loop, quatre Cue Points manipulables et quatre notes MIDI fixes (36/38/40/41). Les notes sont présentées comme C1/D1/E1/F1 dans la configuration Logic testée. CC1 pilote la vitesse de lecture; la vélocité NoteOn déclenche le RGB Split. L'état de projet conserve le média référencé, les Cue Points, Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation RGB Split.
 
-Critère de réussite : une région de quatre notes jouée dans Logic déclenche successivement les quatre moments configurés de la vidéo.
+L'utilisateur confirme manuellement que le parcours fonctionne dans Logic, que le cycle de région rejoue les notes et que la lecture vidéo reste fluide en boucle. Cela constitue une validation fonctionnelle rapportée, pas une mesure instrumentée de latence, cadence ou usage CPU/GPU.
 
-Une seule vidéo et une seule tête de lecture. Ne pas revendiquer une précision frame-perfect ni une faible latence de seek sans mesures sur des codecs et hôtes représentatifs.
+Le seul hôte/form factor qualifié par ce parcours est Logic Pro sur macOS avec l'AU. AV Sampler VST3, Windows, autres DAW, versions macOS minimales et compatibilité codec étendue ne sont pas qualifiés. Une seule vidéo et une seule tête de lecture sont prises en charge. Aucune précision frame-perfect ni latence garantie n'est promise.
 
 ## POC audio conservé
 
 Le plugin `AudioReactiveImagePOC` conserve l'analyse RMS/peak/envelope, le passthrough, le rendu d'image et ses contrôles. Son identité et son comportement restent séparés d'AV Sampler; il n'est pas la cible produit prioritaire.
 
-## Phase 2 — Video Sampler UX
+## Fonctionnalités actuellement disponibles
 
-VISUAL-010 fournit la timeline interactive pour déplacer les quatre Cue Points; VISUAL-011 conserve l'état de session et permet de relier un média; VISUAL-012 organise l'instrument en barre globale, aperçu, timeline, emplacements FX désactivés et quatre pads assignés. Les 16 pads, le mapping éditable, MIDI Learn et les effets actifs restent des étapes ultérieures.
+- Timeline interactive et sélection synchronisée entre Cue Points et quatre pads.
+- Référence vidéo sauvegardée dans le projet hôte; les pixels ne sont pas incorporés. Le média peut être relinké/remplacé sans intention de remettre les Cue timings à zéro; le parcours manuel du relink doit être confirmé séparément avant release.
+- CC1 mappé sur 0,5×–1,5×. Les extrêmes ont été confirmés dans Logic; la valeur neutre 64 et save/reload du contrôle restent à vérifier explicitement.
+- RGB Split déclenché par la vélocité MIDI avec activation sauvegardée. L'utilisateur confirme l'effet et une lecture fluide en boucle.
 
-## Phase 3 — MIDI Effects
+## Produit et phases de distribution
 
-VISUAL-013 active Speed via MIDI CC1 (0,5×–1,5×; 64 = 1×). VISUAL-014a remplace l'affichage vidéo par le rendu Metal; la lecture, les Cue Points, le Loop et CC1 ont été confirmés dans Logic. VISUAL-014b ajoute RGB Split contrôlé par vélocité, avec enveloppe transitoire et activation persistée; l'utilisateur confirme que l'effet fonctionne et reste fluide en boucle. Les autres effets, modes de pad, 16 pads et MIDI Learn restent ultérieurs.
+Le dépôt est en phase **Internal / Dev**. Le premier jalon de distribution proposé est **Closed Alpha 1**, pour 3 à 5 utilisateurs macOS / Logic Pro. Ce n'est pas encore une release: il faut d'abord construire un package AV Sampler installable sans CMake/Xcode, documenter son installation et sa suppression, qualifier son identité/signature/provenance, et arrêter une matrice de macOS/codecs supportés.
 
-## Phase 4 — Validation produit
+### Closed Alpha 1 — périmètre proposé
 
-Tester sur un beat réel la vidéo, la région MIDI, les Cue Points, un effet déclenché par note et un effet piloté par contrôleur. Mesurer la réactivité avant d'annoncer des propriétés temporelles.
+- Une vidéo locale; lecture/pause/loop; timeline et quatre cues/pads MIDI.
+- Déclenchement et relecture de notes dans Logic; vitesse par CC1; RGB Split par vélocité.
+- Sauvegarde/réouverture du projet et récupération après média absent.
+- Installation guidée et session réelle sans crash bloquant; recueil des difficultés d'installation et d'usage.
+
+### Critères d'entrée
+
+- Package AU AV Sampler généré depuis un SHA enregistré, testé sur une machine propre et installable sans compiler.
+- Procédures d'installation, scan Logic, mise à jour et désinstallation compréhensibles; signature et exigences macOS documentées.
+- Scénarios save/reload, relink de média déplacé, neutralité CC1 à 64 et pluginval/AU validation tentés et leurs résultats consignés, sans masquer les blocages.
+- Aucun défaut bloquant dans le scénario Logic actuellement accepté; matrice de formats vidéo et limites visibles.
+
+### Critères de sortie vers Closed Alpha 2
+
+- 3 à 5 participants ont installé le package et terminé le parcours essentiel, ou les abandons sont expliqués et corrigés.
+- Aucun crash bloquant ni perte de projet/mapping média non récupérable rapportés sur la cohorte.
+- Installation, relink, cues, boucle, CC1, RGB Split et sauvegarde/réouverture sont qualifiés sur le package diffusé; versions/SHA et retours sont consignés.
+- Les risques restants sont compris et acceptés avant d'élargir à 5–10 personnes.
+
+Closed Alpha 2 vise 5 à 10 utilisateurs et les corrections d'Alpha 1. Closed Beta vise 10 à 20 utilisateurs, un workflow autonome confirmé et une qualification progressive des autres DAW/VST3.
+
+## Suite produit après Closed Alpha
+
+VST3 et autres DAW, Windows, 16 pads, MIDI Learn, mapping entièrement personnalisable, plusieurs lecteurs vidéo, polyphonie vidéo, export et effets supplémentaires restent en aval de la validation de cette première cohorte.
 
 ## Hors périmètre initial
 
@@ -40,7 +66,7 @@ Polyphonie vidéo, plusieurs lecteurs, moteur 3D, export vidéo, séquenceur MID
 
 Utilisateur initial : beatmaker/producteur sur macOS, notamment Logic Pro. Premier succès : programmer quatre notes dans une région MIDI et rejouer la performance visuelle correspondante.
 
-Distribution ciblée : POC macOS/AU -> validation Logic Pro -> VST3 et autres DAW qualifiés ensuite -> éventuel élargissement multiplateforme.
+Distribution ciblée : prototype interne AU macOS/Logic -> package Closed Alpha 1 contrôlé -> Closed Alpha 2 -> Closed Beta -> qualification progressive de VST3 et d'autres plateformes.
 
 ## Média
 

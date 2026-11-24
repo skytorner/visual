@@ -40,26 +40,26 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 - Scope: tests déterministes RMS/peak, silence, paramètres extrêmes, accès read-only aux buffers audio; intégration JUCE séparée pour la transparence complète de `processBlock()` et la restauration d'état.
 - Acceptance: commandes reproductibles + CI courte; build macOS et tests JUCE passent. Pluginval et QA hôte du nouvel artefact restent documentés séparément et ne sont pas revendiqués sans résultat.
 
-### VISUAL-005 — Enveloppe temporellement cohérente
+### VISUAL-005 — Enveloppe audio temporellement cohérente (POC historique)
 
 - Status: Open.
-- Priority: P1 (promouvoir P0 si mesure de bug utilisateur).
+- Priority: P2 pour la maintenance du POC audio (promouvoir si mesure de bug utilisateur).
 - Scope: test mesurant enveloppe à buffers 32–1024 et sample rates 44.1/48/96 kHz; correction de l'attaque/release si nécessaire.
 - Acceptance: courbes temporelles cohérentes, dégradation sonore/visuelle évitée.
 
-### VISUAL-006 — Cycle de vie UI et état média
+### VISUAL-006 — Cycle de vie import image (POC historique)
 
 - Status: Open.
-- Priority: P1.
+- Priority: P2 pour la maintenance du POC audio.
 - Scope: sécuriser l'import image asynchrone, état manquant/réassignation, restitution des paramètres et robustesse.
 - Acceptance: fermeture éditeur pendant sélection; aucun crash; comportement documenté pour les médias externes. L'embarquement des médias est hors scope.
 
-### VISUAL-007 — Bêta et distribution
+### VISUAL-007 — Packaging historique AudioReactiveImagePOC
 
 - Status: Open.
-- Priority: P1.
-- Scope: vérifier versions AU/VST3 et build exact, packaging, messages d'installation, qualification signature/notarisation, matrice de compatibilité, pluginval en workflow utile.
-- Acceptance: aucune compatibilité non testée annoncée; limitations clairement visibles.
+- Priority: P2; cible distincte du lancement AV Sampler.
+- Scope: vérifier versions AU/VST3 du POC audio, provenance de ses builds, packaging et compatibilité de cette cible historique.
+- Acceptance: aucune compatibilité non testée annoncée; package audio testé et limites visibles. Ne pas confondre ce packaging avec celui du sampler.
 
 ### VISUAL-008 — Vertical slice MIDI audio-reactive
 
@@ -70,7 +70,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-009 — Native MIDI Video POC
 
-- Status: Needs verification — l'utilisateur confirme que le Loop vidéo et le save/reload fonctionnent, ainsi que les quatre cues MIDI et le cycle Logic qui rejoue les notes. Restent les validations hors du scénario manuel rapporté (pluginval, latence mesurée, éditeur fermé); branche `codex/VISUAL-009-native-midi-video-poc`, issue de `main` `741f4b6`.
+- Status: Done — le scénario essentiel de lecture/loop, déclenchement des quatre cues dans Logic, cycle de région et sauvegarde/réouverture est confirmé manuellement puis prolongé par VISUAL-010 à VISUAL-014. Les mesures de latence, l'éditeur fermé et pluginval restent des qualifications séparées, pas des preuves transférées.
 - Priority: P0.
 - Scope: ajouter une cible instrument AU silencieuse; charger une vidéo locale; lecture/pause continue et boucle; quatre Cue Points réglables à la position courante; MIDI 36, 38, 40, 41 déclenche les cues; sauvegarder chemin, positions et loop; tests du mapping pur.
 - Exclusions: timeline éditable, mappings personnalisés, 16 pads, MIDI Learn, CC, effets vélocité, export vidéo, transport sync et moteur vidéo personnalisé.
@@ -84,14 +84,15 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
   - Limites de latence, codecs, éditeur fermé et synchronisation documentées.
   - Limite initiale de coalescence des notes sur le tick UI explicitée; mesurer si un tampon fixe devient nécessaire.
 
-### Roadmap après VISUAL-009
+### Roadmap après le vertical slice vidéo/MIDI
 
 - **Phase 2 — Video Sampler UX:** VISUAL-010 ajoute la timeline et le déplacement des quatre Cue Points existants. 16 pads, mapping éditable et MIDI Learn restent des tickets ultérieurs.
 - **Phase 2b — Session et médias:** VISUAL-011 organise les contrôles de session/média, restaure les états de lecture/Loop et facilite le relink sans déplacer les Cue Points.
 - **Phase 2c — Composition de l'instrument:** VISUAL-012 réorganise les commandes, l'aperçu, la timeline, les emplacements FX inactifs et les quatre pads déjà assignés.
-- **Phase 3 — MIDI Effects:** effet(s) simples, CC, vélocité, Hold/Toggle/One Shot et lissage (tickets séparés).
-- **Phase 4 — Validation produit:** beat réel, mesures de réactivité, VST3 et DAW additionnels.
-- VISUAL-004 à VISUAL-007 restent des tickets de maintenance du plugin audio, priorité secondaire.
+- **Terminé sur main:** timeline/session/média/UI VISUAL-010 à 012; Speed CC1 VISUAL-013; renderer Metal et RGB Split VISUAL-014a/b.
+- **Prochain jalon:** VISUAL-015 remet les sources documentaires en cohérence et audite le dépôt. VISUAL-016 traite séparément le package et le préflight Closed Alpha 1.
+- VST3/autres DAW, Windows, 16 pads, MIDI Learn, mapping éditable, nouveaux effets et modes de pad restent postérieurs à la première cohorte.
+- VISUAL-004 à VISUAL-007 restent des tickets de maintenance du plugin audio historique, priorité secondaire.
 
 ### VISUAL-010 — Timeline interactive et Cue Points déplaçables
 
@@ -160,7 +161,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 - Status: Done — VISUAL-014a et VISUAL-014b implémentés, build AU installé et validation utilisateur Logic rapportée.
 - Priority: P1.
-- Dépendance: le rendu actuel de `juce::VideoComponent` utilise une vue native AVFoundation/AVPlayerLayer sans exposer les frames à AV Sampler; la séparation RGB ne peut pas être faite dans le pipeline actuel.
+- Dépendance historique résolue: PR #9/VISUAL-014a a remplacé l'ancien rendu `juce::VideoComponent` par le chemin AVFoundation/Metal; PR #10/VISUAL-014b a ajouté RGB Split.
 
 #### VISUAL-014a — Prototype d'accès aux frames et rendu GPU
 
@@ -180,3 +181,19 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 ## Non-objectifs explicites
 
 Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, marché de modules, DSP audio destructif, multi-DAW/Windows revendiqués sans tests.
+
+### VISUAL-015 — Audit documentaire et cohérence du repository
+
+- Status: In progress — branche `codex/VISUAL-015-docs-repository-cleanup`, créée depuis `main` au commit `2ad4e5e`.
+- Priority: P0 avant de distribuer une Closed Alpha; aucune fonctionnalité produit nouvelle.
+- Scope: comparer README, AGENTS, CMake/Makefile, scripts/workflows, sources, tests et `docs/project/`; réconcilier vision, décisions supersédées, architecture actuelle, backlog, QA, release log et état de distribution.
+- Acceptance: README présente AV Sampler en premier et distingue le POC audio; docs indiquent les formats/hôtes réellement qualifiés; matrice sépare preuves automatiques/manuelles et NOT TESTED; audit packaging conclut explicitement GO/NO-GO; prochaines actions alpha sont des tickets séparés; branches/worktrees sont signalés sans suppression automatique.
+- Exclusions: changement de code runtime, fabrication de package, publication, merge/push et suppression de branches.
+
+### VISUAL-016 — Closed Alpha 1 : package et préflight
+
+- Status: Open — dépend de la clôture/revue documentaire VISUAL-015.
+- Priority: P0 pour distribution à une cohorte; pas nécessaire à l'audit lui-même.
+- Scope: package AV Sampler AU macOS issu d'un SHA identifié, installation sans environnement de développement, instructions de mise à jour/désinstallation, exigences de signature, versions minimales macOS, codecs et guide de feedback pour 3–5 testeurs Logic.
+- Acceptance: installation, scan Logic, vidéo/Cues/Loop, CC1, RGB Split, save/reopen et relink vérifiés sur le package exact; tests/outils et QA manuelle tracés; pas de publication publique ni de revendication VST3/Windows/latence sans preuve.
+- Pré-requis QA à consigner: CC1=64 et save/reopen; relink après déplacement de média; pluginval/AU validation selon disponibilité et logs complets. Une impossibilité outil est tracée comme BLOCKED, pas comme PASS.

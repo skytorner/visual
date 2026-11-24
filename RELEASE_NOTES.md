@@ -1,5 +1,7 @@
 # AudioReactiveImagePOC v1.0.0
 
+These release notes apply only to the legacy `AudioReactiveImagePOC` audio effect. They do not describe AV Sampler; no AV Sampler release or Closed Alpha package is available yet.
+
 First shareable proof-of-concept release.
 
 ## Included Formats

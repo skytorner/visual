@@ -1,35 +1,70 @@
-# AV Sampler / AudioReactiveImagePOC
+# AV Sampler — Play video like an instrument
 
-`AVSampler` is the new macOS-first visual MIDI instrument target. Phase 1 is a silent AU instrument: load one local video, set four Cue positions, then trigger them with MIDI notes 36, 38, 40, and 41 from the DAW. Its saved state contains the video path, Cue positions, and loop setting; the video itself stays external.
+AV Sampler is a macOS-first MIDI video instrument for music production. It plays one local video, lets four MIDI notes trigger editable Cue Points, and offers video speed via MIDI CC1 plus a velocity-triggered RGB Split effect. It does not generate audio.
 
-`AudioReactiveImagePOC` remains a separate audio effect target with its existing plugin identity and saved projects. It is preserved during the product transition and is not the AV Sampler MIDI instrument.
+## Current maturity
 
-The first AV Sampler slice uses JUCE `VideoComponent` and does not promise frame-perfect timing. Logic Pro behavior, seek latency, supported codecs, and playback when the editor is closed still need manual qualification.
+AV Sampler is an internally tested prototype, **not a released or distributable alpha package**. The AU has been manually exercised in Logic Pro, including Cue playback, project save/reopen, video looping, CC1 control, RGB Split and fluid playback in a loop. These are user-reported host checks; no numeric latency, frame-rate or CPU/GPU benchmark is claimed.
 
-## AV Sampler Phase 1 quick start (macOS)
+The currently qualified target is **macOS Audio Unit in Logic Pro**. AV Sampler VST3, Windows and other DAWs are not qualified. The AV Sampler target is only added by CMake on Apple platforms.
 
-Build the AU target with CMake, install it using the steps below, open Logic Pro, and rescan Audio Units if necessary. Insert `AVSampler` as a software instrument and open its editor. Load a local MOV/MP4/M4V video; playback starts after it loads. Press each `Set Cue` button while the video plays to store its current position. Create MIDI notes 36, 38, 40, and 41 in a region and play the region. The displayed note numbers are raw MIDI values; DAWs can label octave numbers differently.
+## Features present on `main`
 
-This is a Phase 1 validation path, not a release or compatibility claim. Installation into Logic's Components folder is a separate, explicit step.
+- One local video with Play/Pause, Loop, duration and media replacement/relink controls.
+- Four draggable Cue Points, mapped to MIDI notes 36, 38, 40 and 41 (shown as C1, D1, E1 and F1 in the tested Logic setup; octave labels vary between hosts).
+- MIDI CC1 controls video speed from 0.5× to 1.5×. The endpoints have been manually confirmed; CC1=64 neutral behavior and Logic save/reopen are still listed for verification.
+- RGB Split triggered by Cue NoteOn velocity. Its enabled/disabled state is saved with the host project.
+- Metal frame presentation on macOS using AVFoundation and MetalKit.
+- Host-project state includes media path, Cue positions, Loop, requested Play/Pause, selected Cue, speed controller value and RGB Split enablement. Video files remain external to the project and must be relinked if moved.
 
-To install the locally built AU after closing Logic Pro:
+See [product scope](docs/project/VISUAL_PRODUCT.md), [architecture](docs/project/VISUAL_ARCHITECTURE.md), [backlog](docs/project/VISUAL_BACKLOG.md) and [QA evidence](docs/project/VISUAL_QA_CHECKLIST.md).
+
+## Build and install for local Logic QA (macOS)
+
+Requirements: macOS, Xcode Command Line Tools, CMake 3.22+, Git and network access for the first JUCE FetchContent setup. From the repository root:
 
 ```bash
-mkdir -p "$HOME/Library/Audio/Plug-Ins/Components"
-cp -R build/AVSampler_artefacts/Release/AU/AVSampler.component "$HOME/Library/Audio/Plug-Ins/Components/"
+make status
+make install-avsampler-au BUILD_DIR=/private/tmp/visual-build BUILD_TYPE=Release
 ```
 
-Then reopen Logic Pro, rescan Audio Units if needed, add `AVSampler` as a software instrument, and open its editor. The DAW installation and Logic verification are manual; the build does not install the plugin.
+Close Logic Pro before installing. The command builds the AU and copies it to `~/Library/Audio/Plug-Ins/Components/AVSampler.component`, then applies an ad hoc local signature and verifies it. Reopen Logic, rescan Audio Units if needed, and insert AVSampler as a software instrument. This is a **developer QA install**, not a ready-to-share alpha installer. It requires a local build environment and does not notarize the plugin.
+
+In Logic, load a local video, place MIDI notes 36/38/40/41 in a region, and play it. Drag Cue markers to change their trigger times. Send MIDI CC1 to change playback speed; Cue velocity controls RGB Split intensity. The plugin state is saved by the host, while the video file itself remains external.
+
+## Limitations and open qualification
+
+- No Closed Alpha package or automated AV Sampler release workflow exists yet.
+- Supported macOS versions, codec/container matrix and minimum hardware are not formally declared.
+- Project state stores a media path, not video bytes; cross-machine project portability is not guaranteed.
+- Media relink/replacement preservation, Logic CC1 neutral/save-reopen, playback with the editor closed, and numeric responsiveness/performance measurements need explicit release evidence.
+- `pluginval` has previously exited before testing this AU in the local environment. A later manual app run is awaiting its complete logs; no new PASS is inferred from a restart or partial run.
+- Frame-accurate or sample-accurate video triggering and a guaranteed latency are not claimed.
+
+## Repository map
+
+- `Source/AVSampler*` and `Source/VideoFramePlayerComponent.*`: AV Sampler instrument and macOS video renderer.
+- `Source/Plugin*`: separate legacy audio-reactive image effect; preserve its plugin identity and project state.
+- `tests/`: C++ unit and processor tests.
+- `scripts/` and `.github/workflows/`: existing release tooling, currently for `AudioReactiveImagePOC`, not an AV Sampler alpha package.
+- `docs/project/`: versioned product, architecture, decisions, backlog, QA and release records.
+
+## Development commands
+
+```bash
+make help
+make test
+make plugin
+make install-avsampler-au BUILD_DIR=/private/tmp/visual-build BUILD_TYPE=Release
+```
+
+`make test` runs the fast C++ tests; `make plugin` builds the JUCE targets. `make install-avsampler-au` is explicit and must be run for each Logic QA build. `make package` still packages the legacy AudioReactiveImagePOC only; it is not an AV Sampler distribution command.
 
 ---
 
 ## AudioReactiveImagePOC — legacy audio effect
 
-`AudioReactiveImagePOC` is a JUCE/C++ proof-of-concept audio effect plugin.
-
-It is designed to be inserted on an audio track in a DAW. The plugin passes the incoming audio through unchanged, analyses global RMS/peak/envelope, and animates a user-loaded PNG/JPG image from the detected audio energy.
-
-Current release version: `1.0.0`.
+`AudioReactiveImagePOC` is the separate legacy JUCE/C++ audio effect, with its existing plugin identity and saved projects. Insert it on an audio track: it passes the incoming audio through unchanged, analyzes global RMS/peak/envelope, and animates a user-loaded PNG/JPG image from the detected audio energy. Current release version: `1.0.0`. It is not the AV Sampler MIDI instrument.
 
 ## Features
 
@@ -56,16 +91,19 @@ Current release version: `1.0.0`.
 ```txt
 CMakeLists.txt
 Source/
-  PluginProcessor.h
-  PluginProcessor.cpp
-  PluginEditor.h
-  PluginEditor.cpp
   AVSamplerProcessor.h/.cpp
   AVSamplerEditor.h/.cpp
-  CueRouting.h
+  VideoFramePlayerComponent.h/.mm
+  CueTimelineComponent.h/.cpp
+  SamplerUiComponents.h/.cpp
+  PluginProcessor.h/.cpp       # legacy AudioReactiveImagePOC
+  PluginEditor.h/.cpp          # legacy AudioReactiveImagePOC
 tests/
   CueRoutingTests.cpp
+  TimelineMathTests.cpp
+  VideoEffectMathTests.cpp
   AVSamplerCoreTests.cpp
+  AudioReactiveImageProcessorTests.cpp
 README.md
 ```
 
@@ -128,12 +166,12 @@ The first build may fetch JUCE and take longer. Later invocations reuse `build/`
 To test in a DAW, **close Logic Pro / REAPER first**, then deliberately run:
 
 ```bash
-make install       # Build and copy AU + VST3 into ~/Library/Audio/Plug-Ins/
+make install       # Build and install legacy AU/VST3 plus AV Sampler AU (macOS)
 make install-au    # AU only, for Logic Pro
 make install-vst3  # VST3 only, for REAPER
 ```
 
-Installation never runs automatically with `make` and copies only to the current user's plugin folders. Restart the DAW after installation. The shortcuts do **not** run pluginval: validate the new AU and VST3 separately for release QA. For a macOS ZIP, `make package` builds and invokes the existing packaging script, writing into `dist/`. On Windows continue using the CMake/PowerShell commands below.
+Installation never runs automatically with `make` and copies only to the current user's plugin folders. Restart the DAW after installation. These AU/VST3 bundle paths below refer to the legacy AudioReactiveImagePOC; AV Sampler is a separate AU installed by `make install-avsampler-au`. The shortcuts do **not** run pluginval. For a macOS ZIP, `make package` builds and invokes the existing AudioReactiveImagePOC-only packaging script, writing into `dist/`. On Windows continue using the CMake/PowerShell commands below.
 
 ## Package A Shareable macOS Release ZIP
 

@@ -1,9 +1,31 @@
 # AV Sampler / visual — QA Baseline
 
-Date du bilan : 2026-11-20.
-Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; log utilisateur `log audio react.txt` de pluginval. **Ce document transcrit les résultats, il n'exécute pas de tests.**
+Date du bilan : 2026-11-24.
+Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs pluginval transmis par l'utilisateur. **Ce document transcrit les résultats, il n'exécute pas de tests.** Les matrices audio-reactive et AV Sampler sont indépendantes: aucune preuve du POC audio ne vaut preuve de l'instrument vidéo.
 
-## Matrice POC existant
+## État AV Sampler sur main — résumé release readiness
+
+- `main` contient VISUAL-009 à VISUAL-014, y compris la timeline/session, CC1, le renderer Metal et RGB Split.
+- L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload et fonctionnement RGB Split; le dernier retour confirme aussi une lecture fluide en boucle. Résultats manuels rapportés, sans SHA binaire installé dans le dernier retour et sans mesure chiffrée de latence, framerate ou CPU/GPU.
+- CC1 à 0/127 a été confirmé; CC1=64 et sauvegarde/réouverture de cette valeur restent à vérifier explicitement.
+- Le déplacement du média puis Relink et la préservation des Cue timings sont implémentés/prévus, mais le scénario complet dans Logic n'est pas rapporté comme exécuté.
+- pluginval a échoué auparavant avant le chargement du plugin (code 134 sur l'initialisation AppKit/`--help`); les builds 014a/b ont donc `NOT RUN`, pas PASS. Un nouvel essai manuel a été annoncé par l'utilisateur; attendre le journal complet avant de mettre à jour ces lignes. Un redémarrage ou une exécution partielle ne suffit pas à conclure.
+
+## Porte Closed Alpha 1 — état actuel
+
+| Élément | Statut | Preuve / limite |
+| --- | --- | --- |
+| AU macOS et Logic | PASS manuel rapporté | Le parcours actuel charge et fonctionne dans Logic. Autres hôtes non qualifiés. |
+| Package installable sans environnement de développement | NOT AVAILABLE | Les scripts de release et le workflow versionnés package `AudioReactiveImagePOC`; `make install-avsampler-au` est une installation locale développeur qui compile sur la machine. |
+| Installation/mise à jour/désinstallation par des testeurs | NOT TESTED | Aucun package AV Sampler pour cohorte n'existe encore. |
+| Signature notarisation / provenance du package alpha | NOT TESTED | L'installation développeur applique une signature ad hoc; aucune notarisation ni signature de distribution établie. |
+| Versions macOS, codecs et matériel minimal | NOT DEFINED | Un média utilisateur a fonctionné; aucune matrice de compatibilité n'est formalisée. |
+| Relink après déplacement média | NOT REPORTED | Les timings doivent être vérifiés sur le candidat de distribution. |
+| CC1=64 et save/reload | NOT TESTED | Les extrêmes sont confirmés, pas ces cas précis. |
+
+**Décision actuelle : NO-GO pour envoyer une Closed Alpha; GO pour préparer et qualifier son package séparément.**
+
+## Matrice AudioReactiveImagePOC (plugin audio historique seulement)
 
 | Test | Statut | Portée / preuve |
 | --- | --- | --- |
@@ -146,6 +168,8 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | CC1 simultané, Loop, sauvegarde/réouverture | PASS manuel rapporté | L'utilisateur confirme que tout fonctionne correctement en boucle; fluidité confirmée. |
 | Fluidité perçue | PASS manuel rapporté | L'utilisateur rapporte une lecture fluide en boucle; aucune mesure CPU/GPU instrumentée. |
 | pluginval | NOT RUN | Le binaire local se termine avec le code 134 dès `--help`. |
+
+Statut du nouvel essai AV Sampler : logs utilisateur attendus; ne pas remplacer `NOT RUN` sans preuve de plugin chargé et d'un résultat terminal complet.
 
 ## VISUAL-012 — Composition UI et pads assignés
 

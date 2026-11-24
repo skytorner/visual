@@ -1,5 +1,19 @@
 # Visual Release Log
 
+Ce journal conserve les validations de tickets et les releases. Il ne constitue pas un catalogue de packages disponibles. Au 2026-11-24, `AudioReactiveImagePOC` possède son package historique v1.0.0; aucun package AV Sampler Closed Alpha n'est publié ou prêt à partager. Les résultats manuels AV Sampler ci-dessous ne remplacent pas la qualification du package candidat.
+
+## VISUAL-015 — Audit repository et Closed Alpha — 2026-11-24
+
+- Branche locale de travail: `codex/VISUAL-015-docs-repository-cleanup`, créée depuis `main` au SHA `2ad4e5ee3f24dc06239bddbeb82312ea9d84d5e9`. L'audit distant GitHub confirme ce SHA comme commit le plus récent sur `main` et aucune PR ouverte au début de la tâche. `git ls-remote` local a échoué par résolution DNS; GitHub API a fourni la confirmation indépendante.
+- Le worktree courant était propre au démarrage. `.codex/` n'existe pas dans ce clone; conformément aux instructions, les sources versionnées suffisent et aucun export local n'a été créé.
+- L'ancien worktree `/Users/renjy/Documents/IT/vsts/visual` est propre sur `codex/VISUAL-004-audio-tests`; son commit est un ancêtre de `main`, sa branche distante est supprimée. Le worktree est conservé. Les branches locales VISUAL-003/013/014/014a/014b/014-release-closeout sont ancêtres de `main`; aucune branche n'a été supprimée. GitHub liste aussi `codex/VISUAL-001-product-architecture`; son état n'a pas été modifié.
+- Audit statique: README de l'AV Sampler décrit désormais le produit actuel; le backend `VideoComponent` est marqué historique; package AV Sampler inexistant, car le packaging et le workflow actuels ciblent seulement AudioReactiveImagePOC. Recommandation release: **NO-GO** pour la cohorte tant que package, installation propre, version/SHA, signature et exigences système/codec ne sont pas qualifiés.
+- `make help`: PASS; `make status`: PASS, branche et SHA imprimés.
+- `make test BUILD_DIR=/private/tmp/visual-009-build BUILD_TYPE=Release`: PASS, 1/1 (`visual_audio_tests`, suite rapide du POC audio historique uniquement).
+- Vérification des liens Markdown relatifs: PASS, 10 fichiers sans cible manquante. `git diff --check`: PASS.
+- Outils: `/usr/bin/auval` disponible; application pluginval présente sous `/Applications/pluginval.app`, pas trouvée dans le PATH. Aucun test pluginval ni auval n'a été lancé pendant cet audit. Un nouveau log pluginval est attendu de l'utilisateur et devra être associé au format/artefact réellement testé avant mise à jour de la matrice.
+- Modifications limitées à la documentation et à l'aide `make package`; aucun code runtime/build/package installé, tag ou release créé.
+
 ## VISUAL-013 — Merge et clôture du ticket de code
 
 - 2026-11-24 : PR #8 fusionnée dans `main`, merge commit `7bfddf9367521aa47bc7447bb1d740bf2ef211eb`; checks `audio-analysis` et `GitGuardian Security Checks` PASS sur le head `76f942c625dbe51a5df651685eda1a4566d7b368`.
@@ -9,7 +23,7 @@
 
 Status: Done. Branche `codex/VISUAL-014a-metal-video-renderer`; PR #9 fusionnée dans `main` par le commit `146a0ceb3cb455445b55dccaf7003e977718f904`.
 
-- Inspection source : `AVSamplerEditor` utilise `juce::VideoComponent(false)`; le backend macOS JUCE encapsule `AVPlayerLayer` dans `NSViewComponent`.
+- Inspection avant VISUAL-014a : `AVSamplerEditor` utilisait `juce::VideoComponent(false)`; le backend macOS JUCE encapsulait `AVPlayerLayer` dans `NSViewComponent`. Ce constat est historique et ne décrit pas le renderer livré.
 - Aucun `AVPlayerItemVideoOutput`, `CVPixelBuffer`, `CVMetalTexture` ou `MTLTexture` trouvé dans le chemin projet `Source/`/`CMakeLists.txt` ni dans le backend `juce_video` épinglé qui serait exposé au sampler.
 - Le nouveau composant macOS obtient les frames décodées par `AVPlayerItemVideoOutput`, les convertit en textures Metal via `CVMetalTextureCache` et les affiche avec `MTKView`. Ce sous-ticket ne contient aucun effet RGB ni paramètre MIDI.
 - Build Release de `AVSampler_AU`, `AVSamplerCoreTests`, `CueRoutingTests` et `TimelineMathTests` : PASS. CTest : 4/4 PASS. `git diff --check` : PASS.
@@ -38,7 +52,7 @@ Date : 2026-11-23. Branche : `codex/VISUAL-013-midi-speed-cc`.
 ### Portée
 
 - Speed est le premier slot FX actif. MIDI CC1 est mappé sur 0,5×–1,5×, valeur 64 = 1×.
-- Le processeur publie la valeur CC via un atomique; l'éditeur applique `VideoComponent::setPlaySpeed()` sur le thread message, y compris après chargement asynchrone.
+- Le processeur publie la valeur CC via un atomique; l'éditeur applique la vitesse via `VideoFramePlayerComponent` sur le thread message, y compris après chargement asynchrone. Cette implémentation a ensuite remplacé `VideoComponent` dans VISUAL-014a.
 - La valeur est incluse dans l'état du projet; les sessions anciennes sans propriété démarrent à 1×. Les autres slots restent désactivés.
 
 ### Vérifications
@@ -53,6 +67,14 @@ Date : 2026-11-23. Branche : `codex/VISUAL-013-midi-speed-cc`.
 | — | Logic Pro : neutralité CC1 à 64 et save/reload | NOT TESTED | Le comportement principal et les extrêmes sont confirmés; ces cas restent à vérifier séparément. |
 
 pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefact AU est généré dans `/private/tmp/visual-009-build/AVSampler_artefacts/Release/AU/AVSampler.component`; l'installation locale n'est pas consignée ici.
+
+## Audit Closed Alpha AV Sampler — 2026-11-24
+
+- Le build AV Sampler est actuellement configuré comme AU sous macOS; il n'existe pas de cible AV Sampler VST3 dans `CMakeLists.txt`.
+- `make install-avsampler-au` construit et installe pour Logic QA local, avec signature ad hoc. Cette commande n'est pas un installateur de cohorte et requiert l'environnement de compilation.
+- `scripts/package-macos-release.sh`, `scripts/package-windows-release.ps1` et `.github/workflows/build-release.yml` ciblent `AudioReactiveImagePOC` seulement. Le workflow à tag peut créer une release GitHub publique pour ce POC; ne pas l'utiliser comme distribution privée AV Sampler.
+- Les exigences de notarisation/signature de distribution, minimum macOS, codecs acceptés, mise à jour/désinstallation, SHA/version du package AV Sampler restent à définir/tester.
+- Conclusion: NO-GO pour une distribution Closed Alpha sur l'état actuel; poursuivre avec VISUAL-016 après l'audit documentaire VISUAL-015. Aucun package, tag ou release n'est créé par cet audit.
 
 ## Initial Setup
 
