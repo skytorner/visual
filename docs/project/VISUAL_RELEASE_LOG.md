@@ -7,7 +7,7 @@
 
 ## VISUAL-014a — Spike d'accès frame / Metal
 
-Status: In progress. Branche: `codex/VISUAL-014a-metal-video-renderer`, créée depuis `main` après la fusion de VISUAL-013.
+Status: Done. Branche `codex/VISUAL-014a-metal-video-renderer`; PR #9 fusionnée dans `main` par le commit `146a0ceb3cb455445b55dccaf7003e977718f904`.
 
 - Inspection source : `AVSamplerEditor` utilise `juce::VideoComponent(false)`; le backend macOS JUCE encapsule `AVPlayerLayer` dans `NSViewComponent`.
 - Aucun `AVPlayerItemVideoOutput`, `CVPixelBuffer`, `CVMetalTexture` ou `MTLTexture` trouvé dans le chemin projet `Source/`/`CMakeLists.txt` ni dans le backend `juce_video` épinglé qui serait exposé au sampler.
@@ -21,7 +21,7 @@ Status: In progress. Branche: `codex/VISUAL-014a-metal-video-renderer`, créée 
 
 ## VISUAL-014b — RGB Split déclenché par la vélocité
 
-Status: In progress. Branche: `codex/VISUAL-014b-rgb-split-velocity`, créée depuis `main` après fusion de la PR #9. PR de travail: #10, brouillon en attente de QA Logic.
+Status: Done. Branche `codex/VISUAL-014b-rgb-split-velocity`; PR #10 fusionnée dans `main` par le commit `02ea4b43bb6b966c6a0bdf68c8338cf2c76d3a4e` après la QA utilisateur dans Logic.
 
 - Le NoteOn d'une note Cue publie sa vélocité dans un mot atomique avec compteur de déclenchement; l'éditeur déclenche le renderer hors de `processBlock()`. CC1 et le routage des Cue restent séparés.
 - Shader fragment Metal : rouge déplacé visuellement à droite, vert conservé, bleu déplacé à gauche; coordonnées clampées aux bords. Amplitude maximale 1,5 % de la largeur frame.
