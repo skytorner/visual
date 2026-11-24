@@ -22,6 +22,7 @@ Ce journal conserve les validations de tickets et les releases. Il ne constitue 
 - Le rapport sélectionne l'AU par type/subtype/manufacturer, sans chemin de bundle ni SHA de l'exécutable. La preuve confirme donc que pluginval a trouvé et chargé l'AU enregistré, mais ne lie pas indépendamment ce test à un fichier binaire par empreinte.
 - Le même journal teste séparément AudioReactiveImagePOC VST3 et AU à strictness 4 (`ALL TESTS PASSED`); l'AU audio affiche également l'avertissement `Current program is -1`. Ces résultats ne sont pas transférés à AV Sampler.
 - Le précédent blocage de lancement avant chargement est désormais supersédé par ces exécutions manuelles réussies pour strictness 4.
+- Intégration: PR #12 fusionnée dans `main` le 2026-11-24, merge commit `c2eb6a4ff87bef607eef5fbc0adce6a7eee7a01c`. GitHub déclarait la PR fusionnable; aucun check de statut ni avis de revue n'était publié pour ce changement documentaire.
 
 ## VISUAL-013 — Merge et clôture du ticket de code
 

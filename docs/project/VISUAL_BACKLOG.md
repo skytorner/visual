@@ -184,7 +184,7 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 
 ### VISUAL-015 — Audit documentaire et cohérence du repository
 
-- Status: In progress — branche `codex/VISUAL-015-docs-repository-cleanup`, créée depuis `main` au commit `2ad4e5e`.
+- Status: Done — audit documentaire et mise à jour QA fusionnés dans la PR #12, merge commit `c2eb6a4`.
 - Priority: P0 avant de distribuer une Closed Alpha; aucune fonctionnalité produit nouvelle.
 - Scope: comparer README, AGENTS, CMake/Makefile, scripts/workflows, sources, tests et `docs/project/`; réconcilier vision, décisions supersédées, architecture actuelle, backlog, QA, release log et état de distribution.
 - Acceptance: README présente AV Sampler en premier et distingue le POC audio; docs indiquent les formats/hôtes réellement qualifiés; matrice sépare preuves automatiques/manuelles et NOT TESTED; audit packaging conclut explicitement GO/NO-GO; prochaines actions alpha sont des tickets séparés; branches/worktrees sont signalés sans suppression automatique.
