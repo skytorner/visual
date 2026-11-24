@@ -219,7 +219,7 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | Persistance et compatibilité des anciens projets | PASS automatisé | CTest `AVSamplerCoreTests`: toggle actif restauré; propriété absente désactivée. |
 | Shader Metal, effet combiné et bornes des canaux | PASS compilation; visuel en attente | Shader inclus dans l'AU Release; observer le rendu réel et les effets combinés dans Logic. La compilation ne valide pas l'exécution runtime du shader. |
 | Build Release, installation AU et signature | PASS build/install | Build `/private/tmp/visual-021-build`; CTest 5/5. SHA-256 exécutable avant signature `5bb3af088b0f8d5f13e05d3f6662c1e56ca6837e8ee4a3ad2603809130219e53`; SHA-256 exécutable installé après signature ad hoc `f6c14af1cbb2dc78f89097d166f612fdedeee38ec3562a28d2e77ea60c6cc71e`. `codesign --verify --deep --strict` passe. |
-| Validation utilisateur dans Logic | EN ATTENTE QA HUMAINE | Activer Color Boost, comparer vélocités faible/forte, le combiner avec RGB Split/Flash/Zoom Punch, rejouer une région en loop et vérifier save/reload. |
+| Validation utilisateur dans Logic | PASS manuel rapporté | Après installation de l'AU identifié ci-dessus, l'utilisateur confirme « ça marche bien ». Les scénarios individuels vélocité, combinaison, loop et save/reload ne sont pas détaillés séparément. |
 | Renderer Windows | Indisponible connu | Color Boost est rendu sur Metal macOS seulement; Windows/REAPER reste reporté à la fin. |
 
 ## VISUAL-012 — Composition UI et pads assignés

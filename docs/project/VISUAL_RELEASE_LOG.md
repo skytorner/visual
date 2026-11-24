@@ -133,7 +133,7 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 - Build Release macOS configurée dans `/private/tmp/visual-021-build` et compilation complète (`cmake --build /private/tmp/visual-021-build --config Release --parallel 6`) : PASS. CTest : 5/5 PASS; `git diff --check` : PASS.
 - AU installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; `codesign --verify --deep --strict` : PASS. SHA-256 exécutable buildé avant signature : `5bb3af088b0f8d5f13e05d3f6662c1e56ca6837e8ee4a3ad2603809130219e53`; après signature ad hoc, exécutable installé : `f6c14af1cbb2dc78f89097d166f612fdedeee38ec3562a28d2e77ea60c6cc71e`.
 - Build Windows et REAPER : NOT RUN, reportés jusqu'à la fin des fonctionnalités macOS. Exécution runtime du shader Metal et comportement dans Logic : en attente de QA humaine.
-- Validation Logic à effectuer par l'utilisateur avant fusion; inclusion à Closed Alpha 1 à décider séparément.
+- L'utilisateur confirme que l'AU installé « ça marche bien »; validation manuelle globale rapportée, sans détail itemisé des scénarios. PR #19 ouverte en attente de fusion; inclusion à Closed Alpha 1 à décider séparément.
 
 ## Initial Setup
 

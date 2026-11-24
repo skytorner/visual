@@ -23,7 +23,7 @@ See [product scope](docs/project/VISUAL_PRODUCT.md), [architecture](docs/project
 
 ## In progress on `codex/VISUAL-021-color-boost`
 
-Color Boost is being added to the macOS Metal renderer. Cue velocity controls saturation from 1.0× to 1.6× with the fixed 5/40/180 ms envelope; the toggle is saved and defaults off, including in older sessions. Logic host QA is pending, and Windows rendering is not implemented yet.
+Color Boost is implemented on the macOS Metal renderer. Cue velocity controls saturation from 1.0× to 1.6× with the fixed 5/40/180 ms envelope; the toggle is saved and defaults off, including in older sessions. The user reports that it works well in Logic; PR #19 is awaiting merge, and Windows rendering is not implemented yet.
 
 ## Build and install for local Logic QA (macOS)
 

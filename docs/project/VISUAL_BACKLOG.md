@@ -231,7 +231,7 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 
 ### VISUAL-021 — Color Boost piloté par la vélocité (macOS)
 
-- Status: In progress — branche `codex/VISUAL-021-color-boost`, créée depuis `main` au commit `595c533`; build/tests/install AU passés, QA Logic et PR en attente.
+- Status: Done — implémenté et validé par l'utilisateur dans Logic; PR #19 ouverte en attente de fusion.
 - Priority: P1 pour le prototype macOS; inclusion dans Closed Alpha 1 à réévaluer après validation.
 - Scope: augmenter temporairement la saturation dans le shader Metal macOS, sans modifier la teinte intentionnellement. La vélocité 1–127 contrôle un multiplicateur de saturation de 1,0× à 1,6×; durée fixe Attack/Hold/Release 5/40/180 ms. Toggle persisté, désactivé par défaut pour les nouveaux et anciens projets.
 - Acceptance: velocity 0/NoteOff/non assignée n'active pas l'effet; faible/forte vélocité donne une saturation différente; l'image revient à la saturation originale après l'enveloppe; RGB Split, Flash, Zoom Punch, CC1, Cue, Loop et silence audio restent inchangés; save/reload et compatibilité des anciens projets testés; build/tests/install AU et QA Logic; renderer Windows indique explicitement indisponible.
