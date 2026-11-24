@@ -21,7 +21,7 @@ Status: In progress. Branche: `codex/VISUAL-014a-metal-video-renderer`, créée 
 
 ## VISUAL-014b — RGB Split déclenché par la vélocité
 
-Status: In progress. Branche: `codex/VISUAL-014b-rgb-split-velocity`, créée depuis `main` après fusion de la PR #9.
+Status: In progress. Branche: `codex/VISUAL-014b-rgb-split-velocity`, créée depuis `main` après fusion de la PR #9. PR de travail: #10, brouillon en attente de QA Logic.
 
 - Le NoteOn d'une note Cue publie sa vélocité dans un mot atomique avec compteur de déclenchement; l'éditeur déclenche le renderer hors de `processBlock()`. CC1 et le routage des Cue restent séparés.
 - Shader fragment Metal : rouge déplacé visuellement à droite, vert conservé, bleu déplacé à gauche; coordonnées clampées aux bords. Amplitude maximale 1,5 % de la largeur frame.
