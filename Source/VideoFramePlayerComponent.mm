@@ -2,8 +2,10 @@
 #import <CoreVideo/CoreVideo.h>
 #import <Metal/Metal.h>
 #import <MetalKit/MetalKit.h>
+#import <QuartzCore/QuartzCore.h>
 
 #include "VideoFramePlayerComponent.h"
+#include "VideoEffectMath.h"
 
 #include <cmath>
 
@@ -19,6 +21,9 @@
 @property(nonatomic, assign) CGSize nativeVideoSize;
 @property(nonatomic, assign) double playSpeed;
 @property(nonatomic, assign) float audioVolume;
+@property(nonatomic, assign) BOOL rgbSplitEnabled;
+@property(nonatomic, assign) float rgbSplitIntensity;
+@property(nonatomic, assign) CFTimeInterval rgbSplitStartTime;
 @property(nonatomic, assign) NSUInteger loadGeneration;
 @property(nonatomic, copy) NSString* rendererSetupError;
 
@@ -26,6 +31,8 @@
 - (void)closeVideo;
 - (void)shutdown;
 - (void)seekToSeconds:(double)seconds;
+- (void)setRgbSplitEnabled:(BOOL)enabled;
+- (void)triggerRgbSplitVelocity:(int)velocity;
 @end
 
 @implementation AVSamplerMetalVideoView
@@ -90,9 +97,20 @@
             output.uv = coordinates[id];
             return output;
         }
-        fragment float4 avs_fragment(VertexOut input [[stage_in]], texture2d<float> frame [[texture(0)]]) {
+        struct RgbSplitUniforms { float offsetUv; };
+        fragment float4 avs_fragment(VertexOut input [[stage_in]],
+                                     constant RgbSplitUniforms& effect [[buffer(0)]],
+                                     texture2d<float> frame [[texture(0)]]) {
             constexpr sampler frameSampler(coord::normalized, address::clamp_to_edge, filter::linear);
-            return frame.sample(frameSampler, input.uv);
+            if (effect.offsetUv <= 0.0)
+                return frame.sample(frameSampler, input.uv);
+            const float2 redUv = clamp(input.uv - float2(effect.offsetUv, 0.0), float2(0.0), float2(1.0));
+            const float2 greenUv = clamp(input.uv, float2(0.0), float2(1.0));
+            const float2 blueUv = clamp(input.uv + float2(effect.offsetUv, 0.0), float2(0.0), float2(1.0));
+            const float4 redSample = frame.sample(frameSampler, redUv);
+            const float4 greenSample = frame.sample(frameSampler, greenUv);
+            const float4 blueSample = frame.sample(frameSampler, blueUv);
+            return float4(redSample.r, greenSample.g, blueSample.b, greenSample.a);
         }
     )METAL";
 
@@ -193,6 +211,7 @@
     self.playerItem = nil;
     self.videoOutput = nil;
     self.currentFrameTexture = nil;
+    self.rgbSplitIntensity = 0.0f;
     self.nativeVideoSize = CGSizeZero;
     if (_currentVideoTexture != nullptr)
     {
@@ -201,6 +220,22 @@
     }
     if (_textureCache != nullptr)
         CVMetalTextureCacheFlush(_textureCache, 0);
+}
+
+- (void)setRgbSplitEnabled:(BOOL)enabled
+{
+    _rgbSplitEnabled = enabled;
+    if (! enabled)
+        self.rgbSplitIntensity = 0.0f;
+}
+
+- (void)triggerRgbSplitVelocity:(int)velocity
+{
+    if (! self.rgbSplitEnabled || velocity <= 0)
+        return;
+
+    self.rgbSplitIntensity = avsampler::videoEffects::rgbSplitIntensityForVelocity(velocity);
+    self.rgbSplitStartTime = CACurrentMediaTime();
 }
 
 - (void)shutdown
@@ -283,6 +318,12 @@
 
         [encoder setRenderPipelineState:self.pipeline];
         [encoder setVertexBytes:&fit length:sizeof(fit) atIndex:0];
+        const auto elapsedSeconds = CACurrentMediaTime() - self.rgbSplitStartTime;
+        const auto envelope = avsampler::videoEffects::rgbSplitEnvelopeForElapsedSeconds(elapsedSeconds);
+        const auto offsetUv = self.rgbSplitEnabled
+            ? avsampler::videoEffects::rgbSplitMaximumOffsetUv(self.rgbSplitIntensity, envelope) : 0.0;
+        const float effectOffsetUv = static_cast<float>(offsetUv);
+        [encoder setFragmentBytes:&effectOffsetUv length:sizeof(effectOffsetUv) atIndex:0];
         [encoder setFragmentTexture:self.currentFrameTexture atIndex:0];
         [encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:6];
     }
@@ -431,3 +472,13 @@ void VideoFramePlayerComponent::setAudioVolume(float volume)
 }
 
 float VideoFramePlayerComponent::getAudioVolume() const { return impl->audioVolume; }
+
+void VideoFramePlayerComponent::setRgbSplitEnabled(bool enabled)
+{
+    [impl->view setRgbSplitEnabled:enabled];
+}
+
+void VideoFramePlayerComponent::triggerRgbSplitVelocity(int velocity)
+{
+    [impl->view triggerRgbSplitVelocity:velocity];
+}

@@ -19,6 +19,18 @@ Status: In progress. Branche: `codex/VISUAL-014a-metal-video-renderer`, créée 
 - La procédure macOS versionnée utilise désormais `make install-avsampler-au` pour compiler et installer chaque build AV Sampler destiné à Logic; fermer Logic avant copie puis lancer le scan de l'hôte après installation.
 - 2026-11-24 : après rescan et relance de Logic, l'utilisateur confirme « tout fonctionne ». Cela valide manuellement la détection du nouvel AU, le rendu vidéo et, dans le contexte de la checklist, Cue Points, Loop et CC1. Le remplacement/rechargement de média n'a pas été détaillé séparément; aucune mesure chiffrée CPU/GPU ou latence n'a été faite.
 
+## VISUAL-014b — RGB Split déclenché par la vélocité
+
+Status: In progress. Branche: `codex/VISUAL-014b-rgb-split-velocity`, créée depuis `main` après fusion de la PR #9. PR de travail: #10, brouillon en attente de QA Logic.
+
+- Le NoteOn d'une note Cue publie sa vélocité dans un mot atomique avec compteur de déclenchement; l'éditeur déclenche le renderer hors de `processBlock()`. CC1 et le routage des Cue restent séparés.
+- Shader fragment Metal : rouge déplacé visuellement à droite, vert conservé, bleu déplacé à gauche; coordonnées clampées aux bords. Amplitude maximale 1,5 % de la largeur frame.
+- Mapping `(velocity - 1) / 126`; enveloppe smoothstep Attack 5 ms, Hold 40 ms, Release 180 ms. Retrigger réinitialise la vélocité et l'horodatage. Vélocité 0/NoteOff n'active pas l'effet.
+- Bouton RGB Split ajouté dans la barre FX; activé par défaut, état persisté, intensité de frappe transitoire non persistée.
+- Build/install Release : `make install-avsampler-au BUILD_DIR=/private/tmp/visual-009-build BUILD_TYPE=Release` PASS; `codesign --verify --deep --strict` PASS. Après l'optimisation du shader bypass, le dernier build a de nouveau été installé par cette commande.
+- CTest : `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release` PASS, 5/5, incluant mapping/enveloppe et événements/state AV Sampler. `git diff --check` PASS. Un premier avertissement du setter Objective-C a été corrigé avant le build installé final; avertissements JUCE/SDK Apple historiques seulement.
+- 2026-11-24 : après installation et essai dans Logic, l'utilisateur confirme que tout fonctionne correctement et que la lecture reste fluide en boucle. Les contrôles demandés (intensité vélocité, retour, retrigger/Cues, toggle sauvegardé, CC1, Loop) sont validés globalement; aucune mesure chiffrée CPU/GPU, latence ou framerate n'a été faite.
+
 ## VISUAL-013 — Premier effet vidéo piloté par MIDI CC
 
 Date : 2026-11-23. Branche : `codex/VISUAL-013-midi-speed-cc`.

@@ -17,7 +17,7 @@ AVSAMPLER_AU_BUNDLE := $(BUILD_DIR)/AVSampler_artefacts/$(BUILD_TYPE)/AU/AVSampl
 AU_INSTALL_DIR := $(HOME)/Library/Audio/Plug-Ins/Components
 VST3_INSTALL_DIR := $(HOME)/Library/Audio/Plug-Ins/VST3
 
-.PHONY: all check test plugin install install-au install-vst3 install-avsampler-au package status help
+.PHONY: all check test plugin avsampler-au install install-au install-vst3 install-avsampler-au package status help
 
 all: check
 
@@ -51,7 +51,11 @@ install-vst3: plugin
 	@ditto "$(VST3_BUNDLE)" "$(VST3_INSTALL_DIR)/AudioReactiveImagePOC.vst3"
 	@echo "Installed VST3: $(VST3_INSTALL_DIR)/AudioReactiveImagePOC.vst3"
 
-install-avsampler-au: plugin
+avsampler-au:
+	$(CMAKE) -S . -B "$(BUILD_DIR)" -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+	$(CMAKE) --build "$(BUILD_DIR)" --config $(BUILD_TYPE) --target AVSampler_AU
+
+install-avsampler-au: avsampler-au
 	@if [ "$$(uname -s)" != "Darwin" ]; then echo "install-avsampler-au requires macOS"; exit 1; fi
 	@test -d "$(AVSAMPLER_AU_BUNDLE)" || { echo "AV Sampler AU bundle missing: $(AVSAMPLER_AU_BUNDLE)"; exit 1; }
 	@mkdir -p "$(AU_INSTALL_DIR)"
@@ -77,6 +81,7 @@ help:
 	@echo "  make install        Build and install AudioReactive AU/VST3 plus AV Sampler AU (close DAWs first)"
 	@echo "  make install-au     Build and install AU only"
 	@echo "  make install-vst3   Build and install VST3 only"
+	@echo "  make avsampler-au   Build AV Sampler AU only"
 	@echo "  make install-avsampler-au  Build and install AV Sampler AU for Logic QA"
 	@echo "  make package        Build and create macOS ZIP in dist/"
 	@echo "  make status         Show branch and commit for QA logs"

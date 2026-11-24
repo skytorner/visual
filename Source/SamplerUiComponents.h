@@ -30,11 +30,20 @@ private:
 class FxControlBar final : public juce::Component
 {
 public:
+    FxControlBar();
     void setSpeedMultiplier(double multiplier);
+    void setRgbSplitEnabled(bool enabled);
+    void setLastMidiVelocity(int velocity);
     void paint(juce::Graphics& graphics) override;
+    void resized() override;
+
+    std::function<void(bool)> onRgbSplitEnabledChanged;
 
 private:
     double speedMultiplier = 1.0;
+    bool rgbSplitEnabled = true;
+    int lastMidiVelocity = 0;
+    juce::TextButton rgbSplitButton { "RGB SPLIT" };
 };
 
 class AssignedPadsComponent final : public juce::Component
