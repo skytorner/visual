@@ -191,7 +191,7 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 
 | Vérification | Statut | Portée |
 | --- | --- | --- |
-| Build VST3 Windows x64 depuis la branche VISUAL-017 | À exécuter | Workflow `.github/workflows/avsampler-windows-build.yml`; relever SHA source, SHA256 du binaire et artefact téléchargé. |
+| Build VST3 Windows x64 depuis la branche VISUAL-017 | PASS CI | Run `45496818780`; source SHA `7819f9716e45b78a45db7bdd021953bde442dc30`; artefact `AVSampler-Windows-VST3-7819f9716e45b78a45db7bdd021953bde442dc30`, ID `14970036052`, archive SHA256 `335b29c08a520aa28b5c94433e883bd87eb45eee18efb2e8b503d7caaa74d8ae`. Le fichier build-info inclus donne le SHA du binaire. |
 | Scan et insertion dans REAPER Windows | EN ATTENTE | Noter version de Windows et REAPER, chemin d'installation/scans, nom et version du plugin. |
 | Chargement vidéo, Play/Pause, Loop et Cue Points | EN ATTENTE | Charger un média local; vérifier les quatre notes MIDI dans une région puis le rejeu en boucle. |
 | CC1 / vitesse et MIDI simultané avec transport | EN ATTENTE | Vérifier les extrêmes et la valeur neutre à 64; noter tout saut ou perte de déclenchement. |

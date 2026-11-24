@@ -10,8 +10,6 @@ on:
       - "Source/CueTimelineComponent.*"
       - "Source/SamplerUiComponents.*"
       - "Source/VideoFramePlayerComponent.*"
-      - "docs/project/VISUAL_QA_CHECKLIST.md"
-      - "docs/project/VISUAL_RELEASE_LOG.md"
       - ".github/workflows/avsampler-windows-build.yml"
   workflow_dispatch:
 

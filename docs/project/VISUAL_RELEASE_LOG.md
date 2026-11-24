@@ -112,7 +112,8 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 
 - L'utilisateur demande de lancer la phase Windows après validation fonctionnelle du parcours Mac et de Flash. Branche de travail créée depuis le `main` fusionné `d07dc4e30a0db706c492a10389f9d026e4a60c54`.
 - La compilation Windows ne suffisait jusque-là qu'à prouver le build. Cette étape vise le chargement du VST3 exact dans REAPER, vidéo/transport/Loop/Cues, CC1, save/reload et relink; le résultat doit inclure l'environnement hôte et les codecs réellement testés.
-- Le workflow CI Windows a été étendu aux changements de checklist/release log pour permettre de générer un artefact QA depuis cette branche de qualification, avec provenance SHA intégrée. L'artefact exact, son SHA source/binaire et le résultat du build seront ajoutés après CI.
+- GitHub Actions run `45496818780` : configuration, compilation `AVSampler_VST3`, enregistrement build-info et upload PASS. Source SHA `7819f9716e45b78a45db7bdd021953bde442dc30`; artefact `AVSampler-Windows-VST3-7819f9716e45b78a45db7bdd021953bde442dc30`, ID `14970036052`, SHA256 de l'archive `335b29c08a520aa28b5c94433e883bd87eb45eee18efb2e8b503d7caaa74d8ae`. Le bundle et `AVSampler-windows-build-info.txt` sont inclus; le build-info contient le SHA256 du binaire.
+- Checks associés au run: compilation Windows x64 PASS, `audio-analysis` PASS, GitGuardian PASS. Artefact CI temporaire disponible jusqu'au 2027-02-22; ce n'est pas un installateur de cohorte.
 - Windows/REAPER : NOT RUN depuis cet environnement macOS; test humain requis sur la machine Windows. RGB Split et Flash ne sont pas portés au renderer Windows; la parité reste une décision/implémentation séparée avant Closed Alpha.
 - Closed Alpha reste NO-GO : il manque la qualification REAPER, la décision de parité des effets, les validations pluginval par artefact et les packages installables sur machine propre.
 
