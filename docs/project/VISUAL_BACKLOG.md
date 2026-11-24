@@ -1,6 +1,6 @@
 # Visual Backlog
 
-Dernière mise à jour : 2026-11-23. Produit prioritaire : AV Sampler, instrument vidéo MIDI natif; POC audio conservé comme cible distincte.
+Dernière mise à jour : 2026-11-24. Produit prioritaire : AV Sampler, instrument vidéo MIDI natif; POC audio conservé comme cible distincte.
 
 Statuts : `Done` (confirmé), `In progress` (en cours), `Open` (à faire), `Needs verification` (à contrôler), `Deferred` (hors phase). P0 nécessaire au MVP; P1 souhaitable avant bêta; P2 itération ultérieure.
 
@@ -144,7 +144,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-013 — Premier effet vidéo piloté par MIDI CC
 
-- Status: In progress — implémentation locale sur `codex/VISUAL-013-midi-speed-cc`; vérifications et revue à terminer.
+- Status: Needs verification — PR #8 fusionnée dans `main` au commit `7bfddf9`; l'utilisateur confirme le contrôle CC1 en Logic et les extrêmes 0/127. La neutralité 64 et le save/reload ne sont pas séparément confirmés; pluginval non exécuté.
 - Priority: P1.
 - Scope: activer uniquement Speed parmi les emplacements FX, piloté par CC1 (0–127 -> 0,5×–1,5×; 64 = 1×), avec affichage de la vitesse et sauvegarde/restauration de la valeur.
 - Acceptance:
@@ -155,6 +155,26 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
   - Tests C++ couvrent mapping, bornes, routage des événements et persistance; build AU/CTest et `git diff --check` sont consignés.
   - QA Logic sur le build exact confirme le contrôle depuis CC1, la neutralité à 64, les extrêmes et le save/reload; toute mesure de latence reste distincte.
 - Exclusions: choix dynamique de CC, MIDI Learn, vélocité, autres effets, synchronisation tempo/frame et promesse de précision temporelle.
+
+### VISUAL-014 — RGB Split déclenché par la vélocité MIDI
+
+- Status: In progress — découpé en VISUAL-014a (preuve de rendu) puis VISUAL-014b (effet), après inspection du backend JUCE.
+- Priority: P1.
+- Dépendance: le rendu actuel de `juce::VideoComponent` utilise une vue native AVFoundation/AVPlayerLayer sans exposer les frames à AV Sampler; la séparation RGB ne peut pas être faite dans le pipeline actuel.
+
+#### VISUAL-014a — Prototype d'accès aux frames et rendu GPU
+
+- Scope: remplacer uniquement le composant d'affichage vidéo par un rendu macOS qui reçoit les frames décodées et les présente via Metal, en gardant l'architecture transport/session du sampler.
+- Acceptance: vidéo affichée dans l'AU Logic; ouverture, lecture, seek Cue, Loop, vitesse CC1, fermeture/rechargement du média restent fonctionnels; lecture des frames sans copie CPU complète; fluidité et usage CPU/GPU consignés. Aucun effet visuel actif dans ce sous-ticket.
+- Exclusions: RGB Split, vélocité, nouveaux effets et migration VST3/autres plateformes.
+
+#### VISUAL-014b — RGB Split avec enveloppe de vélocité
+
+- Status: Open — dépend de la validation complète de VISUAL-014a.
+- Scope: vitesse indépendante sur CC1; vélocité NoteOn 1–127 pilote l'amplitude du décalage RGB, note velocity 0/NoteOff ignorée; rouge à droite, bleu à gauche, vert centré; enveloppe attack/hold/release et retrigger.
+- Initial values: vélocité normalisée `(velocity - 1) / 126`, amplitude max proposée 1,5 % de la largeur, Attack 0–10 ms, Hold 40 ms, Release 180 ms; clamp aux bords pour éviter le noir.
+- Acceptance: frappes faibles/fortes donnent un Split faible/fort, l'effet revient au neutre et se retrigger; cues/loop/CC1/save-reload inchangés; désactivation rétablit l'image originale; anciennes sessions sans état RGB sont compatibles.
+- Exclusions: opacité/Level velocity, effets supplémentaires, MIDI Learn, 16 pads, Hold/Toggle/One-Shot et autres moteurs.
 
 ## Non-objectifs explicites
 

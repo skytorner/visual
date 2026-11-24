@@ -116,6 +116,22 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | Neutralité à 64, affichage Speed et réouverture de session dans Logic | NOT TESTED | Ces scénarios ne sont pas encore rapportés. Aucune latence mesurée. |
 | Autres emplacements FX | PASS statique | Level, Color, Glitch restent inactifs dans le code de l'éditeur. |
 
+## VISUAL-014a — Preuve du rendu des frames Metal
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Rendu Metal JUCE personnalisé compilable dans l'AU | PASS build | L'AU `AVSampler_AU` et les exécutables C++ compilent sur la branche dédiée. |
+| Tests CTest existants | PASS 4/4 | `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release`. |
+| pluginval | NOT RUN | L'exécutable de `/Applications/pluginval.app` se termine avec le code 134 même sur `--help`, avant une validation de plugin. |
+| `auval` | BLOCKED | L'AU compilé n'est pas installé dans un dossier Audio Units; aucune copie/installation n'a été faite. |
+| Frames AVFoundation rendues dans l'éditeur AU | NOT TESTED | Doit être confirmé dans Logic avant l'effet RGB. |
+| Seek Cue, Loop, vitesse CC1, rechargement média | NOT TESTED | Non-régression du transport/session à vérifier. |
+| Cadence, fluidité et coût CPU/GPU sur vidéo réelle | NOT MEASURED | Consigner résolution/codec et limites observées. |
+
+## VISUAL-014b — RGB Split velocity
+
+Bloqué en attente du PASS de la preuve de rendu VISUAL-014a; aucune implémentation ni test exécuté.
+
 ## VISUAL-012 — Composition UI et pads assignés
 
 | Vérification | Statut | Portée |

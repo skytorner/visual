@@ -26,7 +26,7 @@ VISUAL-010 fournit la timeline interactive pour déplacer les quatre Cue Points;
 
 ## Phase 3 — MIDI Effects
 
-VISUAL-013 active le premier effet visuel : Speed piloté par MIDI CC 1, entre 0,5× et 1,5× avec 1× à la valeur 64. La valeur est restaurée avec la session. Level, Color et Glitch restent des emplacements inactifs; vélocité, Hold/Toggle/One Shot et lissage restent à cadrer séparément.
+VISUAL-013 active Speed via MIDI CC1 (0,5×–1,5×; 64 = 1×). VISUAL-014 est découpé en une preuve d'accès aux frames et de rendu GPU (014a), puis RGB Split dont l'amplitude répond à la vélocité et dont l'enveloppe revient à l'image normale (014b). Le pipeline Metal doit être validé dans Logic avant l'effet. Les autres effets, modes de pad, 16 pads et MIDI Learn restent ultérieurs.
 
 ## Phase 4 — Validation produit
 
