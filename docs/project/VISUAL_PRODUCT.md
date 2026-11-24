@@ -10,11 +10,11 @@ La direction évolue volontairement du POC audio vers un sampler vidéo MIDI nat
 
 ## Produit livré sur `main` — prototype interne
 
-Le prototype comprend une cible instrument AU macOS, un lecteur vidéo AVFoundation avec présentation Metal, une lecture/Loop, quatre Cue Points manipulables et quatre notes MIDI fixes (36/38/40/41). Les notes sont présentées comme C1/D1/E1/F1 dans la configuration Logic testée. CC1 pilote la vitesse de lecture; la vélocité NoteOn déclenche le RGB Split. L'état de projet conserve le média référencé, les Cue Points, Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation RGB Split.
+Le prototype comprend une cible instrument AU macOS, un lecteur vidéo AVFoundation avec présentation Metal, une lecture/Loop, quatre Cue Points manipulables et quatre notes MIDI fixes (36/38/40/41). Les notes sont présentées comme C1/D1/E1/F1 dans la configuration Logic testée. CC1 pilote la vitesse de lecture; la vélocité NoteOn déclenche RGB Split et Flash. L'état de projet conserve le média référencé, les Cue Points, Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation des deux effets.
 
 L'utilisateur confirme manuellement que le parcours fonctionne dans Logic, que le cycle de région rejoue les notes et que la lecture vidéo reste fluide en boucle. Cela constitue une validation fonctionnelle rapportée, pas une mesure instrumentée de latence, cadence ou usage CPU/GPU.
 
-Le seul hôte/form factor qualifié par ce parcours est Logic Pro sur macOS avec l'AU. AV Sampler VST3, Windows, autres DAW, versions macOS minimales et compatibilité codec étendue ne sont pas qualifiés. Une seule vidéo et une seule tête de lecture sont prises en charge. Aucune précision frame-perfect ni latence garantie n'est promise.
+Le parcours Mac est validé manuellement dans Logic avec l'AU, y compris RGB Split et Flash. La qualification VST3 Windows/REAPER commence dans VISUAL-017; le prototype Windows ne prend pas encore en charge les effets Metal. Autres DAW, versions macOS minimales et compatibilité codec étendue restent non qualifiés. Une seule vidéo et une seule tête de lecture sont prises en charge. Aucune précision frame-perfect ni latence garantie n'est promise.
 
 ## POC audio conservé
 
@@ -35,7 +35,7 @@ Le dépôt est en phase **Internal / Dev**. Le build Windows x64/VST3 est automa
 ### Closed Alpha 1 — périmètre proposé
 
 - Une vidéo locale; lecture/pause/loop; timeline et quatre cues/pads MIDI.
-- Déclenchement et relecture de notes dans Logic; vitesse par CC1; RGB Split par vélocité.
+- Déclenchement et relecture de notes dans Logic; vitesse par CC1; RGB Split et Flash par vélocité.
 - Sauvegarde/réouverture du projet et récupération après média absent.
 - Installation guidée et session réelle sans crash bloquant; recueil des difficultés d'installation et d'usage.
 
@@ -67,7 +67,7 @@ Polyphonie vidéo, plusieurs lecteurs, moteur 3D, export vidéo, séquenceur MID
 
 Utilisateur initial : beatmaker/producteur sur macOS, notamment Logic Pro. Premier succès : programmer quatre notes dans une région MIDI et rejouer la performance visuelle correspondante.
 
-Ordre de travail et distribution : développement fonctionnel AU macOS/Logic -> QA hôte et parité Windows VST3/REAPER -> deux packages Closed Alpha 1 contrôlés -> Closed Alpha 2 -> Closed Beta -> qualification progressive d'autres DAW. Le workflow Windows x64 de compilation et d'artefact QA est déjà en place; il ne vaut pas qualification Windows.
+Ordre de travail et distribution : développement fonctionnel AU macOS/Logic (validé pour le périmètre présent) -> QA hôte et parité Windows VST3/REAPER (VISUAL-017 en cours) -> deux packages Closed Alpha 1 contrôlés -> Closed Alpha 2 -> Closed Beta -> qualification progressive d'autres DAW. Le workflow Windows x64 de compilation et d'artefact QA est déjà en place; il ne vaut pas qualification Windows.
 
 ## Média
 

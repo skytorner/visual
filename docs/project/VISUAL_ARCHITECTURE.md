@@ -7,7 +7,7 @@ Cadrage : 2026-11-24. `AVSampler` est un instrument vidéo MIDI JUCE natif. `Aud
 - JUCE 8.0.8, C++17 et CMake.
 - `AudioReactiveImagePOC` conserve ses identifiants, paramètres, formats et état historiques.
 - AV Sampler garde sa propre identité de plugin. Le prototype ajoute les formats AU + VST3 sur macOS et VST3 sur Windows; seul l'AU macOS dans Logic est actuellement qualifié.
-- Interface JUCE native. Le renderer macOS utilise AVFoundation et Metal/MetalKit. Le prototype Windows enveloppe `juce::VideoComponent` pour lecture/transport; son build x64 passe dans GitHub Actions (run `45435924725`), mais le chargement et le comportement en hôte REAPER restent non testés et sont reportés après stabilisation de macOS. Cette vue ne donne pas accès aux frames pour RGB Split, donc l'effet est signalé indisponible sur ce prototype.
+- Interface JUCE native. Le renderer macOS utilise AVFoundation et Metal/MetalKit. Le prototype Windows enveloppe `juce::VideoComponent` pour lecture/transport; son build x64 passe dans GitHub Actions (run `45435924725`), mais le chargement et le comportement dans REAPER restent à qualifier dans VISUAL-017. Cette vue ne donne pas accès aux frames pour RGB Split et Flash; ces effets sont signalés indisponibles sur ce prototype.
 
 ## Flux actuel AV Sampler
 
