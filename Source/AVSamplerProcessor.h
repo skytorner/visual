@@ -19,6 +19,7 @@ public:
         bool playbackRequested = true;
         bool rgbSplitEnabled = true;
         bool flashEnabled = false;
+        bool zoomPunchEnabled = false;
         int selectedCueIndex = 0;
         int speedMidiCcValue = avsampler::defaultVideoSpeedControllerValue;
     };
@@ -56,6 +57,7 @@ public:
     void setPlaybackRequested(bool shouldPlay);
     void setRgbSplitEnabled(bool shouldEnable);
     void setFlashEnabled(bool shouldEnable);
+    void setZoomPunchEnabled(bool shouldEnable);
     void setSelectedCueIndex(int cueIndex);
     int consumePendingCue() noexcept;
     std::uint32_t getLatestCueEffectTrigger() const noexcept;

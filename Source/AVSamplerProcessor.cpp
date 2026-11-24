@@ -137,6 +137,7 @@ void AVSamplerAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
     state.setProperty("playbackRequested", snapshot.playbackRequested, nullptr);
     state.setProperty("rgbSplitEnabled", snapshot.rgbSplitEnabled, nullptr);
     state.setProperty("flashEnabled", snapshot.flashEnabled, nullptr);
+    state.setProperty("zoomPunchEnabled", snapshot.zoomPunchEnabled, nullptr);
     state.setProperty("selectedCueIndex", snapshot.selectedCueIndex, nullptr);
     state.setProperty("speedMidiCcValue", snapshot.speedMidiCcValue, nullptr);
 
@@ -161,6 +162,7 @@ void AVSamplerAudioProcessor::setStateInformation(const void* data, int sizeInBy
         newState.playbackRequested = static_cast<bool>(restored.getProperty("playbackRequested", true));
         newState.rgbSplitEnabled = static_cast<bool>(restored.getProperty("rgbSplitEnabled", true));
         newState.flashEnabled = static_cast<bool>(restored.getProperty("flashEnabled", false));
+        newState.zoomPunchEnabled = static_cast<bool>(restored.getProperty("zoomPunchEnabled", false));
         newState.selectedCueIndex = juce::jlimit(0, cueCount - 1,
             static_cast<int>(restored.getProperty("selectedCueIndex", 0)));
         newState.speedMidiCcValue = juce::jlimit(0, 127,
@@ -226,6 +228,12 @@ void AVSamplerAudioProcessor::setFlashEnabled(bool shouldEnable)
 {
     const juce::ScopedLock lock(projectStateLock);
     projectState.flashEnabled = shouldEnable;
+}
+
+void AVSamplerAudioProcessor::setZoomPunchEnabled(bool shouldEnable)
+{
+    const juce::ScopedLock lock(projectStateLock);
+    projectState.zoomPunchEnabled = shouldEnable;
 }
 
 void AVSamplerAudioProcessor::setSelectedCueIndex(int cueIndex)

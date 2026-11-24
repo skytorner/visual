@@ -63,6 +63,7 @@ int main()
     processor.setPlaybackRequested(false);
     processor.setRgbSplitEnabled(false);
     processor.setFlashEnabled(true);
+    processor.setZoomPunchEnabled(true);
     processor.setSelectedCueIndex(2);
 
     juce::MemoryBlock savedState;
@@ -80,6 +81,8 @@ int main()
     if (! check(! state.rgbSplitEnabled, "RGB Split enabled state did not restore"))
         return 1;
     if (! check(state.flashEnabled, "Flash enabled state did not restore"))
+        return 1;
+    if (! check(state.zoomPunchEnabled, "Zoom Punch enabled state did not restore"))
         return 1;
     if (! check(state.selectedCueIndex == 2, "Selected Cue did not restore"))
         return 1;
@@ -142,6 +145,9 @@ int main()
         return 1;
     if (! check(! legacyProjectState.flashEnabled,
                 "Legacy session unexpectedly enabled the new Flash effect"))
+        return 1;
+    if (! check(! legacyProjectState.zoomPunchEnabled,
+                "Legacy session unexpectedly enabled the new Zoom Punch effect"))
         return 1;
 
     std::cout << "AV Sampler MIDI processing, speed CC, and state tests passed\n";

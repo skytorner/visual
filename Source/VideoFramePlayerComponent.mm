@@ -27,6 +27,9 @@
 @property(nonatomic, assign) BOOL flashEnabled;
 @property(nonatomic, assign) int flashVelocity;
 @property(nonatomic, assign) CFTimeInterval flashStartTime;
+@property(nonatomic, assign) BOOL zoomPunchEnabled;
+@property(nonatomic, assign) int zoomPunchVelocity;
+@property(nonatomic, assign) CFTimeInterval zoomPunchStartTime;
 @property(nonatomic, assign) NSUInteger loadGeneration;
 @property(nonatomic, copy) NSString* rendererSetupError;
 
@@ -38,6 +41,8 @@
 - (void)triggerRgbSplitVelocity:(int)velocity;
 - (void)setFlashEnabled:(BOOL)enabled;
 - (void)triggerFlashVelocity:(int)velocity;
+- (void)setZoomPunchEnabled:(BOOL)enabled;
+- (void)triggerZoomPunchVelocity:(int)velocity;
 @end
 
 @implementation AVSamplerMetalVideoView
@@ -103,21 +108,23 @@
             return output;
         }
         fragment float4 avs_fragment(VertexOut input [[stage_in]],
-                                     constant float2& effects [[buffer(0)]],
+                                     constant float4& effects [[buffer(0)]],
                                      texture2d<float> frame [[texture(0)]]) {
             constexpr sampler frameSampler(coord::normalized, address::clamp_to_edge, filter::linear);
+            const float2 center = float2(0.5, 0.5);
+            const float2 zoomedUv = center + (input.uv - center) / max(effects.z, 1.0);
             float4 color;
             if (effects.x > 0.0) {
-                const float2 redUv = clamp(input.uv - float2(effects.x, 0.0), float2(0.0), float2(1.0));
-                const float2 greenUv = clamp(input.uv, float2(0.0), float2(1.0));
-                const float2 blueUv = clamp(input.uv + float2(effects.x, 0.0), float2(0.0), float2(1.0));
+                const float2 redUv = clamp(zoomedUv - float2(effects.x, 0.0), float2(0.0), float2(1.0));
+                const float2 greenUv = clamp(zoomedUv, float2(0.0), float2(1.0));
+                const float2 blueUv = clamp(zoomedUv + float2(effects.x, 0.0), float2(0.0), float2(1.0));
                 const float4 redSample = frame.sample(frameSampler, redUv);
                 const float4 greenSample = frame.sample(frameSampler, greenUv);
                 const float4 blueSample = frame.sample(frameSampler, blueUv);
                 color = float4(redSample.r, greenSample.g, blueSample.b, greenSample.a);
             }
             else {
-                color = frame.sample(frameSampler, input.uv);
+                color = frame.sample(frameSampler, zoomedUv);
             }
             if (effects.y > 0.0)
                 color.rgb = mix(color.rgb, float3(1.0), clamp(effects.y, 0.0, 0.65));
@@ -265,6 +272,22 @@
     self.flashStartTime = CACurrentMediaTime();
 }
 
+- (void)setZoomPunchEnabled:(BOOL)enabled
+{
+    _zoomPunchEnabled = enabled;
+    if (! enabled)
+        self.zoomPunchVelocity = 0;
+}
+
+- (void)triggerZoomPunchVelocity:(int)velocity
+{
+    if (! self.zoomPunchEnabled || velocity <= 0)
+        return;
+
+    self.zoomPunchVelocity = juce::jlimit(1, 127, velocity);
+    self.zoomPunchStartTime = CACurrentMediaTime();
+}
+
 - (void)shutdown
 {
     [self closeVideo];
@@ -355,8 +378,13 @@
         const auto flashWhiteMix = self.flashEnabled
             ? avsampler::videoEffects::flashWhiteMixForVelocityAndElapsedSeconds(
                 self.flashVelocity, flashElapsedSeconds) : 0.0;
-        const float effectValues[2] {
-            static_cast<float>(offsetUv), static_cast<float>(flashWhiteMix)
+        const auto zoomPunchElapsedSeconds = currentTime - self.zoomPunchStartTime;
+        const auto zoomPunchScale = self.zoomPunchEnabled
+            ? avsampler::videoEffects::zoomPunchScaleForVelocityAndElapsedSeconds(
+                self.zoomPunchVelocity, zoomPunchElapsedSeconds) : 1.0;
+        const float effectValues[4] {
+            static_cast<float>(offsetUv), static_cast<float>(flashWhiteMix),
+            static_cast<float>(zoomPunchScale), 0.0f
         };
         [encoder setFragmentBytes:effectValues length:sizeof(effectValues) atIndex:0];
         [encoder setFragmentTexture:self.currentFrameTexture atIndex:0];
@@ -539,3 +567,15 @@ void VideoFramePlayerComponent::triggerFlashVelocity(int velocity)
 }
 
 bool VideoFramePlayerComponent::isFlashAvailable() const noexcept { return true; }
+
+void VideoFramePlayerComponent::setZoomPunchEnabled(bool enabled)
+{
+    [impl->view setZoomPunchEnabled:enabled];
+}
+
+void VideoFramePlayerComponent::triggerZoomPunchVelocity(int velocity)
+{
+    [impl->view triggerZoomPunchVelocity:velocity];
+}
+
+bool VideoFramePlayerComponent::isZoomPunchAvailable() const noexcept { return true; }
