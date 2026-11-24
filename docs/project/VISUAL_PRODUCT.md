@@ -14,7 +14,7 @@ Le prototype comprend une cible instrument AU macOS, un lecteur vidéo AVFoundat
 
 L'utilisateur confirme manuellement que le parcours fonctionne dans Logic, que le cycle de région rejoue les notes et que la lecture vidéo reste fluide en boucle. Cela constitue une validation fonctionnelle rapportée, pas une mesure instrumentée de latence, cadence ou usage CPU/GPU.
 
-Le parcours Mac est validé manuellement dans Logic avec l'AU, y compris RGB Split et Flash. VISUAL-020 ajoute Zoom Punch au prototype macOS; son acceptation manuelle dans Logic est encore requise. La qualification VST3 Windows/REAPER est reportée à la fin de la stabilisation des fonctionnalités macOS; le prototype Windows ne prend pas encore en charge les effets Metal. Autres DAW, versions macOS minimales et compatibilité codec étendue restent non qualifiés. Une seule vidéo et une seule tête de lecture sont prises en charge. Aucune précision frame-perfect ni latence garantie n'est promise.
+Le parcours Mac est validé manuellement dans Logic avec l'AU, y compris RGB Split, Flash et Zoom Punch (VISUAL-020 validé par l'utilisateur sur l'AU installé). La qualification VST3 Windows/REAPER est reportée à la fin de la stabilisation des fonctionnalités macOS; le prototype Windows ne prend pas encore en charge les effets Metal. Autres DAW, versions macOS minimales et compatibilité codec étendue restent non qualifiés. Une seule vidéo et une seule tête de lecture sont prises en charge. Aucune précision frame-perfect ni latence garantie n'est promise.
 
 ## POC audio conservé
 
@@ -58,7 +58,7 @@ Closed Alpha 2 vise 5 à 10 utilisateurs et les corrections d'Alpha 1. Closed Be
 
 ## Suite produit après Closed Alpha
 
-16 pads, MIDI Learn, mapping entièrement personnalisable, plusieurs lecteurs vidéo, polyphonie vidéo et export restent en aval de la validation de cette première cohorte. Zoom Punch est un ajout au prototype interne macOS; son inclusion dans le package Closed Alpha 1 sera décidée après validation Logic et ne change pas les critères actuels d'alpha. D'autres DAW Windows/macOS restent à qualifier séparément.
+16 pads, MIDI Learn, mapping entièrement personnalisable, plusieurs lecteurs vidéo, polyphonie vidéo et export restent en aval de la validation de cette première cohorte. Zoom Punch est un ajout au prototype interne macOS; son inclusion dans le package Closed Alpha 1 reste à décider et ne change pas les critères actuels d'alpha. D'autres DAW Windows/macOS restent à qualifier séparément.
 
 ## Hors périmètre initial
 
@@ -68,7 +68,7 @@ Polyphonie vidéo, plusieurs lecteurs, moteur 3D, export vidéo, séquenceur MID
 
 Utilisateur initial : beatmaker/producteur sur macOS, notamment Logic Pro. Premier succès : programmer quatre notes dans une région MIDI et rejouer la performance visuelle correspondante.
 
-Ordre de travail et distribution : stabilisation des fonctionnalités AU macOS/Logic (Zoom Punch en cours) -> QA hôte et parité Windows VST3/REAPER (VISUAL-017 reporté jusqu'à la fin de cette stabilisation) -> décision de périmètre et packages Closed Alpha 1 contrôlés -> Closed Alpha 2 -> Closed Beta -> qualification progressive d'autres DAW. Le workflow Windows x64 de compilation et d'artefact QA est déjà en place; il ne vaut pas qualification Windows.
+Ordre de travail et distribution : stabilisation des fonctionnalités AU macOS/Logic (Zoom Punch validé; PR #18 à fusionner) -> QA hôte et parité Windows VST3/REAPER (VISUAL-017 reporté jusqu'à la fin de cette stabilisation) -> décision de périmètre et packages Closed Alpha 1 contrôlés -> Closed Alpha 2 -> Closed Beta -> qualification progressive d'autres DAW. Le workflow Windows x64 de compilation et d'artefact QA est déjà en place; il ne vaut pas qualification Windows.
 
 ## Média
 

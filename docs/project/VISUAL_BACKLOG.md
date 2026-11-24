@@ -223,7 +223,7 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 
 ### VISUAL-020 — Zoom Punch piloté par la vélocité (macOS)
 
-- Status: In progress — PR #18 ouverte; build/tests/install macOS effectués; vérification Logic en attente.
+- Status: Done — validation Logic rapportée par l'utilisateur sur l'AU installé; PR #18 ouverte en attente de fusion.
 - Priority: P1 pour le prototype macOS; l'inclusion dans Closed Alpha 1 reste à décider.
 - Scope: ajouter au shader Metal un zoom centré déclenché par les NoteOn Cue existants. La vélocité contrôle l'amplitude jusqu'à 1,12× à 127; durée fixe Attack/Hold/Release de 5/40/180 ms. Toggle sauvegardé, désactivé par défaut pour les nouveaux et anciens projets.
 - Acceptance: vélocité 0/NoteOff/non assignée n'active pas l'effet; frappes faibles/fortes donnent des amplitudes distinctes; chaque trigger repart avec la même enveloppe et l'image revient à 1×; RGB Split, Flash, CC1, Loop, Cue et audio-silence restent inchangés; état sauvé/rechargé et ancienne session désactivée par défaut; build/test/install AU et QA manuelle Logic; renderer Windows annonce explicitement indisponible.

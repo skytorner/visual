@@ -124,7 +124,8 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 - `make install-avsampler-au BUILD_DIR=/private/tmp/visual-020-build BUILD_TYPE=Release` : PASS. Signature `codesign --verify --deep --strict` valide. SHA-256 du binaire buildé avant signature ad hoc `61b7290eea1ac777157cc94386b553e7f7c83e649849e0b0d2815a72ff78ed6d`; binaire installé signé `fcaa3a6f6641b368f467819c218e14bd34e32c89f99d6ce1e8c8d0d777bf26b4`.
 - Code source compilé : `35048d27aad9e629be97bddafadeb1a2b3c8065a`.
 - `git diff --check` : PASS. Build Windows et test REAPER : NOT RUN, reportés conformément à D-028.
-- QA humaine Logic en attente; test Windows reporté selon D-028. L'ajout n'établit pas l'inclusion de Zoom Punch dans Closed Alpha 1.
+- L'utilisateur confirme dans Logic « fonctionne très bien » après installation de l'AU identifié ci-dessus; validation manuelle rapportée. L'ajout n'établit pas l'inclusion de Zoom Punch dans Closed Alpha 1.
+- PR #18 ouverte et vérifiable; CI PR : `audio-analysis`, GitGuardian et compilation VST3 Windows x64 PASS. Le résultat Windows prouve la compilation seulement; aucun test REAPER exécuté. Fusion en attente d'autorisation explicite.
 
 ## Initial Setup
 
