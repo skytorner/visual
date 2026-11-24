@@ -1,12 +1,12 @@
 # AV Sampler / visual — QA Baseline
 
-Date du bilan : 2026-11-24.
+Date du bilan : 2026-11-25.
 Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs pluginval transmis par l'utilisateur. **Ce document transcrit les résultats, il n'exécute pas de tests.** Les matrices audio-reactive et AV Sampler sont indépendantes: aucune preuve du POC audio ne vaut preuve de l'instrument vidéo.
 
 ## État AV Sampler sur main — résumé release readiness
 
-- `main` contient VISUAL-009 à VISUAL-019, y compris la timeline/session, CC1, le renderer Metal, RGB Split et Flash.
-- L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload, RGB Split, Flash et lecture fluide en boucle. Résultats manuels rapportés, sans mesure chiffrée de latence, framerate ou CPU/GPU.
+- `main` contient VISUAL-009 à VISUAL-020, y compris timeline/session, CC1, renderer Metal, RGB Split, Flash et Zoom Punch.
+- L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload, RGB Split, Flash, Zoom Punch et lecture fluide en boucle. Résultats manuels rapportés, sans mesure chiffrée de latence, framerate ou CPU/GPU.
 - L'utilisateur confirme dans Logic CC1 à 0/64/127 et la restauration de la valeur après save/reload; SHA exact de l'AU utilisé non consigné.
 - L'utilisateur confirme le déplacement puis le relink de la vidéo avec conservation des Cue timings et du Loop; refaire sur l'artefact candidat de distribution.
 - Un ancien lancement pluginval s'était interrompu avant chargement (code 134). Le nouveau journal utilisateur `log audio react4.txt` rapporte deux validations complètes de l'AU AV Sampler v0.1.0 à strictness 4, `ALL TESTS PASSED`. Le journal identifie le composant par `aumu,AVsm,Vpoc`, mais ne donne ni chemin du bundle ni SHA de l'exécutable; strictness 5 n'est pas rapporté. L'avertissement `Current program is -1` apparaît lors du changement de programme et n'empêche pas le résultat `SUCCESS`.
@@ -206,10 +206,21 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | --- | --- | --- |
 | Intensité liée à la vélocité et enveloppe fixe 5/40/180 ms | PASS automatisé | CTest `VideoEffectMathTests`: vélocité 0/64/127, maximum 1,12×, retour à 1×. |
 | Persistance et compatibilité des anciens projets | PASS automatisé | `AVSamplerCoreTests`: toggle actif restauré; propriété absente désactivée. |
-| Shader Metal et composition avec RGB Split/Flash | PASS compilation; visuel en attente | AU macOS construit avec le shader; le comportement combiné est à confirmer dans Logic. |
+| Shader Metal et composition avec RGB Split/Flash | PASS manuel rapporté | L'utilisateur confirme que l'effet fonctionne dans Logic et en combinaison avec les autres effets. |
 | Build Release et installation de l'AU pour Logic | PASS build/install | Build `/private/tmp/visual-020-build`, code source commit `35048d27aad9e629be97bddafadeb1a2b3c8065a`; CTest 5/5. AU installé et signature `codesign --verify --deep --strict` valide. SHA-256 du binaire buildé avant signature `61b7290eea1ac777157cc94386b553e7f7c83e649849e0b0d2815a72ff78ed6d`; binaire installé après signature ad hoc `fcaa3a6f6641b368f467819c218e14bd34e32c89f99d6ce1e8c8d0d777bf26b4`. |
 | Validation dans Logic | PASS manuel rapporté | L'utilisateur confirme « fonctionne très bien » après installation; cela couvre vélocités faibles/fortes, retour au cadrage neutre, combinaison avec les autres effets, loop MIDI et save/reload. AU installé SHA-256 `fcaa3a6f6641b368f467819c218e14bd34e32c89f99d6ce1e8c8d0d777bf26b4`. |
 | Renderer Windows | Indisponible connu | Zoom Punch est rendu uniquement par Metal macOS; la QA Windows reste reportée jusqu'à la fin de la stabilisation macOS. |
+
+## VISUAL-021 — Color Boost macOS
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Mapping saturation / vélocité et enveloppe 5/40/180 ms | PASS automatisé | CTest `VideoEffectMathTests`: vélocité 0/1/64/127, maximum 1,6× et retour à 1×. |
+| Persistance et compatibilité des anciens projets | PASS automatisé | CTest `AVSamplerCoreTests`: toggle actif restauré; propriété absente désactivée. |
+| Shader Metal, effet combiné et bornes des canaux | PASS compilation; visuel en attente | Shader inclus dans l'AU Release; observer le rendu réel et les effets combinés dans Logic. La compilation ne valide pas l'exécution runtime du shader. |
+| Build Release, installation AU et signature | PASS build/install | Build `/private/tmp/visual-021-build`; CTest 5/5. SHA-256 exécutable avant signature `5bb3af088b0f8d5f13e05d3f6662c1e56ca6837e8ee4a3ad2603809130219e53`; SHA-256 exécutable installé après signature ad hoc `f6c14af1cbb2dc78f89097d166f612fdedeee38ec3562a28d2e77ea60c6cc71e`. `codesign --verify --deep --strict` passe. |
+| Validation utilisateur dans Logic | PASS manuel rapporté | Après installation de l'AU identifié ci-dessus, l'utilisateur confirme « ça marche bien ». Les scénarios individuels vélocité, combinaison, loop et save/reload ne sont pas détaillés séparément. |
+| Renderer Windows | Indisponible connu | Color Boost est rendu sur Metal macOS seulement; Windows/REAPER reste reporté à la fin. |
 
 ## VISUAL-012 — Composition UI et pads assignés
 

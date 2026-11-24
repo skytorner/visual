@@ -51,6 +51,7 @@ private:
     bool displayedRgbSplitEnabled = true;
     bool displayedFlashEnabled = false;
     bool displayedZoomPunchEnabled = false;
+    bool displayedColorBoostEnabled = false;
     std::uint32_t lastSeenCueEffectTrigger = 0;
     int lastAppliedSpeedMidiCcValue = -1;
 

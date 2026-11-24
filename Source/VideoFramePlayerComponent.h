@@ -39,6 +39,9 @@ public:
     void setZoomPunchEnabled(bool enabled);
     void triggerZoomPunchVelocity(int velocity);
     bool isZoomPunchAvailable() const noexcept;
+    void setColorBoostEnabled(bool enabled);
+    void triggerColorBoostVelocity(int velocity);
+    bool isColorBoostAvailable() const noexcept;
     void resized() override;
 
     std::function<void(const juce::String&)> onErrorOccurred;

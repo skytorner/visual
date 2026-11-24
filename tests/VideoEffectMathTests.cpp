@@ -25,6 +25,7 @@ int main()
     using avsampler::videoEffects::rgbSplitMaximumOffsetUv;
     using avsampler::videoEffects::flashWhiteMixForVelocityAndElapsedSeconds;
     using avsampler::videoEffects::zoomPunchScaleForVelocityAndElapsedSeconds;
+    using avsampler::videoEffects::colorBoostSaturationForVelocityAndElapsedSeconds;
 
     if (! check(rgbSplitIntensityForVelocity(0) == 0.0f, "Velocity 0 must not trigger RGB Split"))
         return 1;
@@ -88,6 +89,22 @@ int main()
         return 1;
     if (! check(zoomPunchScaleForVelocityAndElapsedSeconds(127, 0.225) == 1.0,
                 "Zoom Punch envelope must return to the original framing"))
+        return 1;
+
+    if (! check(colorBoostSaturationForVelocityAndElapsedSeconds(0, 0.005) == 1.0,
+                "Velocity 0 must not trigger Color Boost"))
+        return 1;
+    if (! check(colorBoostSaturationForVelocityAndElapsedSeconds(1, 0.005) == 1.0,
+                "Velocity 1 must map to neutral Color Boost"))
+        return 1;
+    if (! check(near(colorBoostSaturationForVelocityAndElapsedSeconds(64, 0.005), 1.3),
+                "Color Boost saturation must follow MIDI velocity"))
+        return 1;
+    if (! check(near(colorBoostSaturationForVelocityAndElapsedSeconds(127, 0.005), 1.6),
+                "Maximum velocity must reach the bounded Color Boost saturation"))
+        return 1;
+    if (! check(colorBoostSaturationForVelocityAndElapsedSeconds(127, 0.225) == 1.0,
+                "Color Boost envelope must return to neutral saturation"))
         return 1;
 
     std::cout << "Video effect velocity mapping and envelope tests passed\n";

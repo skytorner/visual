@@ -152,6 +152,21 @@ FxControlBar::FxControlBar()
     };
     addAndMakeVisible(zoomPunchButton);
     setZoomPunchEnabled(false);
+
+    colorBoostButton.setClickingTogglesState(true);
+    colorBoostButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff20252d));
+    colorBoostButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff24382f));
+    colorBoostButton.setColour(juce::TextButton::textColourOffId, juce::Colour(0xffd4dbe7));
+    colorBoostButton.setColour(juce::TextButton::textColourOnId, juce::Colour(0xffb9e7ca));
+    colorBoostButton.setTooltip("Toggle Color Boost saturation triggered by MIDI note velocity");
+    colorBoostButton.onClick = [this]
+    {
+        setColorBoostEnabled(colorBoostButton.getToggleState());
+        if (onColorBoostEnabledChanged)
+            onColorBoostEnabledChanged(colorBoostEnabled);
+    };
+    addAndMakeVisible(colorBoostButton);
+    setColorBoostEnabled(false);
 }
 
 void FxControlBar::setSpeedMultiplier(double multiplier)
@@ -215,6 +230,23 @@ void FxControlBar::setZoomPunchAvailable(bool available)
     repaint();
 }
 
+void FxControlBar::setColorBoostEnabled(bool enabled)
+{
+    colorBoostEnabled = enabled;
+    colorBoostButton.setToggleState(enabled, juce::dontSendNotification);
+    repaint();
+}
+
+void FxControlBar::setColorBoostAvailable(bool available)
+{
+    colorBoostAvailable = available;
+    colorBoostButton.setEnabled(available);
+    colorBoostButton.setTooltip(available
+        ? "Toggle Color Boost saturation triggered by MIDI note velocity"
+        : "Color Boost is not available on this video renderer yet");
+    repaint();
+}
+
 void FxControlBar::setLastMidiVelocity(int velocity)
 {
     const auto clampedVelocity = juce::jlimit(0, 127, velocity);
@@ -229,7 +261,7 @@ void FxControlBar::resized()
 {
     auto placeholders = getLocalBounds().toFloat().reduced(10.0f, 8.0f);
     placeholders.removeFromLeft(112.0f);
-    constexpr auto cellCount = 5;
+    constexpr auto cellCount = 6;
     const auto cellWidth = placeholders.getWidth() / static_cast<float>(cellCount);
     auto rgbCell = placeholders.withX(placeholders.getX() + cellWidth * 2.0f)
         .withWidth(cellWidth).reduced(3.0f, 0.0f);
@@ -242,6 +274,10 @@ void FxControlBar::resized()
     auto zoomCell = placeholders.withX(placeholders.getX() + cellWidth * 4.0f)
         .withWidth(cellWidth).reduced(3.0f, 0.0f);
     zoomPunchButton.setBounds(zoomCell.withY(zoomCell.getY() + 3.0f)
+        .withHeight(29.0f).toNearestInt());
+    auto colorBoostCell = placeholders.withX(placeholders.getX() + cellWidth * 5.0f)
+        .withWidth(cellWidth).reduced(3.0f, 0.0f);
+    colorBoostButton.setBounds(colorBoostCell.withY(colorBoostCell.getY() + 3.0f)
         .withHeight(29.0f).toNearestInt());
 }
 
@@ -260,7 +296,9 @@ void FxControlBar::paint(juce::Graphics& graphics)
 
     auto placeholders = bounds.reduced(10.0f, 8.0f);
     placeholders.removeFromLeft(112.0f);
-    constexpr std::array<const char*, 5> names { "LEVEL", "SPEED", "RGB SPLIT", "FLASH", "ZOOM PUNCH" };
+    constexpr std::array<const char*, 6> names {
+        "LEVEL", "SPEED", "RGB SPLIT", "FLASH", "ZOOM PUNCH", "COLOR BOOST"
+    };
     const auto cellWidth = placeholders.getWidth() / static_cast<float>(names.size());
     for (int i = 0; i < static_cast<int>(names.size()); ++i)
     {
@@ -270,27 +308,33 @@ void FxControlBar::paint(juce::Graphics& graphics)
         const auto isRgbSplitControl = i == 2;
         const auto isFlashControl = i == 3;
         const auto isZoomPunchControl = i == 4;
+        const auto isColorBoostControl = i == 5;
         graphics.setColour(isSpeedControl ? juce::Colour(0xff1e2d39)
             : isRgbSplitControl && rgbSplitAvailable && rgbSplitEnabled ? juce::Colour(0xff292339)
             : isFlashControl && flashAvailable && flashEnabled ? juce::Colour(0xff332a18)
             : isZoomPunchControl && zoomPunchAvailable && zoomPunchEnabled ? juce::Colour(0xff1e3540)
+            : isColorBoostControl && colorBoostAvailable && colorBoostEnabled ? juce::Colour(0xff24382f)
             : juce::Colour(0xff20252d));
         graphics.fillRoundedRectangle(cell, 5.0f);
         graphics.setColour(isSpeedControl ? juce::Colour(0xff3bd5df)
             : isRgbSplitControl && rgbSplitAvailable && rgbSplitEnabled ? juce::Colour(0xffb676f4)
             : isFlashControl && flashAvailable && flashEnabled ? juce::Colour(0xffffc857)
             : isZoomPunchControl && zoomPunchAvailable && zoomPunchEnabled ? juce::Colour(0xff42b9d1)
+            : isColorBoostControl && colorBoostAvailable && colorBoostEnabled ? juce::Colour(0xff61c783)
             : juce::Colour(0xff3a414c));
         graphics.drawRoundedRectangle(cell, 5.0f, 1.0f);
-        if (isRgbSplitControl || isFlashControl || isZoomPunchControl)
+        if (isRgbSplitControl || isFlashControl || isZoomPunchControl || isColorBoostControl)
         {
             const auto effectAvailable = isRgbSplitControl ? rgbSplitAvailable
-                : isFlashControl ? flashAvailable : zoomPunchAvailable;
+                : isFlashControl ? flashAvailable
+                    : isZoomPunchControl ? zoomPunchAvailable : colorBoostAvailable;
             const auto effectEnabled = isRgbSplitControl ? rgbSplitEnabled
-                : isFlashControl ? flashEnabled : zoomPunchEnabled;
+                : isFlashControl ? flashEnabled
+                    : isZoomPunchControl ? zoomPunchEnabled : colorBoostEnabled;
             const auto activeColour = isRgbSplitControl
                 ? juce::Colour(0xffd9c0fb) : isFlashControl
-                    ? juce::Colour(0xffffe4a3) : juce::Colour(0xffa9e6f2);
+                    ? juce::Colour(0xffffe4a3) : isZoomPunchControl
+                        ? juce::Colour(0xffa9e6f2) : juce::Colour(0xffb9e7ca);
             graphics.setColour(effectAvailable && effectEnabled ? activeColour
                 : juce::Colour(0xff8793a6));
             graphics.setFont(9.0f);
@@ -301,7 +345,8 @@ void FxControlBar::paint(juce::Graphics& graphics)
                 cell.withY(cell.getY() + 39.0f).withHeight(13.0f).toNearestInt(),
                 juce::Justification::centred, 1);
             graphics.setColour(isRgbSplitControl ? juce::Colour(0xffa98cc8)
-                : isFlashControl ? juce::Colour(0xffd0ae5d) : juce::Colour(0xff76c5d5));
+                : isFlashControl ? juce::Colour(0xffd0ae5d) : isZoomPunchControl
+                    ? juce::Colour(0xff76c5d5) : juce::Colour(0xff8cc49e));
             graphics.setFont(8.0f);
             graphics.drawFittedText(! effectAvailable ? "WINDOWS PORT PENDING"
                 : effectEnabled ? "MIDI NOTE ON" : "DISABLED",

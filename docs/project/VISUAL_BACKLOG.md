@@ -1,6 +1,6 @@
 # Visual Backlog
 
-Dernière mise à jour : 2026-11-24. Produit prioritaire : AV Sampler, instrument vidéo MIDI natif; POC audio conservé comme cible distincte.
+Dernière mise à jour : 2026-11-25. Produit prioritaire : AV Sampler, instrument vidéo MIDI natif; POC audio conservé comme cible distincte.
 
 Statuts : `Done` (confirmé), `In progress` (en cours), `Open` (à faire), `Needs verification` (à contrôler), `Deferred` (hors phase). P0 nécessaire au MVP; P1 souhaitable avant bêta; P2 itération ultérieure.
 
@@ -223,8 +223,16 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 
 ### VISUAL-020 — Zoom Punch piloté par la vélocité (macOS)
 
-- Status: Done — validation Logic rapportée par l'utilisateur sur l'AU installé; PR #18 ouverte en attente de fusion.
+- Status: Done — validation Logic rapportée par l'utilisateur sur l'AU installé; PR #18 fusionnée dans `main` au commit `595c533`.
 - Priority: P1 pour le prototype macOS; l'inclusion dans Closed Alpha 1 reste à décider.
 - Scope: ajouter au shader Metal un zoom centré déclenché par les NoteOn Cue existants. La vélocité contrôle l'amplitude jusqu'à 1,12× à 127; durée fixe Attack/Hold/Release de 5/40/180 ms. Toggle sauvegardé, désactivé par défaut pour les nouveaux et anciens projets.
 - Acceptance: vélocité 0/NoteOff/non assignée n'active pas l'effet; frappes faibles/fortes donnent des amplitudes distinctes; chaque trigger repart avec la même enveloppe et l'image revient à 1×; RGB Split, Flash, CC1, Loop, Cue et audio-silence restent inchangés; état sauvé/rechargé et ancienne session désactivée par défaut; build/test/install AU et QA manuelle Logic; renderer Windows annonce explicitement indisponible.
 - Exclusions: contrôles de zoom séparés, enveloppe configurable, parité Windows, changement du callback audio et décision d'élargir le package alpha.
+
+### VISUAL-021 — Color Boost piloté par la vélocité (macOS)
+
+- Status: Done — implémenté et validé par l'utilisateur dans Logic; PR #19 ouverte en attente de fusion.
+- Priority: P1 pour le prototype macOS; inclusion dans Closed Alpha 1 à réévaluer après validation.
+- Scope: augmenter temporairement la saturation dans le shader Metal macOS, sans modifier la teinte intentionnellement. La vélocité 1–127 contrôle un multiplicateur de saturation de 1,0× à 1,6×; durée fixe Attack/Hold/Release 5/40/180 ms. Toggle persisté, désactivé par défaut pour les nouveaux et anciens projets.
+- Acceptance: velocity 0/NoteOff/non assignée n'active pas l'effet; faible/forte vélocité donne une saturation différente; l'image revient à la saturation originale après l'enveloppe; RGB Split, Flash, Zoom Punch, CC1, Cue, Loop et silence audio restent inchangés; save/reload et compatibilité des anciens projets testés; build/tests/install AU et QA Logic; renderer Windows indique explicitement indisponible.
+- Exclusions: hue shift, luminosité/contraste indépendants, réglage continu du multiplicateur/enveloppe, parité Windows, changement de `processBlock()` et inclusion automatique dans l'alpha.

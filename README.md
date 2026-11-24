@@ -15,14 +15,15 @@ The currently qualified target remains **macOS Audio Unit in Logic Pro**. The Wi
 - MIDI CC1 controls video speed from 0.5× to 1.5×. The user reports confirming the endpoints, normal speed at 64, and restoration after Logic save/reopen; the exact AU SHA used for that manual check was not recorded.
 - RGB Split triggered by Cue NoteOn velocity. Its enabled/disabled state is saved with the host project.
 - Flash is also triggered by Cue NoteOn velocity on the macOS renderer; it is disabled by default and its toggle is saved with the host project. Windows rendering is not implemented yet.
+- Zoom Punch is triggered by Cue NoteOn velocity on the macOS Metal renderer. Its centered scale pulse reaches 1.12×, uses the fixed 5/40/180 ms envelope, and its saved toggle defaults off. The user confirmed it works in Logic; Windows rendering is not implemented yet.
 - Metal frame presentation on macOS using AVFoundation and MetalKit.
-- Host-project state includes media path, Cue positions, Loop, requested Play/Pause, selected Cue, speed controller value, RGB Split enablement and Flash enablement. Video files remain external to the project and must be relinked if moved.
+- Host-project state includes media path, Cue positions, Loop, requested Play/Pause, selected Cue, speed controller value, and enablement for RGB Split, Flash and Zoom Punch. Color Boost state is part of VISUAL-021 on the current branch. Video files remain external to the project and must be relinked if moved.
 
 See [product scope](docs/project/VISUAL_PRODUCT.md), [architecture](docs/project/VISUAL_ARCHITECTURE.md), [backlog](docs/project/VISUAL_BACKLOG.md) and [QA evidence](docs/project/VISUAL_QA_CHECKLIST.md).
 
-## In progress on `codex/VISUAL-020-zoom-punch`
+## In progress on `codex/VISUAL-021-color-boost`
 
-Zoom Punch is implemented on the macOS Metal renderer and has been validated by the user in Logic. Cue velocity controls a centered scale pulse up to 1.12× with the same fixed 5/40/180 ms envelope; the toggle is saved and defaults off, including in older sessions. The feature is in PR #18 awaiting merge; Windows rendering is not implemented yet.
+Color Boost is implemented on the macOS Metal renderer. Cue velocity controls saturation from 1.0× to 1.6× with the fixed 5/40/180 ms envelope; the toggle is saved and defaults off, including in older sessions. The user reports that it works well in Logic; PR #19 is awaiting merge, and Windows rendering is not implemented yet.
 
 ## Build and install for local Logic QA (macOS)
 
