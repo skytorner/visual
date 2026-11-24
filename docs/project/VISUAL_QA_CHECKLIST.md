@@ -116,6 +116,24 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | Neutralité à 64, affichage Speed et réouverture de session dans Logic | NOT TESTED | Ces scénarios ne sont pas encore rapportés. Aucune latence mesurée. |
 | Autres emplacements FX | PASS statique | Level, Color, Glitch restent inactifs dans le code de l'éditeur. |
 
+## VISUAL-014a — Preuve du rendu des frames Metal
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Rendu Metal JUCE personnalisé compilable dans l'AU | PASS build | L'AU `AVSampler_AU` et les exécutables C++ compilent sur la branche dédiée. |
+| Tests CTest existants | PASS 4/4 | `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release`. |
+| pluginval | NOT RUN | L'exécutable de `/Applications/pluginval.app` se termine avec le code 134 même sur `--help`, avant une validation de plugin. |
+| `auval` / découverte par l'hôte | NOT DETECTED | Le bundle est installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; après rescan du cache, `auval -v aumu AVsm Vpoc` échoue encore avec « didn't find the component ». Le rendu n'a donc pas été testé dans Logic. |
+| AU détecté après rescan et relance de Logic | PASS manuel rapporté | L'utilisateur confirme que le nouveau build fonctionne dans Logic. `auval` local ne retrouve pas le composant, malgré cette validation hôte. |
+| Image rendue, lecture et fonctionnement général | PASS manuel rapporté | L'utilisateur rapporte que tout fonctionne; aucune capture ni test instrumenté. |
+| Cue Points, Loop vidéo et CC1 | PASS manuel rapporté | Inclus dans le retour « tout fonctionne » après la checklist proposée; aucune latence chiffrée. |
+| Remplacement/rechargement de média | NOT REPORTED | Le retour global ne détaille pas ce scénario individuellement. |
+| Cadence et coût CPU/GPU | NOT MEASURED | Fonctionnement jugé bon à l'usage par l'utilisateur; aucun relevé chiffré. |
+
+## VISUAL-014b — RGB Split velocity
+
+Bloqué en attente du PASS de la preuve de rendu VISUAL-014a; aucune implémentation ni test exécuté.
+
 ## VISUAL-012 — Composition UI et pads assignés
 
 | Vérification | Statut | Portée |

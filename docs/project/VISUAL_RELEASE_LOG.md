@@ -1,5 +1,24 @@
 # Visual Release Log
 
+## VISUAL-013 — Merge et clôture du ticket de code
+
+- 2026-11-24 : PR #8 fusionnée dans `main`, merge commit `7bfddf9367521aa47bc7447bb1d740bf2ef211eb`; checks `audio-analysis` et `GitGuardian Security Checks` PASS sur le head `76f942c625dbe51a5df651685eda1a4566d7b368`.
+- L'utilisateur confirme en Logic que CC1 pilote la vitesse du Cue et que les valeurs 0/127 donnent les vitesses extrêmes. Le retour à CC1=0 quand le clavier intégré se ferme est documenté. Le test Logic neutre 64/save-reload et pluginval ne sont pas documentés comme exécutés.
+
+## VISUAL-014a — Spike d'accès frame / Metal
+
+Status: In progress. Branche: `codex/VISUAL-014a-metal-video-renderer`, créée depuis `main` après la fusion de VISUAL-013.
+
+- Inspection source : `AVSamplerEditor` utilise `juce::VideoComponent(false)`; le backend macOS JUCE encapsule `AVPlayerLayer` dans `NSViewComponent`.
+- Aucun `AVPlayerItemVideoOutput`, `CVPixelBuffer`, `CVMetalTexture` ou `MTLTexture` trouvé dans le chemin projet `Source/`/`CMakeLists.txt` ni dans le backend `juce_video` épinglé qui serait exposé au sampler.
+- Le nouveau composant macOS obtient les frames décodées par `AVPlayerItemVideoOutput`, les convertit en textures Metal via `CVMetalTextureCache` et les affiche avec `MTKView`. Ce sous-ticket ne contient aucun effet RGB ni paramètre MIDI.
+- Build Release de `AVSampler_AU`, `AVSamplerCoreTests`, `CueRoutingTests` et `TimelineMathTests` : PASS. CTest : 4/4 PASS. `git diff --check` : PASS.
+- pluginval : non exécuté; le binaire de `/Applications/pluginval.app` termine avec le code 134 sur `--help`, avant l'analyse.
+- Installation du build testée dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; l'ancien bundle a été sauvegardé sous `/private/tmp/AVSampler.component.pre-014a-20261124`. Le binaire installé correspond au build avant signature locale.
+- Le bundle généré a échoué la vérification stricte initiale de signature car il ne contient pas `Contents/Resources`; après signature ad hoc locale, la vérification passe. Malgré l'installation et le rescan du cache utilisateur (cache sauvegardé sous `/private/tmp/com.apple.audiounits.cache.pre-014a-20261124`), `auval -v aumu AVsm Vpoc` ne trouve toujours pas le composant. Cause de non-découverte non déterminée.
+- La procédure macOS versionnée utilise désormais `make install-avsampler-au` pour compiler et installer chaque build AV Sampler destiné à Logic; fermer Logic avant copie puis lancer le scan de l'hôte après installation.
+- 2026-11-24 : après rescan et relance de Logic, l'utilisateur confirme « tout fonctionne ». Cela valide manuellement la détection du nouvel AU, le rendu vidéo et, dans le contexte de la checklist, Cue Points, Loop et CC1. Le remplacement/rechargement de média n'a pas été détaillé séparément; aucune mesure chiffrée CPU/GPU ou latence n'a été faite.
+
 ## VISUAL-013 — Premier effet vidéo piloté par MIDI CC
 
 Date : 2026-11-23. Branche : `codex/VISUAL-013-midi-speed-cc`.

@@ -4,6 +4,7 @@
 #include "AVSamplerProcessor.h"
 #include "CueTimelineComponent.h"
 #include "SamplerUiComponents.h"
+#include "VideoFramePlayerComponent.h"
 
 class AVSamplerAudioProcessorEditor final : public juce::AudioProcessorEditor,
                                              private juce::Timer
@@ -24,7 +25,7 @@ private:
     void updateLoopButtonAppearance(bool enabled);
 
     AVSamplerAudioProcessor& audioProcessor;
-    juce::VideoComponent videoComponent { false };
+    VideoFramePlayerComponent videoComponent;
     CueTimelineComponent timelineComponent;
     FxControlBar fxControlBar;
     AssignedPadsComponent assignedPadsComponent;

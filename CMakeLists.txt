@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.22)
 
 project(AudioReactiveImagePOC VERSION 1.0.0 LANGUAGES C CXX)
 
+if(APPLE)
+    enable_language(OBJCXX)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -92,9 +96,13 @@ if(APPLE)
         PRIVATE
             Source/AVSamplerProcessor.cpp
             Source/AVSamplerEditor.cpp
+            Source/VideoFramePlayerComponent.mm
             Source/CueTimelineComponent.cpp
             Source/SamplerUiComponents.cpp
     )
+
+    set_source_files_properties(Source/VideoFramePlayerComponent.mm
+        PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
 
     target_compile_features(AVSampler PRIVATE cxx_std_17)
     target_compile_definitions(AVSampler
@@ -109,6 +117,10 @@ if(APPLE)
             juce::juce_audio_utils
             juce::juce_gui_extra
             juce::juce_video
+            "-framework Metal"
+            "-framework MetalKit"
+            "-framework AVFoundation"
+            "-framework CoreVideo"
         PUBLIC
             juce::juce_recommended_config_flags
             juce::juce_recommended_lto_flags

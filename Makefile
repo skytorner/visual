@@ -1,6 +1,6 @@
-# Developer shortcuts for the macOS AudioReactiveImagePOC POC.
+# Developer shortcuts for the macOS AudioReactiveImagePOC POC and AV Sampler.
 # `make` checks the pure C++ DSP tests and builds all JUCE plugin formats.
-# Keep DAW installation explicit: never overwrite an installed plugin on a build.
+# Keep DAW installation explicit: never overwrite an installed plugin on build alone.
 
 .DEFAULT_GOAL := all
 
@@ -13,10 +13,11 @@ TEST_BUILD_DIR ?= build-tests
 ARTIFACTS := $(BUILD_DIR)/AudioReactiveImagePOC_artefacts/$(BUILD_TYPE)
 AU_BUNDLE := $(ARTIFACTS)/AU/AudioReactiveImagePOC.component
 VST3_BUNDLE := $(ARTIFACTS)/VST3/AudioReactiveImagePOC.vst3
+AVSAMPLER_AU_BUNDLE := $(BUILD_DIR)/AVSampler_artefacts/$(BUILD_TYPE)/AU/AVSampler.component
 AU_INSTALL_DIR := $(HOME)/Library/Audio/Plug-Ins/Components
 VST3_INSTALL_DIR := $(HOME)/Library/Audio/Plug-Ins/VST3
 
-.PHONY: all check test plugin install install-au install-vst3 package status help
+.PHONY: all check test plugin install install-au install-vst3 install-avsampler-au package status help
 
 all: check
 
@@ -34,7 +35,7 @@ plugin:
 	$(CMAKE) --build "$(BUILD_DIR)" --config $(BUILD_TYPE)
 
 # Explicit installation: close Logic Pro / REAPER before using these targets.
-install: install-au install-vst3
+install: install-au install-vst3 install-avsampler-au
 
 install-au: plugin
 	@if [ "$$(uname -s)" != "Darwin" ]; then echo "install-au requires macOS"; exit 1; fi
@@ -50,6 +51,15 @@ install-vst3: plugin
 	@ditto "$(VST3_BUNDLE)" "$(VST3_INSTALL_DIR)/AudioReactiveImagePOC.vst3"
 	@echo "Installed VST3: $(VST3_INSTALL_DIR)/AudioReactiveImagePOC.vst3"
 
+install-avsampler-au: plugin
+	@if [ "$$(uname -s)" != "Darwin" ]; then echo "install-avsampler-au requires macOS"; exit 1; fi
+	@test -d "$(AVSAMPLER_AU_BUNDLE)" || { echo "AV Sampler AU bundle missing: $(AVSAMPLER_AU_BUNDLE)"; exit 1; }
+	@mkdir -p "$(AU_INSTALL_DIR)"
+	@ditto "$(AVSAMPLER_AU_BUNDLE)" "$(AU_INSTALL_DIR)/AVSampler.component"
+	@codesign --force --deep --sign - --timestamp=none "$(AU_INSTALL_DIR)/AVSampler.component"
+	@codesign --verify --deep --strict "$(AU_INSTALL_DIR)/AVSampler.component"
+	@echo "Installed AV Sampler AU: $(AU_INSTALL_DIR)/AVSampler.component"
+
 # Package for distribution, never as part of normal builds.
 package: plugin
 	@if [ "$$(uname -s)" != "Darwin" ]; then echo "package requires macOS"; exit 1; fi
@@ -64,9 +74,10 @@ help:
 	@echo "  make                Run C++ DSP tests and build JUCE plugin (AU/VST3/Standalone on macOS)"
 	@echo "  make test           Run DSP tests only (fast)"
 	@echo "  make plugin         Build plugin only (incremental)"
-	@echo "  make install        Build and install AU + VST3 to user plugin folders (close DAWs first)"
+	@echo "  make install        Build and install AudioReactive AU/VST3 plus AV Sampler AU (close DAWs first)"
 	@echo "  make install-au     Build and install AU only"
 	@echo "  make install-vst3   Build and install VST3 only"
+	@echo "  make install-avsampler-au  Build and install AV Sampler AU for Logic QA"
 	@echo "  make package        Build and create macOS ZIP in dist/"
 	@echo "  make status         Show branch and commit for QA logs"
 	@echo "  make help           Show these commands"

@@ -36,6 +36,8 @@ Logic Pro (piano roll / MIDI)
 - VISUAL-012 garde les responsabilités d'éditeur dans JUCE natif. `CueTimelineComponent` ne dessine plus les cartes de notes; `AssignedPadsComponent` lit le même `ProjectState` et sélectionne le même index sans envoyer de NoteOn ni seek. `FxControlBar` est une vue sans callback ou propriété moteur. `SamplerIconButton` ne commande que Play/Pause, Loop et Eject. Le composant vidéo JUCE centre la taille native dans son rectangle avec `RectanglePlacement::centred`, sans étirement.
 - Eject ferme le `VideoComponent` et vide seulement `videoPath`. Cue positions, Loop, playback demandé et Cue sélectionné sont inchangés; remplacer ou relier un média garde le comportement de VISUAL-011.
 - VISUAL-013 ajoute CC1 comme contrôle fixe de Speed. `processBlock()` met à jour un atomique (aucun accès UI ou vidéo); le timer éditeur applique la vitesse via `VideoComponent::setPlaySpeed()` sur le thread message et l'état CC est inclus dans `ProjectState`. La vitesse est également posée après chargement asynchrone du média.
+- Inspection VISUAL-014 : AV Sampler utilise `juce::VideoComponent(false)`. Sur macOS, JUCE encapsule le lecteur dans un `NSViewComponent` et affiche par `AVPlayerLayer`; l'API publique de `VideoComponent` n'expose que transport, durée/taille, position, vitesse et volume. Le module JUCE épinglé ne fournit pas à AV Sampler un flux de CVPixelBuffer/texture, et le projet n'a pas de pipeline Metal existant. RGB Split requiert donc un chemin d'images explicite, pas un shader posé sur la vue actuelle.
+- VISUAL-014a doit établir l'accès aux frames AVFoundation et leur présentation Metal dans un composant JUCE macOS, en gardant transport et session. VISUAL-014b ajoutera seulement ensuite le shader RGB et son enveloppe de vélocité. Aucun frame processing GPU/CPU n'est ajouté dans `processBlock()`.
 
 ## Plugin audio existant
 
@@ -60,4 +62,4 @@ DAW (effet audio) -> processBlock() -> RMS / Peak / Envelope -> atomics
 
 ## Évolutions hors Phase 1
 
-Timeline 16 pads, mapping éditable/MIDI Learn, autres CC, vélocité et comportements Hold/Toggle/One Shot restent hors scope. Speed utilise le CC1 fixe de VISUAL-013; ne pas introduire d'architecture générique avant un besoin concret.
+Timeline 16 pads, mapping éditable/MIDI Learn, vélocité hors RGB Split et comportements Hold/Toggle/One Shot restent hors scope. Speed utilise le CC1 fixe de VISUAL-013; le RGB Split velocity dépend de la preuve de rendu VISUAL-014a avant son implémentation.
