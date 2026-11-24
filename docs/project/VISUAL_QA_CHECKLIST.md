@@ -184,7 +184,7 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | Publication atomique NoteOn et exclusion NoteOff / vélocité 0 / note non assignée | PASS tests + inspection | `AVSamplerCoreTests` confirme la vélocité du cue; le traitement reste dans les atomiques existants, sans appel renderer dans `processBlock()`. |
 | Persistance du toggle et compatibilité session historique | PASS automatisé | `AVSamplerCoreTests`: activation restaurée et propriété absente par défaut désactivée. |
 | Build et installation AU macOS | PASS build/install | Build Release local; CTest 5/5; AU installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; signature vérifiée. Exécutable installé après signature ad hoc SHA-256 `7f95d72f9054668f0d035d0fd90f6c107683831dd806d59d679c2e962afaba13`. |
-| Validation utilisateur dans Logic | EN ATTENTE | Frappes faibles/fortes, durée identique, retour à l'image normale, toggle et save/reload. |
+| Validation utilisateur dans Logic | PASS manuel rapporté | Après installation du build identifié ci-dessus, l'utilisateur confirme que Flash fonctionne parfaitement et que tous les essais sont concluants. |
 | Disponibilité VST3 Windows | Non disponible | L'UI doit signaler que Flash n'est pas porté au renderer Windows. |
 
 ## VISUAL-012 — Composition UI et pads assignés
