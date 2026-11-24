@@ -113,6 +113,12 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
         audioProcessor.setRgbSplitEnabled(enabled);
         videoComponent.setRgbSplitEnabled(enabled);
     };
+    fxControlBar.onFlashEnabledChanged = [this](bool enabled)
+    {
+        displayedFlashEnabled = enabled;
+        audioProcessor.setFlashEnabled(enabled);
+        videoComponent.setFlashEnabled(enabled);
+    };
 
     titleLabel.setText("AV SAMPLER", juce::dontSendNotification);
     titleLabel.setFont(juce::FontOptions(16.0f).withStyle("Bold"));
@@ -135,10 +141,14 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     displayedLoopState = state.loopEnabled;
     displayedPlaybackRequested = state.playbackRequested;
     displayedRgbSplitEnabled = state.rgbSplitEnabled;
-    lastSeenRgbSplitTrigger = audioProcessor.getLatestRgbSplitTrigger();
+    displayedFlashEnabled = state.flashEnabled;
+    lastSeenCueEffectTrigger = audioProcessor.getLatestCueEffectTrigger();
     fxControlBar.setRgbSplitAvailable(videoComponent.isRgbSplitAvailable());
+    fxControlBar.setFlashAvailable(videoComponent.isFlashAvailable());
     fxControlBar.setRgbSplitEnabled(displayedRgbSplitEnabled);
+    fxControlBar.setFlashEnabled(displayedFlashEnabled);
     videoComponent.setRgbSplitEnabled(displayedRgbSplitEnabled);
+    videoComponent.setFlashEnabled(displayedFlashEnabled);
     fxControlBar.setSpeedMultiplier(
         avsampler::videoSpeedMultiplierForControllerValue(state.speedMidiCcValue));
     updateLoopButtonAppearance(displayedLoopState);
@@ -219,15 +229,25 @@ void AVSamplerAudioProcessorEditor::timerCallback()
         videoComponent.setRgbSplitEnabled(displayedRgbSplitEnabled);
     }
 
-    const auto rgbSplitTrigger = audioProcessor.getLatestRgbSplitTrigger();
-    if (rgbSplitTrigger != lastSeenRgbSplitTrigger)
+    if (state.flashEnabled != displayedFlashEnabled)
     {
-        lastSeenRgbSplitTrigger = rgbSplitTrigger;
-        const auto velocity = static_cast<int>(rgbSplitTrigger & 0xffu);
-        if (videoComponent.isRgbSplitAvailable() && displayedRgbSplitEnabled && velocity > 0)
+        displayedFlashEnabled = state.flashEnabled;
+        fxControlBar.setFlashEnabled(displayedFlashEnabled);
+        videoComponent.setFlashEnabled(displayedFlashEnabled);
+    }
+
+    const auto cueEffectTrigger = audioProcessor.getLatestCueEffectTrigger();
+    if (cueEffectTrigger != lastSeenCueEffectTrigger)
+    {
+        lastSeenCueEffectTrigger = cueEffectTrigger;
+        const auto velocity = static_cast<int>(cueEffectTrigger & 0xffu);
+        if (velocity > 0)
         {
             fxControlBar.setLastMidiVelocity(velocity);
-            videoComponent.triggerRgbSplitVelocity(velocity);
+            if (videoComponent.isRgbSplitAvailable() && displayedRgbSplitEnabled)
+                videoComponent.triggerRgbSplitVelocity(velocity);
+            if (videoComponent.isFlashAvailable() && displayedFlashEnabled)
+                videoComponent.triggerFlashVelocity(velocity);
         }
     }
 

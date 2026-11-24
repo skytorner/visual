@@ -23,6 +23,7 @@ int main()
     using avsampler::videoEffects::rgbSplitEnvelopeForElapsedSeconds;
     using avsampler::videoEffects::rgbSplitIntensityForVelocity;
     using avsampler::videoEffects::rgbSplitMaximumOffsetUv;
+    using avsampler::videoEffects::flashWhiteMixForVelocityAndElapsedSeconds;
 
     if (! check(rgbSplitIntensityForVelocity(0) == 0.0f, "Velocity 0 must not trigger RGB Split"))
         return 1;
@@ -59,6 +60,22 @@ int main()
     if (! check(rgbSplitMaximumOffsetUv(1.0f, 0.0) == 0.0, "Envelope end must restore the original image"))
         return 1;
 
-    std::cout << "RGB Split velocity mapping and envelope tests passed\n";
+    if (! check(flashWhiteMixForVelocityAndElapsedSeconds(0, 0.005) == 0.0,
+                "Velocity 0 must not trigger Flash"))
+        return 1;
+    if (! check(flashWhiteMixForVelocityAndElapsedSeconds(1, 0.005) == 0.0,
+                "Velocity 1 must map to zero Flash intensity"))
+        return 1;
+    if (! check(near(flashWhiteMixForVelocityAndElapsedSeconds(64, 0.005), 0.325),
+                "Flash intensity must scale with velocity"))
+        return 1;
+    if (! check(near(flashWhiteMixForVelocityAndElapsedSeconds(127, 0.005), 0.65),
+                "Maximum velocity must reach the bounded white mix"))
+        return 1;
+    if (! check(flashWhiteMixForVelocityAndElapsedSeconds(127, 0.225) == 0.0,
+                "Flash envelope must return to the original frame"))
+        return 1;
+
+    std::cout << "Video effect velocity mapping and envelope tests passed\n";
     return 0;
 }

@@ -26,6 +26,7 @@ Le plugin `AudioReactiveImagePOC` conserve l'analyse RMS/peak/envelope, le passt
 - Référence vidéo sauvegardée dans le projet hôte; les pixels ne sont pas incorporés. L'utilisateur confirme dans Logic le relink après déplacement du média avec conservation des Cue timings et du Loop; refaire sur l'artefact candidat de distribution.
 - CC1 mappé sur 0,5×–1,5×. L'utilisateur confirme dans Logic la valeur neutre 64 et sa restauration après save/reload, en plus des extrêmes 0/127; refaire sur l'artefact candidat de distribution.
 - RGB Split déclenché par la vélocité MIDI avec activation sauvegardée. L'utilisateur confirme l'effet et une lecture fluide en boucle.
+- Flash v1 est déclenché par NoteOn des cues sur le renderer Metal macOS; la vélocité règle l'intensité, avec une enveloppe fixe de 5/40/180 ms. Son activation est sauvegardée et désactivée par défaut pour préserver les anciennes sessions. Pas encore disponible sur Windows.
 
 ## Produit et phases de distribution
 

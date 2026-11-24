@@ -18,6 +18,7 @@ public:
         bool loopEnabled = false;
         bool playbackRequested = true;
         bool rgbSplitEnabled = true;
+        bool flashEnabled = false;
         int selectedCueIndex = 0;
         int speedMidiCcValue = avsampler::defaultVideoSpeedControllerValue;
     };
@@ -54,16 +55,17 @@ public:
     void setLoopEnabled(bool shouldLoop);
     void setPlaybackRequested(bool shouldPlay);
     void setRgbSplitEnabled(bool shouldEnable);
+    void setFlashEnabled(bool shouldEnable);
     void setSelectedCueIndex(int cueIndex);
     int consumePendingCue() noexcept;
-    std::uint32_t getLatestRgbSplitTrigger() const noexcept;
+    std::uint32_t getLatestCueEffectTrigger() const noexcept;
 
 private:
     mutable juce::CriticalSection projectStateLock;
     ProjectState projectState;
     std::atomic<int> pendingCueIndex { -1 };
     std::atomic<int> speedMidiCcValue { avsampler::defaultVideoSpeedControllerValue };
-    std::atomic<std::uint32_t> latestRgbSplitTrigger { 0 };
+    std::atomic<std::uint32_t> latestCueEffectTrigger { 0 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AVSamplerAudioProcessor)
 };

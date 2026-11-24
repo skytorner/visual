@@ -29,9 +29,9 @@ int main()
     processor.processBlock(audio, midi);
     if (! check(processor.consumePendingCue() == 1, "NoteOn/last Cue priority failed"))
         return 1;
-    const auto firstRgbSplitTrigger = processor.getLatestRgbSplitTrigger();
-    if (! check((firstRgbSplitTrigger & 0xffu) == 100u,
-                "Latest mapped NoteOn velocity was not published for RGB Split"))
+    const auto firstCueEffectTrigger = processor.getLatestCueEffectTrigger();
+    if (! check((firstCueEffectTrigger & 0xffu) == 100u,
+                "Latest mapped NoteOn velocity was not published for video effects"))
         return 1;
 
     for (int channel = 0; channel < audio.getNumChannels(); ++channel)
@@ -46,8 +46,8 @@ int main()
     processor.processBlock(audio, midi);
     if (! check(processor.consumePendingCue() == -1, "NoteOff/unassigned note triggered a Cue"))
         return 1;
-    if (! check(processor.getLatestRgbSplitTrigger() == firstRgbSplitTrigger,
-                "NoteOff, velocity-zero NoteOn, or unassigned note triggered RGB Split"))
+    if (! check(processor.getLatestCueEffectTrigger() == firstCueEffectTrigger,
+                "NoteOff, velocity-zero NoteOn, or unassigned note triggered a video effect"))
         return 1;
 
     if (! check(processor.getProjectState().speedMidiCcValue == 100,
@@ -62,6 +62,7 @@ int main()
     processor.setLoopEnabled(true);
     processor.setPlaybackRequested(false);
     processor.setRgbSplitEnabled(false);
+    processor.setFlashEnabled(true);
     processor.setSelectedCueIndex(2);
 
     juce::MemoryBlock savedState;
@@ -77,6 +78,8 @@ int main()
     if (! check(! state.playbackRequested, "Paused playback state did not restore"))
         return 1;
     if (! check(! state.rgbSplitEnabled, "RGB Split enabled state did not restore"))
+        return 1;
+    if (! check(state.flashEnabled, "Flash enabled state did not restore"))
         return 1;
     if (! check(state.selectedCueIndex == 2, "Selected Cue did not restore"))
         return 1;
@@ -136,6 +139,9 @@ int main()
         return 1;
     if (! check(legacyProjectState.rgbSplitEnabled,
                 "Legacy session did not default RGB Split to enabled"))
+        return 1;
+    if (! check(! legacyProjectState.flashEnabled,
+                "Legacy session unexpectedly enabled the new Flash effect"))
         return 1;
 
     std::cout << "AV Sampler MIDI processing, speed CC, and state tests passed\n";
