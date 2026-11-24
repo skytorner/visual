@@ -29,7 +29,7 @@ Le plugin `AudioReactiveImagePOC` conserve l'analyse RMS/peak/envelope, le passt
 
 ## Produit et phases de distribution
 
-Le dépôt est en phase **Internal / Dev**. La Closed Alpha 1 vise une cohorte contrôlée de 3 à 5 utilisateurs, avec un parcours macOS/Logic et un parcours Windows/REAPER. Elle attend la qualification du VST3 Windows et de son backend vidéo, puis deux packages installables sans environnement de compilation, leurs instructions de mise à jour/suppression, leur provenance et les matrices système/codecs.
+Le dépôt est en phase **Internal / Dev**. Le build Windows x64/VST3 est automatisé afin que le processus de création soit en place, mais le développement continue d'abord sur macOS/Logic. La qualification Windows/REAPER, la parité vidéo et les packages bi-plateformes seront repris quand le périmètre fonctionnel macOS sera stabilisé. La Closed Alpha 1 vise ensuite une cohorte contrôlée de 3 à 5 utilisateurs et reste bloquée par les deux parcours hôtes qualifiés, les packages installables sans environnement de compilation, leurs instructions de mise à jour/suppression, leur provenance et les matrices système/codecs.
 
 ### Closed Alpha 1 — périmètre proposé
 
@@ -66,7 +66,7 @@ Polyphonie vidéo, plusieurs lecteurs, moteur 3D, export vidéo, séquenceur MID
 
 Utilisateur initial : beatmaker/producteur sur macOS, notamment Logic Pro. Premier succès : programmer quatre notes dans une région MIDI et rejouer la performance visuelle correspondante.
 
-Distribution ciblée : prototype interne AU macOS/Logic -> prototype Windows VST3/REAPER -> deux packages Closed Alpha 1 contrôlés -> Closed Alpha 2 -> Closed Beta -> qualification progressive d'autres DAW.
+Ordre de travail et distribution : développement fonctionnel AU macOS/Logic -> QA hôte et parité Windows VST3/REAPER -> deux packages Closed Alpha 1 contrôlés -> Closed Alpha 2 -> Closed Beta -> qualification progressive d'autres DAW. Le workflow Windows x64 de compilation et d'artefact QA est déjà en place; il ne vaut pas qualification Windows.
 
 ## Média
 

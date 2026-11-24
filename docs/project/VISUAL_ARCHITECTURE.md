@@ -7,7 +7,7 @@ Cadrage : 2026-11-24. `AVSampler` est un instrument vidéo MIDI JUCE natif. `Aud
 - JUCE 8.0.8, C++17 et CMake.
 - `AudioReactiveImagePOC` conserve ses identifiants, paramètres, formats et état historiques.
 - AV Sampler garde sa propre identité de plugin. Le prototype ajoute les formats AU + VST3 sur macOS et VST3 sur Windows; seul l'AU macOS dans Logic est actuellement qualifié.
-- Interface JUCE native. Le renderer macOS utilise AVFoundation et Metal/MetalKit. Le prototype Windows enveloppe `juce::VideoComponent` pour lecture/transport; la construction Windows et l'hôte REAPER restent à vérifier. Cette vue ne donne pas accès aux frames pour RGB Split, donc l'effet est signalé indisponible sur ce prototype.
+- Interface JUCE native. Le renderer macOS utilise AVFoundation et Metal/MetalKit. Le prototype Windows enveloppe `juce::VideoComponent` pour lecture/transport; son build x64 passe dans GitHub Actions (run `45435924725`), mais le chargement et le comportement en hôte REAPER restent non testés et sont reportés après stabilisation de macOS. Cette vue ne donne pas accès aux frames pour RGB Split, donc l'effet est signalé indisponible sur ce prototype.
 
 ## Flux actuel AV Sampler
 
@@ -65,7 +65,7 @@ DAW (effet audio) -> PluginProcessor::processBlock() -> RMS/Peak/Envelope -> ato
 ## Invariants et qualification restant à faire
 
 1. Aucun mutex, I/O, décodage, seek bloquant, allocation dynamique ou appel UI dans `processBlock()`.
-2. Le seul parcours actuellement qualifié dans un hôte reste l'AU macOS dans Logic. Le VST3 Windows compile maintenant en CI (run `45435924725`); son chargement/transport MIDI doit encore être validé dans REAPER.
+2. Le seul parcours actuellement qualifié dans un hôte reste l'AU macOS dans Logic. Le pipeline compile le VST3 Windows en CI (run `45435924725`); cela ne valide pas son chargement/transport MIDI dans REAPER, QA reportée après stabilisation des fonctions macOS.
 3. Le projet hôte conserve les paramètres/session; le fichier vidéo demeure externe.
 4. Un média absent ou illisible doit rester récupérable sans crash; valider relink/remplacement dans la version candidate de distribution.
 5. Ne pas modifier l'identité ni l'état du POC audio.

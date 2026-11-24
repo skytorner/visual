@@ -92,6 +92,7 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 - Build local macOS Release: `AVSampler_AU` et `AVSampler_VST3` PASS depuis JUCE 8.0.8; seulement des warnings JUCE/SDK (Metal déprécié, enum AppKit); signature ad hoc ajoutée par JUCE au VST3 généré.
 - GitHub Actions Windows x64: run `45435924725`, configure + compile `AVSampler_VST3` PASS. Artefact de QA `AVSampler-Windows-VST3-7dbc2e3cfb1897762286dbc00bb73fb781b6c304`; SHA256 ZIP `4450ceddcef0f67ee92244b248a5df55755b42dab194896b069ae22f86451037`. Le fichier `AVSampler-windows-build-info.txt` inclus donne le SHA source et l'empreinte du binaire.
 - Aucune validation manuelle REAPER/Windows ni pluginval Windows n'est rapportée. L'artefact est un build de QA, pas un package d'alpha distribuable.
+- Décision de séquencement du 2026-11-24 : l'utilisateur veut le processus de création VST3 Windows en place, puis continuer le développement sur Mac. Les essais REAPER/Windows et la parité sont reportés jusqu'à stabilisation du périmètre fonctionnel macOS; aucun test Windows manuel n'est demandé maintenant.
 
 ## Initial Setup
 

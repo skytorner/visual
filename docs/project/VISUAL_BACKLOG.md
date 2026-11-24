@@ -90,7 +90,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 - **Phase 2b — Session et médias:** VISUAL-011 organise les contrôles de session/média, restaure les états de lecture/Loop et facilite le relink sans déplacer les Cue Points.
 - **Phase 2c — Composition de l'instrument:** VISUAL-012 réorganise les commandes, l'aperçu, la timeline, les emplacements FX inactifs et les quatre pads déjà assignés.
 - **Terminé sur main:** timeline/session/média/UI VISUAL-010 à 012; Speed CC1 VISUAL-013; renderer Metal et RGB Split VISUAL-014a/b.
-- **Prochain jalon:** VISUAL-015 est terminé. VISUAL-016 établit un premier parcours Windows/VST3 dans REAPER, en gardant macOS/AU/Logic comme référence fonctionnelle.
+- **Prochain jalon:** VISUAL-015 est terminé et VISUAL-016 met en place le build Windows/VST3 en CI. Continuer les fonctionnalités d'abord sur macOS/AU/Logic; la validation dans REAPER et la parité Windows seront reprises quand ce périmètre macOS sera stabilisé.
 - La première cohorte Alpha attend le préflight des deux plateformes. 16 pads, MIDI Learn, mapping éditable, nouveaux effets et modes de pad restent ultérieurs.
 - VISUAL-004 à VISUAL-007 restent des tickets de maintenance du plugin audio historique, priorité secondaire.
 
@@ -190,18 +190,18 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 - Acceptance: README présente AV Sampler en premier et distingue le POC audio; docs indiquent les formats/hôtes réellement qualifiés; matrice sépare preuves automatiques/manuelles et NOT TESTED; audit packaging conclut explicitement GO/NO-GO; prochaines actions alpha sont des tickets séparés; branches/worktrees sont signalés sans suppression automatique.
 - Exclusions: changement de code runtime, fabrication de package, publication, merge/push et suppression de branches.
 
-### VISUAL-016 — Vertical slice Windows / VST3 / REAPER
+### VISUAL-016 — Processus de build Windows / VST3
 
-- Status: In progress — branche `codex/VISUAL-016-dual-platform-preflight`; cible CMake VST3 Windows, wrapper JUCE VideoComponent et build AU/VST3 macOS ajoutés. Build Windows x64 PASS en CI (run `45435924725`); validation REAPER réelle restante.
-- Priority: P0 avant de distribuer l'alpha, car la majorité des testeurs potentiels est attendue sur Windows.
-- Scope: sortir AV Sampler du garde `APPLE` dans CMake sans changer l'identité ni le comportement de l'AU Mac; créer un backend vidéo Windows; établir si JUCE `VideoComponent` suffit pour le parcours de base et comment donner accès aux frames pour RGB Split; produire un VST3 Windows.
-- Acceptance: build Windows x64; le VST3 se charge dans REAPER; vidéo locale ouvre/joue/pause/seek; notes 36/38/40/41 déclenchent les cues; loop, CC1 Speed et persistance de session vérifiés; voie de rendu pour RGB Split décidée et écart de parité documenté; résultats validés sur un vrai hôte Windows, pas seulement compilés sur Mac.
-- Exclusions: package de cohorte, wizard, publication, prise en charge d'autres DAW/Windows ARM et promesse de codec universelle.
+- Status: Done pour le processus de build — branche `codex/VISUAL-016-dual-platform-preflight`; cible CMake VST3 Windows, wrapper JUCE VideoComponent et workflow GitHub Actions x64 ajoutés. Build Windows x64 et artefact QA PASS en CI (run `45435924725`). Le renderer Windows est un prototype compilable; son comportement en hôte est volontairement reporté.
+- Priority: P0 avant toute qualification ou distribution Windows.
+- Scope: préserver le comportement AU macOS, permettre la compilation AV Sampler en VST3 Windows, et automatiser un build x64 avec SHA source/binaire identifiables.
+- Acceptance: workflow Windows x64 compile `AVSampler_VST3`; l'artefact QA fournit la provenance source et binaire; compilation macOS AU/VST3 conservée; écarts connus du prototype Windows documentés.
+- Exclusions: test REAPER/utilisateur, parité RGB Split, package de cohorte, wizard, publication, Windows ARM et promesse de codec universelle. Ces points suivent dans VISUAL-017 après stabilisation des fonctionnalités macOS.
 
-### VISUAL-017 — Parité dual-platform et Closed Alpha 1
+### VISUAL-017 — Qualification Windows et préparation Closed Alpha 1
 
-- Status: Open — démarre après le vertical slice Windows et l'évaluation de son renderer.
+- Status: Deferred — démarrera après stabilisation du périmètre fonctionnel macOS. La compilation Windows est déjà automatisée; aucun test Windows n'est demandé pour l'instant.
 - Priority: P0 pour une cohorte macOS/Windows.
-- Scope: fermer les écarts de parité Mac/Windows, établir formats vidéo et exigences système pris en charge, puis fabriquer deux archives identifiées par SHA avec instructions d'installation/mise à jour/désinstallation et guide de feedback pour 3–5 testeurs.
+- Scope: valider le VST3 dans REAPER sur Windows, qualifier lecture/transport/MIDI/session et codecs, décider puis combler les écarts de rendu (dont RGB Split), établir les exigences système, puis fabriquer deux archives identifiées par SHA avec instructions d'installation/mise à jour/désinstallation et guide de feedback pour 3–5 testeurs.
 - Acceptance: Logic/AU sur Mac et REAPER/VST3 sur Windows vérifiés sur leurs artefacts exacts; vidéo/Cues/Loop, CC1, RGB Split, save/reopen et relink testés; pluginval effectué sur chaque artefact; versions, SHA, installation propre et limites documentés; aucune publication publique.
 - QA restante déjà identifiée côté Mac: CC1=64 avec save/reopen, relink après déplacement média, puis pluginval strictness 4 sur l'artefact exact; strictness 5 n'est pas rapporté.
