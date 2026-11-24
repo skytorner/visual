@@ -121,6 +121,7 @@ if(APPLE)
             "-framework MetalKit"
             "-framework AVFoundation"
             "-framework CoreVideo"
+            "-framework QuartzCore"
         PUBLIC
             juce::juce_recommended_config_flags
             juce::juce_recommended_lto_flags
@@ -139,6 +140,11 @@ if(BUILD_TESTING)
     target_include_directories(TimelineMathTests PRIVATE Source)
     target_compile_features(TimelineMathTests PRIVATE cxx_std_17)
     add_test(NAME TimelineMathTests COMMAND TimelineMathTests)
+
+    add_executable(VideoEffectMathTests tests/VideoEffectMathTests.cpp)
+    target_include_directories(VideoEffectMathTests PRIVATE Source)
+    target_compile_features(VideoEffectMathTests PRIVATE cxx_std_17)
+    add_test(NAME VideoEffectMathTests COMMAND VideoEffectMathTests)
 
     if(APPLE)
         add_executable(AudioReactiveImageProcessorTests tests/AudioReactiveImageProcessorTests.cpp)

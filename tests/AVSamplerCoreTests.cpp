@@ -29,6 +29,10 @@ int main()
     processor.processBlock(audio, midi);
     if (! check(processor.consumePendingCue() == 1, "NoteOn/last Cue priority failed"))
         return 1;
+    const auto firstRgbSplitTrigger = processor.getLatestRgbSplitTrigger();
+    if (! check((firstRgbSplitTrigger & 0xffu) == 100u,
+                "Latest mapped NoteOn velocity was not published for RGB Split"))
+        return 1;
 
     for (int channel = 0; channel < audio.getNumChannels(); ++channel)
         for (int sample = 0; sample < audio.getNumSamples(); ++sample)
@@ -38,8 +42,12 @@ int main()
     midi.clear();
     midi.addEvent(juce::MidiMessage::noteOff(1, 36), 0);
     midi.addEvent(juce::MidiMessage::noteOn(1, 37, static_cast<juce::uint8>(100)), 4);
+    midi.addEvent(juce::MidiMessage::noteOn(1, 38, static_cast<juce::uint8>(0)), 8);
     processor.processBlock(audio, midi);
     if (! check(processor.consumePendingCue() == -1, "NoteOff/unassigned note triggered a Cue"))
+        return 1;
+    if (! check(processor.getLatestRgbSplitTrigger() == firstRgbSplitTrigger,
+                "NoteOff, velocity-zero NoteOn, or unassigned note triggered RGB Split"))
         return 1;
 
     if (! check(processor.getProjectState().speedMidiCcValue == 100,
@@ -53,6 +61,7 @@ int main()
     processor.setCuePosition(3, 8.0);
     processor.setLoopEnabled(true);
     processor.setPlaybackRequested(false);
+    processor.setRgbSplitEnabled(false);
     processor.setSelectedCueIndex(2);
 
     juce::MemoryBlock savedState;
@@ -66,6 +75,8 @@ int main()
     if (! check(state.loopEnabled, "Loop setting did not restore"))
         return 1;
     if (! check(! state.playbackRequested, "Paused playback state did not restore"))
+        return 1;
+    if (! check(! state.rgbSplitEnabled, "RGB Split enabled state did not restore"))
         return 1;
     if (! check(state.selectedCueIndex == 2, "Selected Cue did not restore"))
         return 1;
@@ -122,6 +133,9 @@ int main()
         return 1;
     if (! check(legacyProjectState.speedMidiCcValue == avsampler::defaultVideoSpeedControllerValue,
                 "Legacy session did not default video speed to 1x"))
+        return 1;
+    if (! check(legacyProjectState.rgbSplitEnabled,
+                "Legacy session did not default RGB Split to enabled"))
         return 1;
 
     std::cout << "AV Sampler MIDI processing, speed CC, and state tests passed\n";

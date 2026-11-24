@@ -106,6 +106,24 @@ void SamplerIconButton::paintButton(juce::Graphics& graphics, bool isMouseOver, 
     }
 }
 
+FxControlBar::FxControlBar()
+{
+    rgbSplitButton.setClickingTogglesState(true);
+    rgbSplitButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff20252d));
+    rgbSplitButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff41305a));
+    rgbSplitButton.setColour(juce::TextButton::textColourOffId, juce::Colour(0xffd4dbe7));
+    rgbSplitButton.setColour(juce::TextButton::textColourOnId, juce::Colour(0xffefddff));
+    rgbSplitButton.setTooltip("Toggle RGB Split triggered by MIDI note velocity");
+    rgbSplitButton.onClick = [this]
+    {
+        setRgbSplitEnabled(rgbSplitButton.getToggleState());
+        if (onRgbSplitEnabledChanged)
+            onRgbSplitEnabledChanged(rgbSplitEnabled);
+    };
+    addAndMakeVisible(rgbSplitButton);
+    setRgbSplitEnabled(true);
+}
+
 void FxControlBar::setSpeedMultiplier(double multiplier)
 {
     const auto clampedMultiplier = juce::jlimit(0.5, 1.5, multiplier);
@@ -114,6 +132,35 @@ void FxControlBar::setSpeedMultiplier(double multiplier)
 
     speedMultiplier = clampedMultiplier;
     repaint();
+}
+
+void FxControlBar::setRgbSplitEnabled(bool enabled)
+{
+    rgbSplitEnabled = enabled;
+    rgbSplitButton.setToggleState(enabled, juce::dontSendNotification);
+    repaint();
+}
+
+void FxControlBar::setLastMidiVelocity(int velocity)
+{
+    const auto clampedVelocity = juce::jlimit(0, 127, velocity);
+    if (lastMidiVelocity == clampedVelocity)
+        return;
+
+    lastMidiVelocity = clampedVelocity;
+    repaint();
+}
+
+void FxControlBar::resized()
+{
+    auto placeholders = getLocalBounds().toFloat().reduced(10.0f, 8.0f);
+    placeholders.removeFromLeft(112.0f);
+    constexpr auto cellCount = 4;
+    const auto cellWidth = placeholders.getWidth() / static_cast<float>(cellCount);
+    auto rgbCell = placeholders.withX(placeholders.getX() + cellWidth * 2.0f)
+        .withWidth(cellWidth).reduced(3.0f, 0.0f);
+    rgbSplitButton.setBounds(rgbCell.withY(rgbCell.getY() + 3.0f)
+        .withHeight(29.0f).toNearestInt());
 }
 
 void FxControlBar::paint(juce::Graphics& graphics)
@@ -131,17 +178,39 @@ void FxControlBar::paint(juce::Graphics& graphics)
 
     auto placeholders = bounds.reduced(10.0f, 8.0f);
     placeholders.removeFromLeft(112.0f);
-    constexpr std::array<const char*, 4> names { "LEVEL", "SPEED", "COLOR", "GLITCH" };
+    constexpr std::array<const char*, 4> names { "LEVEL", "SPEED", "RGB SPLIT", "GLITCH" };
     const auto cellWidth = placeholders.getWidth() / static_cast<float>(names.size());
     for (int i = 0; i < static_cast<int>(names.size()); ++i)
     {
         auto cell = placeholders.withX(placeholders.getX() + cellWidth * static_cast<float>(i))
             .withWidth(cellWidth).reduced(3.0f, 0.0f);
         const auto isSpeedControl = i == 1;
-        graphics.setColour(isSpeedControl ? juce::Colour(0xff1e2d39) : juce::Colour(0xff20252d));
+        const auto isRgbSplitControl = i == 2;
+        graphics.setColour(isSpeedControl ? juce::Colour(0xff1e2d39)
+            : isRgbSplitControl && rgbSplitEnabled ? juce::Colour(0xff292339)
+            : juce::Colour(0xff20252d));
         graphics.fillRoundedRectangle(cell, 5.0f);
-        graphics.setColour(isSpeedControl ? juce::Colour(0xff3bd5df) : juce::Colour(0xff3a414c));
+        graphics.setColour(isSpeedControl ? juce::Colour(0xff3bd5df)
+            : isRgbSplitControl && rgbSplitEnabled ? juce::Colour(0xffb676f4)
+            : juce::Colour(0xff3a414c));
         graphics.drawRoundedRectangle(cell, 5.0f, 1.0f);
+        if (isRgbSplitControl)
+        {
+            graphics.setColour(rgbSplitEnabled ? juce::Colour(0xffd9c0fb)
+                                                : juce::Colour(0xff8793a6));
+            graphics.setFont(9.0f);
+            const auto velocityText = lastMidiVelocity > 0
+                ? "VELOCITY " + juce::String(lastMidiVelocity) : juce::String("VELOCITY");
+            graphics.drawFittedText(velocityText,
+                cell.withY(cell.getY() + 39.0f).withHeight(13.0f).toNearestInt(),
+                juce::Justification::centred, 1);
+            graphics.setColour(juce::Colour(0xffa98cc8));
+            graphics.setFont(8.0f);
+            graphics.drawFittedText(rgbSplitEnabled ? "MIDI NOTE ON" : "DISABLED",
+                cell.withY(cell.getY() + 51.0f).withHeight(11.0f).toNearestInt(),
+                juce::Justification::centred, 1);
+            continue;
+        }
         graphics.setColour(juce::Colour(0xff8b96a6));
         graphics.setFont(juce::FontOptions(10.0f).withStyle("Bold"));
         graphics.drawFittedText(names[static_cast<std::size_t>(i)],

@@ -171,7 +171,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 #### VISUAL-014b — RGB Split avec enveloppe de vélocité
 
-- Status: Open — le chemin de rendu est validé manuellement dans Logic; implémentation autorisée sur une nouvelle branche.
+- Status: In progress — `codex/VISUAL-014b-rgb-split-velocity`; implémentation et build installé pour QA Logic.
 - Scope: vitesse indépendante sur CC1; vélocité NoteOn 1–127 pilote l'amplitude du décalage RGB, note velocity 0/NoteOff ignorée; rouge à droite, bleu à gauche, vert centré; enveloppe attack/hold/release et retrigger.
 - Initial values: vélocité normalisée `(velocity - 1) / 126`, amplitude max proposée 1,5 % de la largeur, Attack 0–10 ms, Hold 40 ms, Release 180 ms; clamp aux bords pour éviter le noir.
 - Acceptance: frappes faibles/fortes donnent un Split faible/fort, l'effet revient au neutre et se retrigger; cues/loop/CC1/save-reload inchangés; désactivation rétablit l'image originale; anciennes sessions sans état RGB sont compatibles.

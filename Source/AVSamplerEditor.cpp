@@ -107,6 +107,12 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
         audioProcessor.setSelectedCueIndex(cueIndex);
         timelineComponent.setSelectedCue(cueIndex);
     };
+    fxControlBar.onRgbSplitEnabledChanged = [this](bool enabled)
+    {
+        displayedRgbSplitEnabled = enabled;
+        audioProcessor.setRgbSplitEnabled(enabled);
+        videoComponent.setRgbSplitEnabled(enabled);
+    };
 
     titleLabel.setText("AV SAMPLER", juce::dontSendNotification);
     titleLabel.setFont(juce::FontOptions(16.0f).withStyle("Bold"));
@@ -128,6 +134,10 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     const auto state = audioProcessor.getProjectState();
     displayedLoopState = state.loopEnabled;
     displayedPlaybackRequested = state.playbackRequested;
+    displayedRgbSplitEnabled = state.rgbSplitEnabled;
+    lastSeenRgbSplitTrigger = audioProcessor.getLatestRgbSplitTrigger();
+    fxControlBar.setRgbSplitEnabled(displayedRgbSplitEnabled);
+    videoComponent.setRgbSplitEnabled(displayedRgbSplitEnabled);
     fxControlBar.setSpeedMultiplier(
         avsampler::videoSpeedMultiplierForControllerValue(state.speedMidiCcValue));
     updateLoopButtonAppearance(displayedLoopState);
@@ -199,6 +209,25 @@ void AVSamplerAudioProcessorEditor::timerCallback()
     {
         displayedLoopState = state.loopEnabled;
         updateLoopButtonAppearance(displayedLoopState);
+    }
+
+    if (state.rgbSplitEnabled != displayedRgbSplitEnabled)
+    {
+        displayedRgbSplitEnabled = state.rgbSplitEnabled;
+        fxControlBar.setRgbSplitEnabled(displayedRgbSplitEnabled);
+        videoComponent.setRgbSplitEnabled(displayedRgbSplitEnabled);
+    }
+
+    const auto rgbSplitTrigger = audioProcessor.getLatestRgbSplitTrigger();
+    if (rgbSplitTrigger != lastSeenRgbSplitTrigger)
+    {
+        lastSeenRgbSplitTrigger = rgbSplitTrigger;
+        const auto velocity = static_cast<int>(rgbSplitTrigger & 0xffu);
+        if (displayedRgbSplitEnabled && velocity > 0)
+        {
+            fxControlBar.setLastMidiVelocity(velocity);
+            videoComponent.triggerRgbSplitVelocity(velocity);
+        }
     }
 
     timelineComponent.setSelectedCue(state.selectedCueIndex);

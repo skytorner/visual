@@ -4,6 +4,7 @@
 #include "CueRouting.h"
 #include <array>
 #include <atomic>
+#include <cstdint>
 
 class AVSamplerAudioProcessor final : public juce::AudioProcessor
 {
@@ -16,6 +17,7 @@ public:
         std::array<double, cueCount> cuePositionsSeconds {};
         bool loopEnabled = false;
         bool playbackRequested = true;
+        bool rgbSplitEnabled = true;
         int selectedCueIndex = 0;
         int speedMidiCcValue = avsampler::defaultVideoSpeedControllerValue;
     };
@@ -51,14 +53,17 @@ public:
     void setCuePosition(int cueIndex, double positionSeconds);
     void setLoopEnabled(bool shouldLoop);
     void setPlaybackRequested(bool shouldPlay);
+    void setRgbSplitEnabled(bool shouldEnable);
     void setSelectedCueIndex(int cueIndex);
     int consumePendingCue() noexcept;
+    std::uint32_t getLatestRgbSplitTrigger() const noexcept;
 
 private:
     mutable juce::CriticalSection projectStateLock;
     ProjectState projectState;
     std::atomic<int> pendingCueIndex { -1 };
     std::atomic<int> speedMidiCcValue { avsampler::defaultVideoSpeedControllerValue };
+    std::atomic<std::uint32_t> latestRgbSplitTrigger { 0 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AVSamplerAudioProcessor)
 };

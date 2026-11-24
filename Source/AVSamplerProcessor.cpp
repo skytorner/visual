@@ -34,11 +34,18 @@ void AVSamplerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
     auto latestCueIndex = -1;
     auto latestSpeedCcValue = speedMidiCcValue.load(std::memory_order_relaxed);
+    auto latestTriggerVelocity = 0;
+    auto hasRgbSplitTrigger = false;
     for (const auto metadata : midiMessages)
     {
         const auto& message = metadata.getMessage();
         latestCueIndex = avsampler::latestCueForMidiEvent(
             latestCueIndex, message.getNoteNumber(), message.isNoteOn());
+        if (message.isNoteOn() && avsampler::cueIndexForMidiNote(message.getNoteNumber()) >= 0)
+        {
+            latestTriggerVelocity = message.getVelocity();
+            hasRgbSplitTrigger = true;
+        }
 
         if (message.isController())
             latestSpeedCcValue = avsampler::videoSpeedValueForMidiEvent(
@@ -47,6 +54,16 @@ void AVSamplerAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
 
     if (latestCueIndex >= 0)
         pendingCueIndex.store(latestCueIndex, std::memory_order_release);
+    if (hasRgbSplitTrigger)
+    {
+        constexpr std::uint32_t sequenceMask = 0x00ffffffu;
+        const auto previous = latestRgbSplitTrigger.load(std::memory_order_relaxed);
+        auto sequence = ((previous >> 8u) + 1u) & sequenceMask;
+        if (sequence == 0u)
+            sequence = 1u;
+        const auto event = (sequence << 8u) | static_cast<std::uint32_t>(latestTriggerVelocity & 0xff);
+        latestRgbSplitTrigger.store(event, std::memory_order_release);
+    }
     speedMidiCcValue.store(latestSpeedCcValue, std::memory_order_release);
 
     // This is a visual instrument; it never generates or passes audio.
@@ -118,6 +135,7 @@ void AVSamplerAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
     state.setProperty("videoPath", snapshot.videoPath, nullptr);
     state.setProperty("loopEnabled", snapshot.loopEnabled, nullptr);
     state.setProperty("playbackRequested", snapshot.playbackRequested, nullptr);
+    state.setProperty("rgbSplitEnabled", snapshot.rgbSplitEnabled, nullptr);
     state.setProperty("selectedCueIndex", snapshot.selectedCueIndex, nullptr);
     state.setProperty("speedMidiCcValue", snapshot.speedMidiCcValue, nullptr);
 
@@ -140,6 +158,7 @@ void AVSamplerAudioProcessor::setStateInformation(const void* data, int sizeInBy
         newState.videoPath = restored.getProperty("videoPath").toString();
         newState.loopEnabled = static_cast<bool>(restored.getProperty("loopEnabled", false));
         newState.playbackRequested = static_cast<bool>(restored.getProperty("playbackRequested", true));
+        newState.rgbSplitEnabled = static_cast<bool>(restored.getProperty("rgbSplitEnabled", true));
         newState.selectedCueIndex = juce::jlimit(0, cueCount - 1,
             static_cast<int>(restored.getProperty("selectedCueIndex", 0)));
         newState.speedMidiCcValue = juce::jlimit(0, 127,
@@ -195,6 +214,12 @@ void AVSamplerAudioProcessor::setPlaybackRequested(bool shouldPlay)
     projectState.playbackRequested = shouldPlay;
 }
 
+void AVSamplerAudioProcessor::setRgbSplitEnabled(bool shouldEnable)
+{
+    const juce::ScopedLock lock(projectStateLock);
+    projectState.rgbSplitEnabled = shouldEnable;
+}
+
 void AVSamplerAudioProcessor::setSelectedCueIndex(int cueIndex)
 {
     if (cueIndex < 0 || cueIndex >= cueCount)
@@ -207,6 +232,11 @@ void AVSamplerAudioProcessor::setSelectedCueIndex(int cueIndex)
 int AVSamplerAudioProcessor::consumePendingCue() noexcept
 {
     return pendingCueIndex.exchange(-1, std::memory_order_acq_rel);
+}
+
+std::uint32_t AVSamplerAudioProcessor::getLatestRgbSplitTrigger() const noexcept
+{
+    return latestRgbSplitTrigger.load(std::memory_order_acquire);
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()

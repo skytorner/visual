@@ -31,6 +31,8 @@ public:
     double getPlaySpeed() const;
     void setAudioVolume(float volume);
     float getAudioVolume() const;
+    void setRgbSplitEnabled(bool enabled);
+    void triggerRgbSplitVelocity(int velocity);
 
     std::function<void(const juce::String&)> onErrorOccurred;
 
