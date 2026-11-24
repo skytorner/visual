@@ -4,7 +4,7 @@ AV Sampler is a macOS-first MIDI video instrument for music production. It plays
 
 ## Current maturity
 
-AV Sampler is an internally tested prototype, **not a released or distributable alpha package**. The AU has been manually exercised in Logic Pro, including Cue playback, project save/reopen, video looping, CC1 control, RGB Split and fluid playback in a loop. These are user-reported host checks; no numeric latency, frame-rate or CPU/GPU benchmark is claimed.
+AV Sampler is an internally tested prototype, **not a released or distributable alpha package**. The AU has been manually exercised in Logic Pro, including Cue playback, project save/reopen, video looping, CC1 control, RGB Split and Flash. Zoom Punch is being added on macOS and still needs Logic host QA. These are user-reported host checks; no numeric latency, frame-rate or CPU/GPU benchmark is claimed.
 
 The currently qualified target remains **macOS Audio Unit in Logic Pro**. The Windows x64 VST3 build workflow is in place and has compiled a QA artifact; Windows host behavior in REAPER is not yet verified. Mac feature work continues first, with Windows host qualification planned after that work stabilizes. Other DAWs are not qualified.
 
@@ -20,6 +20,10 @@ The currently qualified target remains **macOS Audio Unit in Logic Pro**. The Wi
 
 See [product scope](docs/project/VISUAL_PRODUCT.md), [architecture](docs/project/VISUAL_ARCHITECTURE.md), [backlog](docs/project/VISUAL_BACKLOG.md) and [QA evidence](docs/project/VISUAL_QA_CHECKLIST.md).
 
+## In progress on `codex/VISUAL-020-zoom-punch`
+
+Zoom Punch is being implemented on the macOS Metal renderer. Cue velocity controls a centered scale pulse up to 1.12× with the same fixed 5/40/180 ms envelope; the toggle is saved and defaults off, including in older sessions. Logic host QA is pending, and Windows rendering is not implemented yet.
+
 ## Build and install for local Logic QA (macOS)
 
 Requirements: macOS, Xcode Command Line Tools, CMake 3.22+, Git and network access for the first JUCE FetchContent setup. From the repository root:
@@ -31,7 +35,7 @@ make install-avsampler-au BUILD_DIR=/private/tmp/visual-build BUILD_TYPE=Release
 
 Close Logic Pro before installing. The command builds the AU and copies it to `~/Library/Audio/Plug-Ins/Components/AVSampler.component`, then applies an ad hoc local signature and verifies it. Reopen Logic, rescan Audio Units if needed, and insert AVSampler as a software instrument. This is a **developer QA install**, not a ready-to-share alpha installer. It requires a local build environment and does not notarize the plugin.
 
-In Logic, load a local video, place MIDI notes 36/38/40/41 in a region, and play it. Drag Cue markers to change their trigger times. Send MIDI CC1 to change playback speed; Cue velocity controls RGB Split and Flash intensity when enabled. Flash uses a fixed envelope and blends toward white. The plugin state is saved by the host, while the video file itself remains external.
+In Logic, load a local video, place MIDI notes 36/38/40/41 in a region, and play it. Drag Cue markers to change their trigger times. Send MIDI CC1 to change playback speed; Cue velocity controls RGB Split and Flash intensity and Zoom Punch amplitude when enabled. Visual effects use the same fixed 5/40/180 ms envelope. Zoom Punch peaks at 1.12× at maximum velocity. The plugin state is saved by the host, while the video file itself remains external.
 
 ## Limitations and open qualification
 

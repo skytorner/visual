@@ -200,6 +200,17 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | RGB Split et Flash dans le renderer Windows | Indisponibles connu | Windows emploie actuellement `juce::VideoComponent`; pas d'accès aux frames pour ces shaders. Décider et implémenter la parité avant Closed Alpha. |
 | pluginval / autre validator du VST3 Windows | NOT RUN | Exécuter sur l'artefact exact après obtention; consigner version, niveau, SHA source et binaire. |
 
+## VISUAL-020 — Zoom Punch macOS
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Intensité liée à la vélocité et enveloppe fixe 5/40/180 ms | PASS automatisé | CTest `VideoEffectMathTests`: vélocité 0/64/127, maximum 1,12×, retour à 1×. |
+| Persistance et compatibilité des anciens projets | PASS automatisé | `AVSamplerCoreTests`: toggle actif restauré; propriété absente désactivée. |
+| Shader Metal et composition avec RGB Split/Flash | PASS compilation; visuel en attente | AU macOS construit avec le shader; le comportement combiné est à confirmer dans Logic. |
+| Build Release et installation de l'AU pour Logic | PASS build/install | Build `/private/tmp/visual-020-build`, source worktree sur branche `codex/VISUAL-020-zoom-punch`; CTest 5/5. AU installé et signature `codesign --verify --deep --strict` valide. SHA-256 du binaire buildé avant signature `61b7290eea1ac777157cc94386b553e7f7c83e649849e0b0d2815a72ff78ed6d`; binaire installé après signature ad hoc `fcaa3a6f6641b368f467819c218e14bd34e32c89f99d6ce1e8c8d0d777bf26b4`. |
+| Validation dans Logic | EN ATTENTE QA HUMAINE | Tester vélocités faibles/fortes, Cue déclenché en MIDI, RGB Split/Flash simultanés, loop de région et save/reload du toggle. |
+| Renderer Windows | Indisponible connu | Zoom Punch est rendu uniquement par Metal macOS; la QA Windows reste reportée jusqu'à la fin de la stabilisation macOS. |
+
 ## VISUAL-012 — Composition UI et pads assignés
 
 | Vérification | Statut | Portée |

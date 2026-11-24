@@ -117,6 +117,14 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 - Windows/REAPER : NOT RUN depuis cet environnement macOS; test humain requis sur la machine Windows. RGB Split et Flash ne sont pas portés au renderer Windows; la parité reste une décision/implémentation séparée avant Closed Alpha.
 - Closed Alpha reste NO-GO : il manque la qualification REAPER, la décision de parité des effets, les validations pluginval par artefact et les packages installables sur machine propre.
 
+## VISUAL-020 — Zoom Punch macOS — 2026-11-24
+
+- Effet ajouté au renderer AVFoundation/Metal: zoom centré jusqu'à 1,12× à vélocité 127, intensité proportionnelle à la vélocité et enveloppe fixe de 5/40/180 ms partagée avec RGB Split/Flash. Activation enregistrée dans le projet et désactivée par défaut, y compris pour les états historiques.
+- `cmake -S . -B /private/tmp/visual-020-build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DFETCHCONTENT_SOURCE_DIR_JUCE=/Users/renjy/Documents/IT/vsts/visual/build/_deps/juce-src` : PASS. `cmake --build /private/tmp/visual-020-build --config Release --parallel 6` : PASS pour les cibles macOS. `ctest --test-dir /private/tmp/visual-020-build --output-on-failure -C Release` : 5/5 PASS. Warnings seulement dans JUCE/SDK Metal/AppKit dépréciés.
+- `make install-avsampler-au BUILD_DIR=/private/tmp/visual-020-build BUILD_TYPE=Release` : PASS. Signature `codesign --verify --deep --strict` valide. SHA-256 du binaire buildé avant signature ad hoc `61b7290eea1ac777157cc94386b553e7f7c83e649849e0b0d2815a72ff78ed6d`; binaire installé signé `fcaa3a6f6641b368f467819c218e14bd34e32c89f99d6ce1e8c8d0d777bf26b4`.
+- `git diff --check` : PASS. Build Windows et test REAPER : NOT RUN, reportés conformément à D-028.
+- QA humaine Logic en attente; test Windows reporté selon D-028. L'ajout n'établit pas l'inclusion de Zoom Punch dans Closed Alpha 1.
+
 ## Initial Setup
 
 Status: Planning.

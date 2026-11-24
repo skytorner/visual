@@ -36,6 +36,9 @@ public:
     void setFlashEnabled(bool enabled);
     void triggerFlashVelocity(int velocity);
     bool isFlashAvailable() const noexcept;
+    void setZoomPunchEnabled(bool enabled);
+    void triggerZoomPunchVelocity(int velocity);
+    bool isZoomPunchAvailable() const noexcept;
     void resized() override;
 
     std::function<void(const juce::String&)> onErrorOccurred;

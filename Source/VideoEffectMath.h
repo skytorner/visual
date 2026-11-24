@@ -51,4 +51,13 @@ constexpr double flashWhiteMixForVelocityAndElapsedSeconds(int velocity,
         * static_cast<double>(rgbSplitIntensityForVelocity(velocity))
         * rgbSplitEnvelopeForElapsedSeconds(elapsedSeconds);
 }
+
+constexpr double zoomPunchScaleForVelocityAndElapsedSeconds(int velocity,
+                                                              double elapsedSeconds) noexcept
+{
+    constexpr double maximumZoomScale = 1.12;
+    const auto intensity = static_cast<double>(rgbSplitIntensityForVelocity(velocity));
+    const auto envelope = rgbSplitEnvelopeForElapsedSeconds(elapsedSeconds);
+    return 1.0 + (maximumZoomScale - 1.0) * intensity * envelope;
+}
 }

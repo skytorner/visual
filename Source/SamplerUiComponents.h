@@ -36,12 +36,15 @@ public:
     void setRgbSplitAvailable(bool available);
     void setFlashEnabled(bool enabled);
     void setFlashAvailable(bool available);
+    void setZoomPunchEnabled(bool enabled);
+    void setZoomPunchAvailable(bool available);
     void setLastMidiVelocity(int velocity);
     void paint(juce::Graphics& graphics) override;
     void resized() override;
 
     std::function<void(bool)> onRgbSplitEnabledChanged;
     std::function<void(bool)> onFlashEnabledChanged;
+    std::function<void(bool)> onZoomPunchEnabledChanged;
 
 private:
     double speedMultiplier = 1.0;
@@ -49,9 +52,12 @@ private:
     bool rgbSplitAvailable = true;
     bool flashEnabled = false;
     bool flashAvailable = true;
+    bool zoomPunchEnabled = false;
+    bool zoomPunchAvailable = true;
     int lastMidiVelocity = 0;
     juce::TextButton rgbSplitButton { "RGB SPLIT" };
     juce::TextButton flashButton { "FLASH" };
+    juce::TextButton zoomPunchButton { "ZOOM PUNCH" };
 };
 
 class AssignedPadsComponent final : public juce::Component

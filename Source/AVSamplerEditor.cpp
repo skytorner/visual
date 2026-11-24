@@ -119,6 +119,12 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
         audioProcessor.setFlashEnabled(enabled);
         videoComponent.setFlashEnabled(enabled);
     };
+    fxControlBar.onZoomPunchEnabledChanged = [this](bool enabled)
+    {
+        displayedZoomPunchEnabled = enabled;
+        audioProcessor.setZoomPunchEnabled(enabled);
+        videoComponent.setZoomPunchEnabled(enabled);
+    };
 
     titleLabel.setText("AV SAMPLER", juce::dontSendNotification);
     titleLabel.setFont(juce::FontOptions(16.0f).withStyle("Bold"));
@@ -142,13 +148,17 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     displayedPlaybackRequested = state.playbackRequested;
     displayedRgbSplitEnabled = state.rgbSplitEnabled;
     displayedFlashEnabled = state.flashEnabled;
+    displayedZoomPunchEnabled = state.zoomPunchEnabled;
     lastSeenCueEffectTrigger = audioProcessor.getLatestCueEffectTrigger();
     fxControlBar.setRgbSplitAvailable(videoComponent.isRgbSplitAvailable());
     fxControlBar.setFlashAvailable(videoComponent.isFlashAvailable());
+    fxControlBar.setZoomPunchAvailable(videoComponent.isZoomPunchAvailable());
     fxControlBar.setRgbSplitEnabled(displayedRgbSplitEnabled);
     fxControlBar.setFlashEnabled(displayedFlashEnabled);
+    fxControlBar.setZoomPunchEnabled(displayedZoomPunchEnabled);
     videoComponent.setRgbSplitEnabled(displayedRgbSplitEnabled);
     videoComponent.setFlashEnabled(displayedFlashEnabled);
+    videoComponent.setZoomPunchEnabled(displayedZoomPunchEnabled);
     fxControlBar.setSpeedMultiplier(
         avsampler::videoSpeedMultiplierForControllerValue(state.speedMidiCcValue));
     updateLoopButtonAppearance(displayedLoopState);
@@ -236,6 +246,13 @@ void AVSamplerAudioProcessorEditor::timerCallback()
         videoComponent.setFlashEnabled(displayedFlashEnabled);
     }
 
+    if (state.zoomPunchEnabled != displayedZoomPunchEnabled)
+    {
+        displayedZoomPunchEnabled = state.zoomPunchEnabled;
+        fxControlBar.setZoomPunchEnabled(displayedZoomPunchEnabled);
+        videoComponent.setZoomPunchEnabled(displayedZoomPunchEnabled);
+    }
+
     const auto cueEffectTrigger = audioProcessor.getLatestCueEffectTrigger();
     if (cueEffectTrigger != lastSeenCueEffectTrigger)
     {
@@ -248,6 +265,8 @@ void AVSamplerAudioProcessorEditor::timerCallback()
                 videoComponent.triggerRgbSplitVelocity(velocity);
             if (videoComponent.isFlashAvailable() && displayedFlashEnabled)
                 videoComponent.triggerFlashVelocity(velocity);
+            if (videoComponent.isZoomPunchAvailable() && displayedZoomPunchEnabled)
+                videoComponent.triggerZoomPunchVelocity(velocity);
         }
     }
 

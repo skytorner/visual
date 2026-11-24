@@ -24,6 +24,7 @@ int main()
     using avsampler::videoEffects::rgbSplitIntensityForVelocity;
     using avsampler::videoEffects::rgbSplitMaximumOffsetUv;
     using avsampler::videoEffects::flashWhiteMixForVelocityAndElapsedSeconds;
+    using avsampler::videoEffects::zoomPunchScaleForVelocityAndElapsedSeconds;
 
     if (! check(rgbSplitIntensityForVelocity(0) == 0.0f, "Velocity 0 must not trigger RGB Split"))
         return 1;
@@ -74,6 +75,19 @@ int main()
         return 1;
     if (! check(flashWhiteMixForVelocityAndElapsedSeconds(127, 0.225) == 0.0,
                 "Flash envelope must return to the original frame"))
+        return 1;
+
+    if (! check(zoomPunchScaleForVelocityAndElapsedSeconds(0, 0.005) == 1.0,
+                "Velocity 0 must not trigger Zoom Punch"))
+        return 1;
+    if (! check(near(zoomPunchScaleForVelocityAndElapsedSeconds(64, 0.005), 1.06),
+                "Zoom Punch scale must follow MIDI velocity"))
+        return 1;
+    if (! check(near(zoomPunchScaleForVelocityAndElapsedSeconds(127, 0.005), 1.12),
+                "Maximum velocity must reach the bounded Zoom Punch scale"))
+        return 1;
+    if (! check(zoomPunchScaleForVelocityAndElapsedSeconds(127, 0.225) == 1.0,
+                "Zoom Punch envelope must return to the original framing"))
         return 1;
 
     std::cout << "Video effect velocity mapping and envelope tests passed\n";

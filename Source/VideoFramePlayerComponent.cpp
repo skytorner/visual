@@ -151,3 +151,18 @@ bool VideoFramePlayerComponent::isFlashAvailable() const noexcept
 {
     return false;
 }
+
+void VideoFramePlayerComponent::setZoomPunchEnabled(bool enabled)
+{
+    juce::ignoreUnused(enabled);
+}
+
+void VideoFramePlayerComponent::triggerZoomPunchVelocity(int velocity)
+{
+    juce::ignoreUnused(velocity);
+}
+
+bool VideoFramePlayerComponent::isZoomPunchAvailable() const noexcept
+{
+    return false;
+}

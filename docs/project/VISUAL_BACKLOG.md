@@ -220,3 +220,11 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 - Scope: sur le renderer Metal macOS, ajouter un mélange bref vers le blanc déclenché par NoteOn d'un cue; utiliser le même événement de vélocité et la même enveloppe fixe qu'RGB Split; ajouter un toggle Flash sauvegardé.
 - Acceptance: intensité augmente avec vélocité 1–127 (maximum 65 %); durée reste fixe (Attack/Hold/Release 5/40/180 ms); l'image revient intacte au neutre; vélocité 0/NoteOff/non-assignée n'active pas l'effet; RGB Split, CC1, cue, Loop et lecture restent indépendants; l'état Flash est persisté, absent/false dans les sessions historiques; AU build/tests et installation passent; l'utilisateur confirme que les essais fonctionnent parfaitement dans Logic. Le contrôle Flash est indisponible et clairement signalé sous Windows.
 - Exclusions: autres effets, réglages utilisateur d'enveloppe/intensité, MIDI Learn, parité Windows, pluginval de distribution et mesure de performance chiffrée.
+
+### VISUAL-020 — Zoom Punch piloté par la vélocité (macOS)
+
+- Status: In progress — implémentation sur branche `codex/VISUAL-020-zoom-punch`; vérification Logic et PR en attente.
+- Priority: P1 pour le prototype macOS; l'inclusion dans Closed Alpha 1 reste à décider.
+- Scope: ajouter au shader Metal un zoom centré déclenché par les NoteOn Cue existants. La vélocité contrôle l'amplitude jusqu'à 1,12× à 127; durée fixe Attack/Hold/Release de 5/40/180 ms. Toggle sauvegardé, désactivé par défaut pour les nouveaux et anciens projets.
+- Acceptance: vélocité 0/NoteOff/non assignée n'active pas l'effet; frappes faibles/fortes donnent des amplitudes distinctes; chaque trigger repart avec la même enveloppe et l'image revient à 1×; RGB Split, Flash, CC1, Loop, Cue et audio-silence restent inchangés; état sauvé/rechargé et ancienne session désactivée par défaut; build/test/install AU et QA manuelle Logic; renderer Windows annonce explicitement indisponible.
+- Exclusions: contrôles de zoom séparés, enveloppe configurable, parité Windows, changement du callback audio et décision d'élargir le package alpha.
