@@ -32,12 +32,14 @@ Ce document définit la boucle légère entre l'humain, Codex et ChatGPT pour `s
 
 ## Raccourcis quotidiens sur macOS (Makefile versionné)
 
-- `make` : tests DSP CTest puis compilation JUCE incrémentale; pour la QA complète, il reste à lancer pluginval sur les nouveaux artefacts.
+- `make` : tests C++/CTest puis compilation des cibles JUCE; cela ne valide pas automatiquement les plugins dans un hôte.
 - `make test` : tests DSP rapides; `make plugin` : build AU/VST3/Standalone.
 - `make status` : branche et SHA à consigner dans les rapports QA.
 - `make install-avsampler-au` : commande de référence pour toute build AV Sampler destinée à un essai dans Logic; elle compile seulement la cible AU puis l'installe vers `~/Library/Audio/Plug-Ins/Components/AVSampler.component`. Utiliser cette commande à chaque nouveau build à valider dans Logic, puis relancer le scan de l'hôte. **Fermer Logic avant l'installation.**
 - `make install` : compile puis copie les AU/VST3 du POC et l'AU AV Sampler dans les dossiers utilisateur. L'installation reste une étape explicite; un build seul ne remplace pas le plugin chargé par le DAW.
-- `make package` : compile et utilise le packaging ZIP macOS déjà existant dans `dist/`.
+- `make package` : compile puis génère dans `dist/` le ZIP macOS historique `AudioReactiveImagePOC` seulement. Cette commande ne crée pas un package AV Sampler.
+- `make install-avsampler-au` : installation développeur locale pour Logic; elle requiert macOS et l'outillage de build, et sa signature ad hoc n'est pas une signature de distribution.
+- Toute distribution AV Sampler demande un ticket dédié, un package construit depuis un SHA consigné, une installation propre testée, et des instructions de mise à jour/suppression. Ne pas utiliser le workflow de release `v*` pour annoncer une cohorte fermée : il publie les packages AudioReactiveImagePOC sur un dépôt GitHub public.
 - Le `Makefile` n'est qu'une couche de confort autour de CMake/CTest : aucun changement de stack ou de source de vérité. Sur Windows, utiliser les commandes CMake/PowerShell.
 
 ## Changements à haut risque
@@ -45,7 +47,7 @@ Ce document définit la boucle légère entre l'humain, Codex et ChatGPT pour `s
 - DSP : tests reproductibles, aucun lock/allocation/I/O sur audio thread, passthrough préservé.
 - Identifiants de paramètres, bundle/plugin et sauvegardes : migration documentée et test d'ouverture de vieux projets.
 - Médias : aucune régression de l'import ou du message de fichier manquant.
-- CI : compiler sur Mac/Windows selon l'artefact et contrôler le build précis au lieu de s'appuyer sur la seule compilation.
+- CI/distribution : compiler sur la plateforme cible et contrôler le build précis; le workflow public actuel concerne le POC audio, pas AV Sampler.
 
 ## Exports optionnels
 

@@ -64,7 +64,7 @@ install-avsampler-au: avsampler-au
 	@codesign --verify --deep --strict "$(AU_INSTALL_DIR)/AVSampler.component"
 	@echo "Installed AV Sampler AU: $(AU_INSTALL_DIR)/AVSampler.component"
 
-# Package for distribution, never as part of normal builds.
+# Package the legacy AudioReactiveImagePOC release only; not an AV Sampler installer.
 package: plugin
 	@if [ "$$(uname -s)" != "Darwin" ]; then echo "package requires macOS"; exit 1; fi
 	bash scripts/package-macos-release.sh
@@ -83,6 +83,6 @@ help:
 	@echo "  make install-vst3   Build and install VST3 only"
 	@echo "  make avsampler-au   Build AV Sampler AU only"
 	@echo "  make install-avsampler-au  Build and install AV Sampler AU for Logic QA"
-	@echo "  make package        Build and create macOS ZIP in dist/"
+	@echo "  make package        Build and create legacy AudioReactiveImagePOC macOS ZIP in dist/"
 	@echo "  make status         Show branch and commit for QA logs"
 	@echo "  make help           Show these commands"
