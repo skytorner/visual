@@ -16,6 +16,7 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | Élément | Statut | Preuve / limite |
 | --- | --- | --- |
 | AU macOS et Logic | PASS manuel rapporté | Le parcours actuel charge et fonctionne dans Logic. Autres hôtes non qualifiés. |
+| VST3 Windows et REAPER | NOT AVAILABLE | AV Sampler n'a pas encore de cible Windows/VST3 ni de backend vidéo Windows; VISUAL-016 est le premier jalon de portage. |
 | Package installable sans environnement de développement | NOT AVAILABLE | Les scripts de release et le workflow versionnés package `AudioReactiveImagePOC`; `make install-avsampler-au` est une installation locale développeur qui compile sur la machine. |
 | Installation/mise à jour/désinstallation par des testeurs | NOT TESTED | Aucun package AV Sampler pour cohorte n'existe encore. |
 | Signature notarisation / provenance du package alpha | NOT TESTED | L'installation développeur applique une signature ad hoc; aucune notarisation ni signature de distribution établie. |
@@ -25,7 +26,7 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | CC1=64 et save/reload | NOT TESTED | Les extrêmes sont confirmés, pas ces cas précis. |
 | pluginval sur le package alpha exact | NOT TESTED | Strictness 4 passe sur l'AU de développement enregistré, mais le log ne donne pas le chemin ou SHA. Refaire et consigner le test sur l'artefact de cohorte. |
 
-**Décision actuelle : NO-GO pour envoyer une Closed Alpha; GO pour préparer et qualifier son package séparément.**
+**Décision actuelle : NO-GO pour envoyer une Closed Alpha multi-plateforme; GO pour le prototype Windows de VISUAL-016.**
 
 ## Matrice AudioReactiveImagePOC (plugin audio historique seulement)
 

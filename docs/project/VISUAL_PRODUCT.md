@@ -29,7 +29,7 @@ Le plugin `AudioReactiveImagePOC` conserve l'analyse RMS/peak/envelope, le passt
 
 ## Produit et phases de distribution
 
-Le dépôt est en phase **Internal / Dev**. Le premier jalon de distribution proposé est **Closed Alpha 1**, pour 3 à 5 utilisateurs macOS / Logic Pro. Ce n'est pas encore une release: il faut d'abord construire un package AV Sampler installable sans CMake/Xcode, documenter son installation et sa suppression, qualifier son identité/signature/provenance, et arrêter une matrice de macOS/codecs supportés.
+Le dépôt est en phase **Internal / Dev**. La Closed Alpha 1 vise une cohorte contrôlée de 3 à 5 utilisateurs, avec un parcours macOS/Logic et un parcours Windows/REAPER. Elle attend la qualification du VST3 Windows et de son backend vidéo, puis deux packages installables sans environnement de compilation, leurs instructions de mise à jour/suppression, leur provenance et les matrices système/codecs.
 
 ### Closed Alpha 1 — périmètre proposé
 
@@ -40,10 +40,10 @@ Le dépôt est en phase **Internal / Dev**. Le premier jalon de distribution pro
 
 ### Critères d'entrée
 
-- Package AU AV Sampler généré depuis un SHA enregistré, testé sur une machine propre et installable sans compiler.
-- Procédures d'installation, scan Logic, mise à jour et désinstallation compréhensibles; signature et exigences macOS documentées.
-- Scénarios save/reload, relink de média déplacé, neutralité CC1 à 64 et pluginval/AU validation tentés et leurs résultats consignés, sans masquer les blocages.
-- Aucun défaut bloquant dans le scénario Logic actuellement accepté; matrice de formats vidéo et limites visibles.
+- Packages AU macOS et VST3 Windows générés depuis des SHA enregistrés, testés sur des machines propres et installables sans compiler.
+- Procédures d'installation, scan hôte, mise à jour et désinstallation compréhensibles; exigences de signature et systèmes documentés pour chaque plateforme.
+- Scénarios save/reload, relink de média déplacé, neutralité CC1 à 64 et pluginval tentés sur les artefacts candidats, avec résultats et blocages consignés.
+- Parcours Logic/macOS et REAPER/Windows sans défaut bloquant; matrice de formats vidéo et limites visibles.
 
 ### Critères de sortie vers Closed Alpha 2
 
@@ -56,7 +56,7 @@ Closed Alpha 2 vise 5 à 10 utilisateurs et les corrections d'Alpha 1. Closed Be
 
 ## Suite produit après Closed Alpha
 
-VST3 et autres DAW, Windows, 16 pads, MIDI Learn, mapping entièrement personnalisable, plusieurs lecteurs vidéo, polyphonie vidéo, export et effets supplémentaires restent en aval de la validation de cette première cohorte.
+16 pads, MIDI Learn, mapping entièrement personnalisable, plusieurs lecteurs vidéo, polyphonie vidéo, export et effets supplémentaires restent en aval de la validation de cette première cohorte. D'autres DAW Windows/macOS restent à qualifier séparément.
 
 ## Hors périmètre initial
 
@@ -66,7 +66,7 @@ Polyphonie vidéo, plusieurs lecteurs, moteur 3D, export vidéo, séquenceur MID
 
 Utilisateur initial : beatmaker/producteur sur macOS, notamment Logic Pro. Premier succès : programmer quatre notes dans une région MIDI et rejouer la performance visuelle correspondante.
 
-Distribution ciblée : prototype interne AU macOS/Logic -> package Closed Alpha 1 contrôlé -> Closed Alpha 2 -> Closed Beta -> qualification progressive de VST3 et d'autres plateformes.
+Distribution ciblée : prototype interne AU macOS/Logic -> prototype Windows VST3/REAPER -> deux packages Closed Alpha 1 contrôlés -> Closed Alpha 2 -> Closed Beta -> qualification progressive d'autres DAW.
 
 ## Média
 
