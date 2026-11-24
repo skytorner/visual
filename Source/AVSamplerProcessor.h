@@ -21,6 +21,7 @@ public:
         bool flashEnabled = false;
         bool zoomPunchEnabled = false;
         bool colorBoostEnabled = false;
+        bool videoEchoEnabled = false;
         int selectedCueIndex = 0;
         int speedMidiCcValue = avsampler::defaultVideoSpeedControllerValue;
     };
@@ -60,6 +61,7 @@ public:
     void setFlashEnabled(bool shouldEnable);
     void setZoomPunchEnabled(bool shouldEnable);
     void setColorBoostEnabled(bool shouldEnable);
+    void setVideoEchoEnabled(bool shouldEnable);
     void setSelectedCueIndex(int cueIndex);
     int consumePendingCue() noexcept;
     std::uint32_t getLatestCueEffectTrigger() const noexcept;

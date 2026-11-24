@@ -167,6 +167,21 @@ FxControlBar::FxControlBar()
     };
     addAndMakeVisible(colorBoostButton);
     setColorBoostEnabled(false);
+
+    videoEchoButton.setClickingTogglesState(true);
+    videoEchoButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff20252d));
+    videoEchoButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff382b45));
+    videoEchoButton.setColour(juce::TextButton::textColourOffId, juce::Colour(0xffd4dbe7));
+    videoEchoButton.setColour(juce::TextButton::textColourOnId, juce::Colour(0xffe1c8fa));
+    videoEchoButton.setTooltip("Toggle velocity-triggered Video Echo");
+    videoEchoButton.onClick = [this]
+    {
+        setVideoEchoEnabled(videoEchoButton.getToggleState());
+        if (onVideoEchoEnabledChanged)
+            onVideoEchoEnabledChanged(videoEchoEnabled);
+    };
+    addAndMakeVisible(videoEchoButton);
+    setVideoEchoEnabled(false);
 }
 
 void FxControlBar::setSpeedMultiplier(double multiplier)
@@ -247,6 +262,23 @@ void FxControlBar::setColorBoostAvailable(bool available)
     repaint();
 }
 
+void FxControlBar::setVideoEchoEnabled(bool enabled)
+{
+    videoEchoEnabled = enabled;
+    videoEchoButton.setToggleState(enabled, juce::dontSendNotification);
+    repaint();
+}
+
+void FxControlBar::setVideoEchoAvailable(bool available)
+{
+    videoEchoAvailable = available;
+    videoEchoButton.setEnabled(available);
+    videoEchoButton.setTooltip(available
+        ? "Toggle velocity-triggered Video Echo"
+        : "Video Echo is not available on this video renderer yet");
+    repaint();
+}
+
 void FxControlBar::setLastMidiVelocity(int velocity)
 {
     const auto clampedVelocity = juce::jlimit(0, 127, velocity);
@@ -261,7 +293,7 @@ void FxControlBar::resized()
 {
     auto placeholders = getLocalBounds().toFloat().reduced(10.0f, 8.0f);
     placeholders.removeFromLeft(112.0f);
-    constexpr auto cellCount = 6;
+    constexpr auto cellCount = 7;
     const auto cellWidth = placeholders.getWidth() / static_cast<float>(cellCount);
     auto rgbCell = placeholders.withX(placeholders.getX() + cellWidth * 2.0f)
         .withWidth(cellWidth).reduced(3.0f, 0.0f);
@@ -278,6 +310,10 @@ void FxControlBar::resized()
     auto colorBoostCell = placeholders.withX(placeholders.getX() + cellWidth * 5.0f)
         .withWidth(cellWidth).reduced(3.0f, 0.0f);
     colorBoostButton.setBounds(colorBoostCell.withY(colorBoostCell.getY() + 3.0f)
+        .withHeight(29.0f).toNearestInt());
+    auto videoEchoCell = placeholders.withX(placeholders.getX() + cellWidth * 6.0f)
+        .withWidth(cellWidth).reduced(3.0f, 0.0f);
+    videoEchoButton.setBounds(videoEchoCell.withY(videoEchoCell.getY() + 3.0f)
         .withHeight(29.0f).toNearestInt());
 }
 
@@ -296,8 +332,8 @@ void FxControlBar::paint(juce::Graphics& graphics)
 
     auto placeholders = bounds.reduced(10.0f, 8.0f);
     placeholders.removeFromLeft(112.0f);
-    constexpr std::array<const char*, 6> names {
-        "LEVEL", "SPEED", "RGB SPLIT", "FLASH", "ZOOM PUNCH", "COLOR BOOST"
+    constexpr std::array<const char*, 7> names {
+        "LEVEL", "SPEED", "RGB SPLIT", "FLASH", "ZOOM PUNCH", "COLOR BOOST", "VIDEO ECHO"
     };
     const auto cellWidth = placeholders.getWidth() / static_cast<float>(names.size());
     for (int i = 0; i < static_cast<int>(names.size()); ++i)
@@ -309,11 +345,13 @@ void FxControlBar::paint(juce::Graphics& graphics)
         const auto isFlashControl = i == 3;
         const auto isZoomPunchControl = i == 4;
         const auto isColorBoostControl = i == 5;
+        const auto isVideoEchoControl = i == 6;
         graphics.setColour(isSpeedControl ? juce::Colour(0xff1e2d39)
             : isRgbSplitControl && rgbSplitAvailable && rgbSplitEnabled ? juce::Colour(0xff292339)
             : isFlashControl && flashAvailable && flashEnabled ? juce::Colour(0xff332a18)
             : isZoomPunchControl && zoomPunchAvailable && zoomPunchEnabled ? juce::Colour(0xff1e3540)
             : isColorBoostControl && colorBoostAvailable && colorBoostEnabled ? juce::Colour(0xff24382f)
+            : isVideoEchoControl && videoEchoAvailable && videoEchoEnabled ? juce::Colour(0xff382b45)
             : juce::Colour(0xff20252d));
         graphics.fillRoundedRectangle(cell, 5.0f);
         graphics.setColour(isSpeedControl ? juce::Colour(0xff3bd5df)
@@ -321,20 +359,25 @@ void FxControlBar::paint(juce::Graphics& graphics)
             : isFlashControl && flashAvailable && flashEnabled ? juce::Colour(0xffffc857)
             : isZoomPunchControl && zoomPunchAvailable && zoomPunchEnabled ? juce::Colour(0xff42b9d1)
             : isColorBoostControl && colorBoostAvailable && colorBoostEnabled ? juce::Colour(0xff61c783)
+            : isVideoEchoControl && videoEchoAvailable && videoEchoEnabled ? juce::Colour(0xffad77d6)
             : juce::Colour(0xff3a414c));
         graphics.drawRoundedRectangle(cell, 5.0f, 1.0f);
-        if (isRgbSplitControl || isFlashControl || isZoomPunchControl || isColorBoostControl)
+        if (isRgbSplitControl || isFlashControl || isZoomPunchControl || isColorBoostControl
+            || isVideoEchoControl)
         {
             const auto effectAvailable = isRgbSplitControl ? rgbSplitAvailable
                 : isFlashControl ? flashAvailable
-                    : isZoomPunchControl ? zoomPunchAvailable : colorBoostAvailable;
+                    : isZoomPunchControl ? zoomPunchAvailable
+                        : isColorBoostControl ? colorBoostAvailable : videoEchoAvailable;
             const auto effectEnabled = isRgbSplitControl ? rgbSplitEnabled
                 : isFlashControl ? flashEnabled
-                    : isZoomPunchControl ? zoomPunchEnabled : colorBoostEnabled;
+                    : isZoomPunchControl ? zoomPunchEnabled
+                        : isColorBoostControl ? colorBoostEnabled : videoEchoEnabled;
             const auto activeColour = isRgbSplitControl
                 ? juce::Colour(0xffd9c0fb) : isFlashControl
                     ? juce::Colour(0xffffe4a3) : isZoomPunchControl
-                        ? juce::Colour(0xffa9e6f2) : juce::Colour(0xffb9e7ca);
+                    ? juce::Colour(0xffa9e6f2) : isColorBoostControl
+                        ? juce::Colour(0xffb9e7ca) : juce::Colour(0xffe1c8fa);
             graphics.setColour(effectAvailable && effectEnabled ? activeColour
                 : juce::Colour(0xff8793a6));
             graphics.setFont(9.0f);
@@ -346,7 +389,8 @@ void FxControlBar::paint(juce::Graphics& graphics)
                 juce::Justification::centred, 1);
             graphics.setColour(isRgbSplitControl ? juce::Colour(0xffa98cc8)
                 : isFlashControl ? juce::Colour(0xffd0ae5d) : isZoomPunchControl
-                    ? juce::Colour(0xff76c5d5) : juce::Colour(0xff8cc49e));
+                    ? juce::Colour(0xff76c5d5) : isColorBoostControl
+                        ? juce::Colour(0xff8cc49e) : juce::Colour(0xffaa7dc8));
             graphics.setFont(8.0f);
             graphics.drawFittedText(! effectAvailable ? "WINDOWS PORT PENDING"
                 : effectEnabled ? "MIDI NOTE ON" : "DISABLED",

@@ -65,6 +65,7 @@ int main()
     processor.setFlashEnabled(true);
     processor.setZoomPunchEnabled(true);
     processor.setColorBoostEnabled(true);
+    processor.setVideoEchoEnabled(true);
     processor.setSelectedCueIndex(2);
 
     juce::MemoryBlock savedState;
@@ -86,6 +87,8 @@ int main()
     if (! check(state.zoomPunchEnabled, "Zoom Punch enabled state did not restore"))
         return 1;
     if (! check(state.colorBoostEnabled, "Color Boost enabled state did not restore"))
+        return 1;
+    if (! check(state.videoEchoEnabled, "Video Echo enabled state did not restore"))
         return 1;
     if (! check(state.selectedCueIndex == 2, "Selected Cue did not restore"))
         return 1;
@@ -154,6 +157,9 @@ int main()
         return 1;
     if (! check(! legacyProjectState.colorBoostEnabled,
                 "Legacy session unexpectedly enabled the new Color Boost effect"))
+        return 1;
+    if (! check(! legacyProjectState.videoEchoEnabled,
+                "Legacy session unexpectedly enabled the new Video Echo effect"))
         return 1;
 
     std::cout << "AV Sampler MIDI processing, speed CC, and state tests passed\n";

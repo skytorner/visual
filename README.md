@@ -1,10 +1,10 @@
 # AV Sampler — Play video like an instrument
 
-AV Sampler is a macOS-first MIDI video instrument for music production. It plays one local video, lets four MIDI notes trigger editable Cue Points, and offers video speed via MIDI CC1 plus a velocity-triggered RGB Split effect. It does not generate audio.
+AV Sampler is a macOS-first MIDI video instrument for music production. It plays one local video, lets four MIDI notes trigger editable Cue Points, and offers video speed via MIDI CC1 plus velocity-triggered visual effects. It does not generate audio.
 
 ## Current maturity
 
-AV Sampler is an internally tested prototype, **not a released or distributable alpha package**. The AU has been manually exercised in Logic Pro, including Cue playback, project save/reopen, video looping, CC1 control, RGB Split, Flash and Zoom Punch. These are user-reported host checks; no numeric latency, frame-rate or CPU/GPU benchmark is claimed.
+AV Sampler is an internally tested prototype, **not a released or distributable alpha package**. The AU has been manually exercised in Logic Pro, including Cue playback, project save/reopen, video looping, CC1 control, RGB Split, Flash, Zoom Punch and Color Boost. These are user-reported host checks; no numeric latency, frame-rate or CPU/GPU benchmark is claimed.
 
 The currently qualified target remains **macOS Audio Unit in Logic Pro**. The Windows x64 VST3 build workflow is in place and has compiled a QA artifact; Windows host behavior in REAPER is not yet verified. Mac feature work continues first, with Windows host qualification planned after that work stabilizes. Other DAWs are not qualified.
 
@@ -16,14 +16,15 @@ The currently qualified target remains **macOS Audio Unit in Logic Pro**. The Wi
 - RGB Split triggered by Cue NoteOn velocity. Its enabled/disabled state is saved with the host project.
 - Flash is also triggered by Cue NoteOn velocity on the macOS renderer; it is disabled by default and its toggle is saved with the host project. Windows rendering is not implemented yet.
 - Zoom Punch is triggered by Cue NoteOn velocity on the macOS Metal renderer. Its centered scale pulse reaches 1.12×, uses the fixed 5/40/180 ms envelope, and its saved toggle defaults off. The user confirmed it works in Logic; Windows rendering is not implemented yet.
+- Color Boost is triggered by Cue NoteOn velocity on the macOS Metal renderer; its saturation pulse reaches 1.6× and the saved toggle defaults off. The user reports that it works in Logic. Windows rendering is not implemented yet.
 - Metal frame presentation on macOS using AVFoundation and MetalKit.
-- Host-project state includes media path, Cue positions, Loop, requested Play/Pause, selected Cue, speed controller value, and enablement for RGB Split, Flash and Zoom Punch. Color Boost state is part of VISUAL-021 on the current branch. Video files remain external to the project and must be relinked if moved.
+- Host-project state includes media path, Cue positions, Loop, requested Play/Pause, selected Cue, speed controller value, and enablement for RGB Split, Flash, Zoom Punch and Color Boost. Video files remain external to the project and must be relinked if moved.
 
 See [product scope](docs/project/VISUAL_PRODUCT.md), [architecture](docs/project/VISUAL_ARCHITECTURE.md), [backlog](docs/project/VISUAL_BACKLOG.md) and [QA evidence](docs/project/VISUAL_QA_CHECKLIST.md).
 
-## In progress on `codex/VISUAL-021-color-boost`
+## In progress on `codex/VISUAL-022-video-echo`
 
-Color Boost is implemented on the macOS Metal renderer. Cue velocity controls saturation from 1.0× to 1.6× with the fixed 5/40/180 ms envelope; the toggle is saved and defaults off, including in older sessions. The user reports that it works well in Logic; PR #19 is awaiting merge, and Windows rendering is not implemented yet.
+Video Echo is being added to the macOS Metal renderer. It blends up to two recent frames with a maximum mix of 45%, driven by Cue velocity and the fixed 5/40/180 ms envelope. Its saved toggle defaults off. Logic host QA is pending, and Windows rendering is not implemented yet.
 
 ## Build and install for local Logic QA (macOS)
 
@@ -36,7 +37,7 @@ make install-avsampler-au BUILD_DIR=/private/tmp/visual-build BUILD_TYPE=Release
 
 Close Logic Pro before installing. The command builds the AU and copies it to `~/Library/Audio/Plug-Ins/Components/AVSampler.component`, then applies an ad hoc local signature and verifies it. Reopen Logic, rescan Audio Units if needed, and insert AVSampler as a software instrument. This is a **developer QA install**, not a ready-to-share alpha installer. It requires a local build environment and does not notarize the plugin.
 
-In Logic, load a local video, place MIDI notes 36/38/40/41 in a region, and play it. Drag Cue markers to change their trigger times. Send MIDI CC1 to change playback speed; Cue velocity controls RGB Split and Flash intensity and Zoom Punch amplitude when enabled. Visual effects use the same fixed 5/40/180 ms envelope. Zoom Punch peaks at 1.12× at maximum velocity. The plugin state is saved by the host, while the video file itself remains external.
+In Logic, load a local video, place MIDI notes 36/38/40/41 in a region, and play it. Drag Cue markers to change their trigger times. Send MIDI CC1 to change playback speed; Cue velocity controls the enabled effects, each with the fixed 5/40/180 ms envelope. Zoom Punch peaks at 1.12×, Color Boost at 1.6× saturation, and Video Echo mixes up to 45% of the two latest frames at maximum velocity. The plugin state is saved by the host, while the video file itself remains external.
 
 ## Limitations and open qualification
 
