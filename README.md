@@ -12,7 +12,7 @@ The currently qualified target remains **macOS Audio Unit in Logic Pro**. The Wi
 
 - One local video with Play/Pause, Loop, duration and media replacement/relink controls.
 - Four draggable Cue Points, mapped to MIDI notes 36, 38, 40 and 41 (shown as C1, D1, E1 and F1 in the tested Logic setup; octave labels vary between hosts).
-- MIDI CC1 controls video speed from 0.5× to 1.5×. The endpoints have been manually confirmed; CC1=64 neutral behavior and Logic save/reopen are still listed for verification.
+- MIDI CC1 controls video speed from 0.5× to 1.5×. The user reports confirming the endpoints, normal speed at 64, and restoration after Logic save/reopen; the exact AU SHA used for that manual check was not recorded.
 - RGB Split triggered by Cue NoteOn velocity. Its enabled/disabled state is saved with the host project.
 - Metal frame presentation on macOS using AVFoundation and MetalKit.
 - Host-project state includes media path, Cue positions, Loop, requested Play/Pause, selected Cue, speed controller value and RGB Split enablement. Video files remain external to the project and must be relinked if moved.
@@ -37,7 +37,7 @@ In Logic, load a local video, place MIDI notes 36/38/40/41 in a region, and play
 - No Closed Alpha package or automated AV Sampler release workflow exists yet.
 - Supported macOS versions, codec/container matrix and minimum hardware are not formally declared.
 - Project state stores a media path, not video bytes; cross-machine project portability is not guaranteed.
-- Media relink/replacement preservation, Logic CC1 neutral/save-reopen, playback with the editor closed, and numeric responsiveness/performance measurements need explicit release evidence.
+- The user reports confirming media relink after moving the video while preserving Cue timings and Loop, and Logic CC1 neutral/save-reopen. Repeat these checks on the exact alpha candidate; playback with the editor closed and numeric responsiveness/performance measurements remain open.
 - A complete user-provided GUI log now reports two AV Sampler AU runs at pluginval strictness 4 with `ALL TESTS PASSED`. It identifies AVSampler v0.1.0 by AU type/subtype/manufacturer, but does not record the loaded component path or executable SHA; strictness 5 is not reported. The log contains a non-failing `Current program is -1` warning. An earlier local launch had aborted before plugin load.
 - Frame-accurate or sample-accurate video triggering and a guaranteed latency are not claimed.
 

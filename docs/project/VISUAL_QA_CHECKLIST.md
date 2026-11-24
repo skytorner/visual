@@ -7,8 +7,8 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 
 - `main` contient VISUAL-009 à VISUAL-014, y compris la timeline/session, CC1, le renderer Metal et RGB Split.
 - L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload et fonctionnement RGB Split; le dernier retour confirme aussi une lecture fluide en boucle. Résultats manuels rapportés, sans mesure chiffrée de latence, framerate ou CPU/GPU. Le journal pluginval récent ne relie pas le test à un SHA binaire.
-- CC1 à 0/127 a été confirmé; CC1=64 et sauvegarde/réouverture de cette valeur restent à vérifier explicitement.
-- Le déplacement du média puis Relink et la préservation des Cue timings sont implémentés/prévus, mais le scénario complet dans Logic n'est pas rapporté comme exécuté.
+- L'utilisateur confirme dans Logic CC1 à 0/64/127 et la restauration de la valeur après save/reload; SHA exact de l'AU utilisé non consigné.
+- L'utilisateur confirme le déplacement puis le relink de la vidéo avec conservation des Cue timings et du Loop; refaire sur l'artefact candidat de distribution.
 - Un ancien lancement pluginval s'était interrompu avant chargement (code 134). Le nouveau journal utilisateur `log audio react4.txt` rapporte deux validations complètes de l'AU AV Sampler v0.1.0 à strictness 4, `ALL TESTS PASSED`. Le journal identifie le composant par `aumu,AVsm,Vpoc`, mais ne donne ni chemin du bundle ni SHA de l'exécutable; strictness 5 n'est pas rapporté. L'avertissement `Current program is -1` apparaît lors du changement de programme et n'empêche pas le résultat `SUCCESS`.
 
 ## Porte Closed Alpha 1 — état actuel
@@ -23,8 +23,8 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | Signature notarisation / provenance du package alpha | NOT TESTED | L'installation développeur applique une signature ad hoc; aucune notarisation ni signature de distribution établie. |
 | pluginval AU | PASS strictness 4 | Deux essais GUI complets sur `aumu,AVsm,Vpoc`, version 0.1.0. Le rapport ne lie pas le test à un SHA; strictness 5 non exécuté/rapporté. |
 | Versions macOS, codecs et matériel minimal | NOT DEFINED | Un média utilisateur a fonctionné; aucune matrice de compatibilité n'est formalisée. |
-| Relink après déplacement média | NOT REPORTED | Les timings doivent être vérifiés sur le candidat de distribution. |
-| CC1=64 et save/reload | NOT TESTED | Les extrêmes sont confirmés, pas ces cas précis. |
+| Relink après déplacement média | PASS manuel rapporté, 2026-11-24 | L'utilisateur confirme que les Cue timings et Loop sont conservés après déplacement/relink dans Logic. SHA de l'AU testé non consigné; refaire sur le candidat de distribution. |
+| CC1=64 et save/reload | PASS manuel rapporté, 2026-11-24 | L'utilisateur confirme la vitesse normale à 64 et la restauration après sauvegarde/réouverture dans Logic. SHA de l'AU testé non consigné; refaire sur le candidat de distribution. |
 | pluginval sur le package alpha exact | NOT TESTED | Strictness 4 passe sur l'AU de développement enregistré, mais le log ne donne pas le chemin ou SHA. Refaire et consigner le test sur l'artefact de cohorte. |
 
 **Décision actuelle : NO-GO pour envoyer une Closed Alpha multi-plateforme; GO pour le processus de build Windows de VISUAL-016. La QA REAPER/Windows est volontairement reportée pendant la poursuite du développement macOS.**
@@ -124,8 +124,8 @@ La ligne pluginval de cette matrice concerne la tentative strictness 5 du 2026-1
 | Restauration d'une session en Pause | PASS automatisé / UI NOT TESTED | L'état Pause est restauré par sérialisation; vérifier ensuite l'éditeur dans Logic. |
 | Changement de chemin sans perte de timings | PASS automatisé | `AVSamplerCoreTests` remplace le chemin média et vérifie que les quatre Cue timings restent identiques. |
 | Build et copie AU macOS VISUAL-011 | PASS build/install | Bundle installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; SHA `8b39418aa3877e8750ca0ea34a0269911b36633d131624ef6e72b8b939ddc4ef` identique à l'artefact. |
-| Média déplacé/absent et action Relink | NOT TESTED | Vérifier l'état visuel Missing media et le sélecteur de relink dans Logic. |
-| Relink/remplacement en état Pause/Loop | NOT TESTED | Vérifier le chargement, Play/Pause conservé, Loop/sélection et cues au temps existant. |
+| Média déplacé/absent et action Relink | PASS manuel rapporté | L'utilisateur confirme le déplacement/relink dans Logic et la préservation des Cue timings; l'état visuel Missing media n'est pas décrit séparément. Refaire sur l'artefact candidat de distribution. |
+| Relink/remplacement et conservation du Loop | PASS manuel rapporté | L'utilisateur confirme que Loop et timings des cues restent en place après relink. La conservation de l'état Pause/Play n'est pas rapportée séparément. |
 | Composition UI hôte | NOT TESTED | Header session, barre média/transport, aperçu, timeline et cartes; aucune reprise graphique propriétaire. |
 
 Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, sans rapport de chaque scénario séparé; garder les limites de preuve détaillées ci-dessus.
@@ -141,7 +141,7 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | Modulation du clavier intégré de Logic contrôle la vitesse du Cue en cours | PASS manuel rapporté | L'utilisateur confirme que jouer sur la modulation change bien la vitesse du pad en cours. |
 | Extrêmes CC1 (0 et 127) | PASS manuel rapporté | L'utilisateur confirme que les deux extrêmes donnent une vitesse très lente et très rapide. |
 | Fermeture du clavier intégré de Logic | OBSERVÉ | La modulation revient à 0 à la fermeture; avec le mapping actuel, cela place Speed à son minimum de 0,5×. |
-| Neutralité à 64, affichage Speed et réouverture de session dans Logic | NOT TESTED | Ces scénarios ne sont pas encore rapportés. Aucune latence mesurée. |
+| Neutralité à 64 et save/reload dans Logic | PASS manuel rapporté, 2026-11-24 | Vitesse normale à 64 et restauration après réouverture confirmées par l'utilisateur; SHA exact non consigné. Aucune latence mesurée. |
 | Autres emplacements FX | PASS statique | Level, Color, Glitch restent inactifs dans le code de l'éditeur. |
 
 ## VISUAL-014a — Preuve du rendu des frames Metal

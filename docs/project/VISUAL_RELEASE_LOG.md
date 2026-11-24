@@ -94,6 +94,12 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 - Aucune validation manuelle REAPER/Windows ni pluginval Windows n'est rapportée. L'artefact est un build de QA, pas un package d'alpha distribuable.
 - Décision de séquencement du 2026-11-24 : l'utilisateur veut le processus de création VST3 Windows en place, puis continuer le développement sur Mac. Les essais REAPER/Windows et la parité sont reportés jusqu'à stabilisation du périmètre fonctionnel macOS; aucun test Windows manuel n'est demandé maintenant.
 
+## VISUAL-018 — Clôture QA Logic CC1 et relink média — 2026-11-24
+
+- L'utilisateur confirme manuellement dans Logic que CC1=64 donne la vitesse normale et que cette valeur est conservée après sauvegarde/réouverture.
+- L'utilisateur confirme également le déplacement puis le relink de la vidéo, avec conservation des Cue timings et du Loop.
+- Aucun SHA du composant AU utilisé pour ces essais n'a été consigné. Ces scénarios restent à reprendre sur l'artefact exact de Closed Alpha; la validation ne vaut pas QA d'un package de distribution.
+
 ## Initial Setup
 
 Status: Planning.
