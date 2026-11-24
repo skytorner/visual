@@ -136,6 +136,7 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     displayedPlaybackRequested = state.playbackRequested;
     displayedRgbSplitEnabled = state.rgbSplitEnabled;
     lastSeenRgbSplitTrigger = audioProcessor.getLatestRgbSplitTrigger();
+    fxControlBar.setRgbSplitAvailable(videoComponent.isRgbSplitAvailable());
     fxControlBar.setRgbSplitEnabled(displayedRgbSplitEnabled);
     videoComponent.setRgbSplitEnabled(displayedRgbSplitEnabled);
     fxControlBar.setSpeedMultiplier(
@@ -223,7 +224,7 @@ void AVSamplerAudioProcessorEditor::timerCallback()
     {
         lastSeenRgbSplitTrigger = rgbSplitTrigger;
         const auto velocity = static_cast<int>(rgbSplitTrigger & 0xffu);
-        if (displayedRgbSplitEnabled && velocity > 0)
+        if (videoComponent.isRgbSplitAvailable() && displayedRgbSplitEnabled && velocity > 0)
         {
             fxControlBar.setLastMidiVelocity(velocity);
             videoComponent.triggerRgbSplitVelocity(velocity);

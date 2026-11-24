@@ -16,7 +16,7 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | Élément | Statut | Preuve / limite |
 | --- | --- | --- |
 | AU macOS et Logic | PASS manuel rapporté | Le parcours actuel charge et fonctionne dans Logic. Autres hôtes non qualifiés. |
-| VST3 Windows et REAPER | NOT AVAILABLE | AV Sampler n'a pas encore de cible Windows/VST3 ni de backend vidéo Windows; VISUAL-016 est le premier jalon de portage. |
+| VST3 Windows et REAPER | IN PROGRESS / NOT VERIFIED | La branche VISUAL-016 ajoute une cible VST3 et un backend JUCE VideoComponent. Build Windows CI et validation réelle dans REAPER restent requis; RGB Split est indisponible sur cette vue prototype. |
 | Package installable sans environnement de développement | NOT AVAILABLE | Les scripts de release et le workflow versionnés package `AudioReactiveImagePOC`; `make install-avsampler-au` est une installation locale développeur qui compile sur la machine. |
 | Installation/mise à jour/désinstallation par des testeurs | NOT TESTED | Aucun package AV Sampler pour cohorte n'existe encore. |
 | Signature notarisation / provenance du package alpha | NOT TESTED | L'installation développeur applique une signature ad hoc; aucune notarisation ni signature de distribution établie. |

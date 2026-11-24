@@ -71,9 +71,14 @@ target_link_libraries(AudioReactiveImagePOC
         juce::juce_recommended_warning_flags
 )
 
-# Phase 1 is macOS/AU-first. Keep the existing audio effect as a separate
-# target so its plugin identity and saved projects remain compatible.
-if(APPLE)
+# AV Sampler shares its processor/editor across platforms. The video surface is
+# selected per platform; the legacy audio plugin above remains unchanged.
+if(APPLE OR WIN32)
+    set(AVSAMPLER_FORMATS VST3)
+    if(APPLE)
+        list(APPEND AVSAMPLER_FORMATS AU)
+    endif()
+
     juce_add_plugin(AVSampler
         COMPANY_NAME "Visual POC"
         BUNDLE_ID "com.visual.avsampler"
@@ -86,7 +91,7 @@ if(APPLE)
         PLUGIN_MANUFACTURER_CODE Vpoc
         PLUGIN_CODE AVsm
         VERSION 0.1.0
-        FORMATS AU
+        FORMATS ${AVSAMPLER_FORMATS}
         PRODUCT_NAME "AVSampler"
     )
 
@@ -96,13 +101,17 @@ if(APPLE)
         PRIVATE
             Source/AVSamplerProcessor.cpp
             Source/AVSamplerEditor.cpp
-            Source/VideoFramePlayerComponent.mm
             Source/CueTimelineComponent.cpp
             Source/SamplerUiComponents.cpp
     )
 
-    set_source_files_properties(Source/VideoFramePlayerComponent.mm
-        PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
+    if(APPLE)
+        target_sources(AVSampler PRIVATE Source/VideoFramePlayerComponent.mm)
+        set_source_files_properties(Source/VideoFramePlayerComponent.mm
+            PROPERTIES COMPILE_OPTIONS "-fobjc-arc")
+    elseif(WIN32)
+        target_sources(AVSampler PRIVATE Source/VideoFramePlayerComponent.cpp)
+    endif()
 
     target_compile_features(AVSampler PRIVATE cxx_std_17)
     target_compile_definitions(AVSampler
@@ -117,16 +126,21 @@ if(APPLE)
             juce::juce_audio_utils
             juce::juce_gui_extra
             juce::juce_video
-            "-framework Metal"
-            "-framework MetalKit"
-            "-framework AVFoundation"
-            "-framework CoreVideo"
-            "-framework QuartzCore"
         PUBLIC
             juce::juce_recommended_config_flags
             juce::juce_recommended_lto_flags
             juce::juce_recommended_warning_flags
     )
+
+    if(APPLE)
+        target_link_libraries(AVSampler PRIVATE
+            "-framework Metal"
+            "-framework MetalKit"
+            "-framework AVFoundation"
+            "-framework CoreVideo"
+            "-framework QuartzCore"
+        )
+    endif()
 endif()
 
 include(CTest)

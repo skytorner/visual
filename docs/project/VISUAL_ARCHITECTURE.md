@@ -6,8 +6,8 @@ Cadrage : 2026-11-24. `AVSampler` est un instrument vidéo MIDI JUCE natif. `Aud
 
 - JUCE 8.0.8, C++17 et CMake.
 - `AudioReactiveImagePOC` conserve ses identifiants, paramètres, formats et état historiques.
-- AV Sampler a sa propre identité de plugin et est actuellement configuré comme instrument AU macOS uniquement. VST3/Standalone, Windows et autres hôtes ne sont pas qualifiés pour AV Sampler.
-- Interface JUCE native. Le lecteur vidéo macOS utilise AVFoundation et la présentation utilise Metal/MetalKit.
+- AV Sampler garde sa propre identité de plugin. Le prototype ajoute les formats AU + VST3 sur macOS et VST3 sur Windows; seul l'AU macOS dans Logic est actuellement qualifié.
+- Interface JUCE native. Le renderer macOS utilise AVFoundation et Metal/MetalKit. Le prototype Windows enveloppe `juce::VideoComponent` pour lecture/transport; la construction Windows et l'hôte REAPER restent à vérifier. Cette vue ne donne pas accès aux frames pour RGB Split, donc l'effet est signalé indisponible sur ce prototype.
 
 ## Flux actuel AV Sampler
 
@@ -19,8 +19,9 @@ DAW / MIDI
   -> timer éditeur sur le thread message
        -> transport/seek/speed de VideoFramePlayerComponent
        -> trigger de l'enveloppe RGB côté renderer
-  -> AVFoundation AVPlayerItemVideoOutput
-  -> CVPixelBuffer -> CVMetalTextureCache -> MTKView / shader RGB Split
+  -> macOS: AVFoundation AVPlayerItemVideoOutput -> CVPixelBuffer
+             -> CVMetalTextureCache -> MTKView / shader RGB Split
+  -> Windows: JUCE VideoComponent / playback backend (RGB Split indisponible)
 
 État JUCE sauvegardé dans le projet hôte : chemin média, quatre Cue timings,
 Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation RGB Split.
@@ -64,7 +65,7 @@ DAW (effet audio) -> PluginProcessor::processBlock() -> RMS/Peak/Envelope -> ato
 ## Invariants et qualification restant à faire
 
 1. Aucun mutex, I/O, décodage, seek bloquant, allocation dynamique ou appel UI dans `processBlock()`.
-2. Le produit actuellement qualifié est l'AU macOS dans Logic; ne pas généraliser à d'autres hôtes, formats ou plateformes.
+2. Le seul parcours actuellement qualifié reste l'AU macOS dans Logic; le prototype VST3 Windows doit encore passer le build Windows et un test réel REAPER.
 3. Le projet hôte conserve les paramètres/session; le fichier vidéo demeure externe.
 4. Un média absent ou illisible doit rester récupérable sans crash; valider relink/remplacement dans la version candidate de distribution.
 5. Ne pas modifier l'identité ni l'état du POC audio.

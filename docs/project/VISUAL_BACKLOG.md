@@ -192,7 +192,7 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 
 ### VISUAL-016 — Vertical slice Windows / VST3 / REAPER
 
-- Status: Open — nouvelle priorité produit confirmée le 2026-11-24; le prototype macOS/AU/Logic reste la référence et doit rester fonctionnel.
+- Status: In progress — branche `codex/VISUAL-016-dual-platform-preflight`; cible CMake VST3 Windows, wrapper JUCE VideoComponent et build AU/VST3 macOS ajoutés. Le build Windows et le test REAPER restent à obtenir.
 - Priority: P0 avant de distribuer l'alpha, car la majorité des testeurs potentiels est attendue sur Windows.
 - Scope: sortir AV Sampler du garde `APPLE` dans CMake sans changer l'identité ni le comportement de l'AU Mac; créer un backend vidéo Windows; établir si JUCE `VideoComponent` suffit pour le parcours de base et comment donner accès aux frames pour RGB Split; produire un VST3 Windows.
 - Acceptance: build Windows x64; le VST3 se charge dans REAPER; vidéo locale ouvre/joue/pause/seek; notes 36/38/40/41 déclenchent les cues; loop, CC1 Speed et persistance de session vérifiés; voie de rendu pour RGB Split décidée et écart de parité documenté; résultats validés sur un vrai hôte Windows, pas seulement compilés sur Mac.

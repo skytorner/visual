@@ -6,7 +6,7 @@ AV Sampler is a macOS-first MIDI video instrument for music production. It plays
 
 AV Sampler is an internally tested prototype, **not a released or distributable alpha package**. The AU has been manually exercised in Logic Pro, including Cue playback, project save/reopen, video looping, CC1 control, RGB Split and fluid playback in a loop. These are user-reported host checks; no numeric latency, frame-rate or CPU/GPU benchmark is claimed.
 
-The currently qualified target is **macOS Audio Unit in Logic Pro**. AV Sampler VST3, Windows and other DAWs are not qualified. The AV Sampler target is only added by CMake on Apple platforms.
+The currently qualified target remains **macOS Audio Unit in Logic Pro**. A Windows VST3 playback prototype is being added, but its Windows build and REAPER behavior are not yet verified. Other DAWs are not qualified.
 
 ## Features present on `main`
 
