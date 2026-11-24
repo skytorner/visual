@@ -112,7 +112,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-011 — Session et gestion du média
 
-- Status: Done — session/média validés par l'utilisateur et fusionnés à `main`.
+- Status: Done — session/média validés par l'utilisateur et fusionnés à `main`; relink après déplacement avec Cue timings/Loop préservés confirmé manuellement dans Logic le 2026-11-24. Vérification à répéter sur l'artefact candidat de distribution.
 - Priority: P1.
 - Scope: organiser l'éditeur avec un en-tête AV Sampler/session, une barre média/transport, l'aperçu vidéo et la timeline/Cues existants; afficher le média courant ou son état manquant; charger, relier ou remplacer le média.
 - Persistance: chemin média, Cue Points, Loop ON/OFF, lecture demandée (Pause/Play) et Cue sélectionné restent dans l'état du projet hôte. Une ancienne session sans champ lecture démarre automatiquement la vidéo lors de l'ouverture de l'éditeur.
@@ -145,7 +145,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-013 — Premier effet vidéo piloté par MIDI CC
 
-- Status: Needs verification — PR #8 fusionnée dans `main` au commit `7bfddf9`; l'utilisateur confirme le contrôle CC1 en Logic et les extrêmes 0/127. La neutralité 64 et le save/reload ne sont pas séparément confirmés. Un pluginval strictness 4 générique passe sur l'AU, sans remplacer ces vérifications MIDI manuelles.
+- Status: Done — PR #8 fusionnée dans `main` au commit `7bfddf9`; l'utilisateur confirme dans Logic le contrôle CC1, les extrêmes 0/127, la neutralité 64 et save/reload (validation rapportée le 2026-11-24). Le SHA de l'AU testé n'est pas consigné; revalider sur l'artefact candidat de distribution. Un pluginval strictness 4 générique passe sur l'AU, sans remplacer ces vérifications MIDI manuelles.
 - Priority: P1.
 - Scope: activer uniquement Speed parmi les emplacements FX, piloté par CC1 (0–127 -> 0,5×–1,5×; 64 = 1×), avec affichage de la vitesse et sauvegarde/restauration de la valeur.
 - Acceptance:
@@ -204,4 +204,10 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 - Priority: P0 pour une cohorte macOS/Windows.
 - Scope: valider le VST3 dans REAPER sur Windows, qualifier lecture/transport/MIDI/session et codecs, décider puis combler les écarts de rendu (dont RGB Split), établir les exigences système, puis fabriquer deux archives identifiées par SHA avec instructions d'installation/mise à jour/désinstallation et guide de feedback pour 3–5 testeurs.
 - Acceptance: Logic/AU sur Mac et REAPER/VST3 sur Windows vérifiés sur leurs artefacts exacts; vidéo/Cues/Loop, CC1, RGB Split, save/reopen et relink testés; pluginval effectué sur chaque artefact; versions, SHA, installation propre et limites documentés; aucune publication publique.
-- QA restante déjà identifiée côté Mac: CC1=64 avec save/reopen, relink après déplacement média, puis pluginval strictness 4 sur l'artefact exact; strictness 5 n'est pas rapporté.
+- QA restante côté Mac avant Closed Alpha: pluginval strictness 4 sur l'artefact AU exact; strictness 5 n'est pas rapporté. CC1=64/save-reload et relink après déplacement sont confirmés manuellement, sans SHA d'artefact.
+
+### VISUAL-018 — Clôture QA Logic CC1 et relink média
+
+- Status: Done — le 2026-11-24, l'utilisateur confirme dans Logic CC1=64 à vitesse normale avec save/reload, puis le déplacement/relink de la vidéo en conservant les Cue timings et l'état Loop.
+- Portée: consigner les retours manuels sur les fonctions macOS existantes; aucune modification de code.
+- Limite: le SHA exact de l'AU testé n'est pas consigné. Rejouer ces scénarios sur l'artefact candidat de distribution; pluginval sur l'artefact alpha reste séparément requis.

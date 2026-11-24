@@ -33,7 +33,7 @@ Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation RGB Split
 - NoteOff, vélocité zéro et notes non assignées ne déclenchent pas de Cue/RGB. Si plusieurs cues arrivent avant le prochain tick éditeur, la mailbox ne retient que le plus récent.
 - L'éditeur exécute les opérations de transport sur le thread message. La lecture, le seek, la vitesse et le rendu vidéo ne tournent pas dans le callback audio.
 - Le RGB Split décale rouge et bleu en directions opposées, garde le vert centré et borne les UV. La vélocité pilote l'intensité; l'enveloppe Attack/Hold/Release est transitoire. L'activation est persistée.
-- CC1 pilote Speed indépendamment de RGB Split. Mapping courant : 0,5× à 1,5×; les extrêmes ont été confirmés en Logic, neutralité à 64/save-reload restent à vérifier explicitement.
+- CC1 pilote Speed indépendamment de RGB Split. Mapping courant : 0,5× à 1,5×; l'utilisateur confirme dans Logic les extrêmes, la neutralité à 64 et save/reload. Refaire sur le candidat de distribution identifié par SHA.
 - La fluidité de lecture en boucle est confirmée à l'usage par l'utilisateur. Aucune mesure de latence MIDI-image, framerate ou coût CPU/GPU n'est disponible.
 
 ## Média, timeline et session
@@ -41,7 +41,7 @@ Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation RGB Split
 - Un seul lecteur et une seule vidéo à la fois. `CueTimelineComponent` et `AssignedPadsComponent` représentent les mêmes quatre états du `ProjectState`; les pads et la timeline synchronisent leur sélection sans déclencher de NoteOn.
 - Cue notes : MIDI 36/38/40/41, présentées C1/D1/E1/F1 dans le Logic testé. L'appellation d'octave varie entre hôtes.
 - Le média reste externe; le projet conserve son chemin, pas les octets vidéo. Les anciens états sans préférence Play/Pause démarrent en lecture à l'ouverture de l'éditeur; les autres nouveaux champs ont des valeurs par défaut documentées par les tests.
-- L'état média absent est récupérable depuis l'éditeur. Le relink/remplacement est conçu pour préserver les Cue timings, Loop et préférences, mais le scénario utilisateur complet de déplacement/relink reste à confirmer dans la checklist de release.
+- L'état média absent est récupérable depuis l'éditeur. L'utilisateur confirme le relink après déplacement avec préservation des Cue timings et du Loop dans Logic; refaire sur l'artefact candidat de distribution.
 - Les cues peuvent être déplacés sur la timeline. Le nudging clavier utilise un pas nominal de 1/30 s (Maj = 10 pas), car la cadence source n'est pas exposée par l'API projet.
 
 ## Historique d'architecture — décisions supersédées

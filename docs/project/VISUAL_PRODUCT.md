@@ -23,8 +23,8 @@ Le plugin `AudioReactiveImagePOC` conserve l'analyse RMS/peak/envelope, le passt
 ## Fonctionnalités actuellement disponibles
 
 - Timeline interactive et sélection synchronisée entre Cue Points et quatre pads.
-- Référence vidéo sauvegardée dans le projet hôte; les pixels ne sont pas incorporés. Le média peut être relinké/remplacé sans intention de remettre les Cue timings à zéro; le parcours manuel du relink doit être confirmé séparément avant release.
-- CC1 mappé sur 0,5×–1,5×. Les extrêmes ont été confirmés dans Logic; la valeur neutre 64 et save/reload du contrôle restent à vérifier explicitement.
+- Référence vidéo sauvegardée dans le projet hôte; les pixels ne sont pas incorporés. L'utilisateur confirme dans Logic le relink après déplacement du média avec conservation des Cue timings et du Loop; refaire sur l'artefact candidat de distribution.
+- CC1 mappé sur 0,5×–1,5×. L'utilisateur confirme dans Logic la valeur neutre 64 et sa restauration après save/reload, en plus des extrêmes 0/127; refaire sur l'artefact candidat de distribution.
 - RGB Split déclenché par la vélocité MIDI avec activation sauvegardée. L'utilisateur confirme l'effet et une lecture fluide en boucle.
 
 ## Produit et phases de distribution
