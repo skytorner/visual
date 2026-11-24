@@ -33,6 +33,9 @@ public:
     void setRgbSplitEnabled(bool enabled);
     void triggerRgbSplitVelocity(int velocity);
     bool isRgbSplitAvailable() const noexcept;
+    void setFlashEnabled(bool enabled);
+    void triggerFlashVelocity(int velocity);
+    bool isFlashAvailable() const noexcept;
     void resized() override;
 
     std::function<void(const juce::String&)> onErrorOccurred;

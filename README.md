@@ -14,8 +14,9 @@ The currently qualified target remains **macOS Audio Unit in Logic Pro**. The Wi
 - Four draggable Cue Points, mapped to MIDI notes 36, 38, 40 and 41 (shown as C1, D1, E1 and F1 in the tested Logic setup; octave labels vary between hosts).
 - MIDI CC1 controls video speed from 0.5× to 1.5×. The user reports confirming the endpoints, normal speed at 64, and restoration after Logic save/reopen; the exact AU SHA used for that manual check was not recorded.
 - RGB Split triggered by Cue NoteOn velocity. Its enabled/disabled state is saved with the host project.
+- Flash is also triggered by Cue NoteOn velocity on the macOS renderer; it is disabled by default and its toggle is saved with the host project. Windows rendering is not implemented yet.
 - Metal frame presentation on macOS using AVFoundation and MetalKit.
-- Host-project state includes media path, Cue positions, Loop, requested Play/Pause, selected Cue, speed controller value and RGB Split enablement. Video files remain external to the project and must be relinked if moved.
+- Host-project state includes media path, Cue positions, Loop, requested Play/Pause, selected Cue, speed controller value, RGB Split enablement and Flash enablement. Video files remain external to the project and must be relinked if moved.
 
 See [product scope](docs/project/VISUAL_PRODUCT.md), [architecture](docs/project/VISUAL_ARCHITECTURE.md), [backlog](docs/project/VISUAL_BACKLOG.md) and [QA evidence](docs/project/VISUAL_QA_CHECKLIST.md).
 
@@ -30,7 +31,7 @@ make install-avsampler-au BUILD_DIR=/private/tmp/visual-build BUILD_TYPE=Release
 
 Close Logic Pro before installing. The command builds the AU and copies it to `~/Library/Audio/Plug-Ins/Components/AVSampler.component`, then applies an ad hoc local signature and verifies it. Reopen Logic, rescan Audio Units if needed, and insert AVSampler as a software instrument. This is a **developer QA install**, not a ready-to-share alpha installer. It requires a local build environment and does not notarize the plugin.
 
-In Logic, load a local video, place MIDI notes 36/38/40/41 in a region, and play it. Drag Cue markers to change their trigger times. Send MIDI CC1 to change playback speed; Cue velocity controls RGB Split intensity. The plugin state is saved by the host, while the video file itself remains external.
+In Logic, load a local video, place MIDI notes 36/38/40/41 in a region, and play it. Drag Cue markers to change their trigger times. Send MIDI CC1 to change playback speed; Cue velocity controls RGB Split and Flash intensity when enabled. Flash uses a fixed envelope and blends toward white. The plugin state is saved by the host, while the video file itself remains external.
 
 ## Limitations and open qualification
 

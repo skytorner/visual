@@ -24,6 +24,9 @@
 @property(nonatomic, assign) BOOL rgbSplitEnabled;
 @property(nonatomic, assign) float rgbSplitIntensity;
 @property(nonatomic, assign) CFTimeInterval rgbSplitStartTime;
+@property(nonatomic, assign) BOOL flashEnabled;
+@property(nonatomic, assign) int flashVelocity;
+@property(nonatomic, assign) CFTimeInterval flashStartTime;
 @property(nonatomic, assign) NSUInteger loadGeneration;
 @property(nonatomic, copy) NSString* rendererSetupError;
 
@@ -33,6 +36,8 @@
 - (void)seekToSeconds:(double)seconds;
 - (void)setRgbSplitEnabled:(BOOL)enabled;
 - (void)triggerRgbSplitVelocity:(int)velocity;
+- (void)setFlashEnabled:(BOOL)enabled;
+- (void)triggerFlashVelocity:(int)velocity;
 @end
 
 @implementation AVSamplerMetalVideoView
@@ -97,20 +102,26 @@
             output.uv = coordinates[id];
             return output;
         }
-        struct RgbSplitUniforms { float offsetUv; };
         fragment float4 avs_fragment(VertexOut input [[stage_in]],
-                                     constant RgbSplitUniforms& effect [[buffer(0)]],
+                                     constant float2& effects [[buffer(0)]],
                                      texture2d<float> frame [[texture(0)]]) {
             constexpr sampler frameSampler(coord::normalized, address::clamp_to_edge, filter::linear);
-            if (effect.offsetUv <= 0.0)
-                return frame.sample(frameSampler, input.uv);
-            const float2 redUv = clamp(input.uv - float2(effect.offsetUv, 0.0), float2(0.0), float2(1.0));
-            const float2 greenUv = clamp(input.uv, float2(0.0), float2(1.0));
-            const float2 blueUv = clamp(input.uv + float2(effect.offsetUv, 0.0), float2(0.0), float2(1.0));
-            const float4 redSample = frame.sample(frameSampler, redUv);
-            const float4 greenSample = frame.sample(frameSampler, greenUv);
-            const float4 blueSample = frame.sample(frameSampler, blueUv);
-            return float4(redSample.r, greenSample.g, blueSample.b, greenSample.a);
+            float4 color;
+            if (effects.x > 0.0) {
+                const float2 redUv = clamp(input.uv - float2(effects.x, 0.0), float2(0.0), float2(1.0));
+                const float2 greenUv = clamp(input.uv, float2(0.0), float2(1.0));
+                const float2 blueUv = clamp(input.uv + float2(effects.x, 0.0), float2(0.0), float2(1.0));
+                const float4 redSample = frame.sample(frameSampler, redUv);
+                const float4 greenSample = frame.sample(frameSampler, greenUv);
+                const float4 blueSample = frame.sample(frameSampler, blueUv);
+                color = float4(redSample.r, greenSample.g, blueSample.b, greenSample.a);
+            }
+            else {
+                color = frame.sample(frameSampler, input.uv);
+            }
+            if (effects.y > 0.0)
+                color.rgb = mix(color.rgb, float3(1.0), clamp(effects.y, 0.0, 0.65));
+            return color;
         }
     )METAL";
 
@@ -238,6 +249,22 @@
     self.rgbSplitStartTime = CACurrentMediaTime();
 }
 
+- (void)setFlashEnabled:(BOOL)enabled
+{
+    _flashEnabled = enabled;
+    if (! enabled)
+        self.flashVelocity = 0;
+}
+
+- (void)triggerFlashVelocity:(int)velocity
+{
+    if (! self.flashEnabled || velocity <= 0)
+        return;
+
+    self.flashVelocity = juce::jlimit(1, 127, velocity);
+    self.flashStartTime = CACurrentMediaTime();
+}
+
 - (void)shutdown
 {
     [self closeVideo];
@@ -318,12 +345,20 @@
 
         [encoder setRenderPipelineState:self.pipeline];
         [encoder setVertexBytes:&fit length:sizeof(fit) atIndex:0];
-        const auto elapsedSeconds = CACurrentMediaTime() - self.rgbSplitStartTime;
-        const auto envelope = avsampler::videoEffects::rgbSplitEnvelopeForElapsedSeconds(elapsedSeconds);
+        const auto currentTime = CACurrentMediaTime();
+        const auto rgbSplitElapsedSeconds = currentTime - self.rgbSplitStartTime;
+        const auto rgbSplitEnvelope = avsampler::videoEffects::rgbSplitEnvelopeForElapsedSeconds(
+            rgbSplitElapsedSeconds);
         const auto offsetUv = self.rgbSplitEnabled
-            ? avsampler::videoEffects::rgbSplitMaximumOffsetUv(self.rgbSplitIntensity, envelope) : 0.0;
-        const float effectOffsetUv = static_cast<float>(offsetUv);
-        [encoder setFragmentBytes:&effectOffsetUv length:sizeof(effectOffsetUv) atIndex:0];
+            ? avsampler::videoEffects::rgbSplitMaximumOffsetUv(self.rgbSplitIntensity, rgbSplitEnvelope) : 0.0;
+        const auto flashElapsedSeconds = currentTime - self.flashStartTime;
+        const auto flashWhiteMix = self.flashEnabled
+            ? avsampler::videoEffects::flashWhiteMixForVelocityAndElapsedSeconds(
+                self.flashVelocity, flashElapsedSeconds) : 0.0;
+        const float effectValues[2] {
+            static_cast<float>(offsetUv), static_cast<float>(flashWhiteMix)
+        };
+        [encoder setFragmentBytes:effectValues length:sizeof(effectValues) atIndex:0];
         [encoder setFragmentTexture:self.currentFrameTexture atIndex:0];
         [encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:6];
     }
@@ -492,3 +527,15 @@ void VideoFramePlayerComponent::triggerRgbSplitVelocity(int velocity)
 }
 
 bool VideoFramePlayerComponent::isRgbSplitAvailable() const noexcept { return true; }
+
+void VideoFramePlayerComponent::setFlashEnabled(bool enabled)
+{
+    [impl->view setFlashEnabled:enabled];
+}
+
+void VideoFramePlayerComponent::triggerFlashVelocity(int velocity)
+{
+    [impl->view triggerFlashVelocity:velocity];
+}
+
+bool VideoFramePlayerComponent::isFlashAvailable() const noexcept { return true; }

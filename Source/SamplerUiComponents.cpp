@@ -122,6 +122,21 @@ FxControlBar::FxControlBar()
     };
     addAndMakeVisible(rgbSplitButton);
     setRgbSplitEnabled(true);
+
+    flashButton.setClickingTogglesState(true);
+    flashButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff20252d));
+    flashButton.setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff493b20));
+    flashButton.setColour(juce::TextButton::textColourOffId, juce::Colour(0xffd4dbe7));
+    flashButton.setColour(juce::TextButton::textColourOnId, juce::Colour(0xffffe4a3));
+    flashButton.setTooltip("Toggle velocity-triggered white Flash");
+    flashButton.onClick = [this]
+    {
+        setFlashEnabled(flashButton.getToggleState());
+        if (onFlashEnabledChanged)
+            onFlashEnabledChanged(flashEnabled);
+    };
+    addAndMakeVisible(flashButton);
+    setFlashEnabled(false);
 }
 
 void FxControlBar::setSpeedMultiplier(double multiplier)
@@ -151,6 +166,23 @@ void FxControlBar::setRgbSplitAvailable(bool available)
     repaint();
 }
 
+void FxControlBar::setFlashEnabled(bool enabled)
+{
+    flashEnabled = enabled;
+    flashButton.setToggleState(enabled, juce::dontSendNotification);
+    repaint();
+}
+
+void FxControlBar::setFlashAvailable(bool available)
+{
+    flashAvailable = available;
+    flashButton.setEnabled(available);
+    flashButton.setTooltip(available
+        ? "Toggle Flash triggered by MIDI note velocity"
+        : "Flash is not available on this video renderer yet");
+    repaint();
+}
+
 void FxControlBar::setLastMidiVelocity(int velocity)
 {
     const auto clampedVelocity = juce::jlimit(0, 127, velocity);
@@ -171,6 +203,10 @@ void FxControlBar::resized()
         .withWidth(cellWidth).reduced(3.0f, 0.0f);
     rgbSplitButton.setBounds(rgbCell.withY(rgbCell.getY() + 3.0f)
         .withHeight(29.0f).toNearestInt());
+    auto flashCell = placeholders.withX(placeholders.getX() + cellWidth * 3.0f)
+        .withWidth(cellWidth).reduced(3.0f, 0.0f);
+    flashButton.setBounds(flashCell.withY(flashCell.getY() + 3.0f)
+        .withHeight(29.0f).toNearestInt());
 }
 
 void FxControlBar::paint(juce::Graphics& graphics)
@@ -188,7 +224,7 @@ void FxControlBar::paint(juce::Graphics& graphics)
 
     auto placeholders = bounds.reduced(10.0f, 8.0f);
     placeholders.removeFromLeft(112.0f);
-    constexpr std::array<const char*, 4> names { "LEVEL", "SPEED", "RGB SPLIT", "GLITCH" };
+    constexpr std::array<const char*, 4> names { "LEVEL", "SPEED", "RGB SPLIT", "FLASH" };
     const auto cellWidth = placeholders.getWidth() / static_cast<float>(names.size());
     for (int i = 0; i < static_cast<int>(names.size()); ++i)
     {
@@ -196,29 +232,37 @@ void FxControlBar::paint(juce::Graphics& graphics)
             .withWidth(cellWidth).reduced(3.0f, 0.0f);
         const auto isSpeedControl = i == 1;
         const auto isRgbSplitControl = i == 2;
+        const auto isFlashControl = i == 3;
         graphics.setColour(isSpeedControl ? juce::Colour(0xff1e2d39)
             : isRgbSplitControl && rgbSplitAvailable && rgbSplitEnabled ? juce::Colour(0xff292339)
+            : isFlashControl && flashAvailable && flashEnabled ? juce::Colour(0xff332a18)
             : juce::Colour(0xff20252d));
         graphics.fillRoundedRectangle(cell, 5.0f);
         graphics.setColour(isSpeedControl ? juce::Colour(0xff3bd5df)
             : isRgbSplitControl && rgbSplitAvailable && rgbSplitEnabled ? juce::Colour(0xffb676f4)
+            : isFlashControl && flashAvailable && flashEnabled ? juce::Colour(0xffffc857)
             : juce::Colour(0xff3a414c));
         graphics.drawRoundedRectangle(cell, 5.0f, 1.0f);
-        if (isRgbSplitControl)
+        if (isRgbSplitControl || isFlashControl)
         {
-            graphics.setColour(rgbSplitAvailable && rgbSplitEnabled
-                ? juce::Colour(0xffd9c0fb) : juce::Colour(0xff8793a6));
+            const auto effectAvailable = isRgbSplitControl ? rgbSplitAvailable : flashAvailable;
+            const auto effectEnabled = isRgbSplitControl ? rgbSplitEnabled : flashEnabled;
+            const auto activeColour = isRgbSplitControl
+                ? juce::Colour(0xffd9c0fb) : juce::Colour(0xffffe4a3);
+            graphics.setColour(effectAvailable && effectEnabled ? activeColour
+                : juce::Colour(0xff8793a6));
             graphics.setFont(9.0f);
-            const auto velocityText = ! rgbSplitAvailable ? juce::String("PENDING")
-                : lastMidiVelocity > 0
-                ? "VELOCITY " + juce::String(lastMidiVelocity) : juce::String("VELOCITY");
+            const auto velocityText = ! effectAvailable ? juce::String("PENDING")
+                : lastMidiVelocity > 0 ? "VELOCITY " + juce::String(lastMidiVelocity)
+                : juce::String("VELOCITY");
             graphics.drawFittedText(velocityText,
                 cell.withY(cell.getY() + 39.0f).withHeight(13.0f).toNearestInt(),
                 juce::Justification::centred, 1);
-            graphics.setColour(juce::Colour(0xffa98cc8));
+            graphics.setColour(isRgbSplitControl ? juce::Colour(0xffa98cc8)
+                : juce::Colour(0xffd0ae5d));
             graphics.setFont(8.0f);
-            graphics.drawFittedText(! rgbSplitAvailable ? "WINDOWS PORT PENDING"
-                : rgbSplitEnabled ? "MIDI NOTE ON" : "DISABLED",
+            graphics.drawFittedText(! effectAvailable ? "WINDOWS PORT PENDING"
+                : effectEnabled ? "MIDI NOTE ON" : "DISABLED",
                 cell.withY(cell.getY() + 51.0f).withHeight(11.0f).toNearestInt(),
                 juce::Justification::centred, 1);
             continue;

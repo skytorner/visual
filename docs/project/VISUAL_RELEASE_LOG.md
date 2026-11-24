@@ -100,6 +100,14 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 - L'utilisateur confirme également le déplacement puis le relink de la vidéo, avec conservation des Cue timings et du Loop.
 - Aucun SHA du composant AU utilisé pour ces essais n'a été consigné. Ces scénarios restent à reprendre sur l'artefact exact de Closed Alpha; la validation ne vaut pas QA d'un package de distribution.
 
+## VISUAL-019 — Flash v1 sur macOS
+
+- Flash est déclenché par les mêmes NoteOn de cue que RGB Split; la vélocité commande le mélange vers le blanc, jusqu'à 65 %, durée fixe Attack/Hold/Release 5/40/180 ms.
+- Le toggle est sauvegardé et désactivé par défaut pour les états nouveaux et historiques. `processBlock()` conserve la publication atomique existante; le renderer Metal applique les deux effets.
+- Build Release macOS AU/VST3/Standalone et cibles de tests : PASS avec JUCE 8.0.8; CTest 5/5 PASS; `git diff --check` PASS. Warnings JUCE/Metal/AppKit dépréciés non bloquants.
+- `make install-avsampler-au BUILD_DIR=/private/tmp/visual-019-build BUILD_TYPE=Release` : PASS; bundle copié dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component` et signature `codesign --verify --deep --strict` validée. SHA-256 de l'exécutable installé après signature ad hoc : `7f95d72f9054668f0d035d0fd90f6c107683831dd806d59d679c2e962afaba13`.
+- Validation manuelle dans Logic : PASS rapporté par l'utilisateur (« fonctionne parfaitement tous les tests ») sur l'AU installé. CI GitHub du commit `a93ec95d8174319c6c61311bc66cfc0cfd4962e0` : build AVSampler VST3 Windows x64 PASS, audio-analysis PASS, GitGuardian PASS. Windows reste indisponible pour l'effet Flash; la compilation VST3 ne constitue pas une validation du renderer Windows.
+
 ## Initial Setup
 
 Status: Planning.

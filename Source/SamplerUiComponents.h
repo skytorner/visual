@@ -34,18 +34,24 @@ public:
     void setSpeedMultiplier(double multiplier);
     void setRgbSplitEnabled(bool enabled);
     void setRgbSplitAvailable(bool available);
+    void setFlashEnabled(bool enabled);
+    void setFlashAvailable(bool available);
     void setLastMidiVelocity(int velocity);
     void paint(juce::Graphics& graphics) override;
     void resized() override;
 
     std::function<void(bool)> onRgbSplitEnabledChanged;
+    std::function<void(bool)> onFlashEnabledChanged;
 
 private:
     double speedMultiplier = 1.0;
     bool rgbSplitEnabled = true;
     bool rgbSplitAvailable = true;
+    bool flashEnabled = false;
+    bool flashAvailable = true;
     int lastMidiVelocity = 0;
     juce::TextButton rgbSplitButton { "RGB SPLIT" };
+    juce::TextButton flashButton { "FLASH" };
 };
 
 class AssignedPadsComponent final : public juce::Component

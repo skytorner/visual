@@ -42,4 +42,13 @@ constexpr double rgbSplitMaximumOffsetUv(double intensity, double envelope) noex
     const auto boundedEnvelope = std::clamp(envelope, 0.0, 1.0);
     return 0.015 * boundedIntensity * boundedEnvelope;
 }
+
+constexpr double flashWhiteMixForVelocityAndElapsedSeconds(int velocity,
+                                                           double elapsedSeconds) noexcept
+{
+    constexpr double maximumWhiteMix = 0.65;
+    return maximumWhiteMix
+        * static_cast<double>(rgbSplitIntensityForVelocity(velocity))
+        * rgbSplitEnvelopeForElapsedSeconds(elapsedSeconds);
+}
 }

@@ -211,3 +211,11 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 - Status: Done — le 2026-11-24, l'utilisateur confirme dans Logic CC1=64 à vitesse normale avec save/reload, puis le déplacement/relink de la vidéo en conservant les Cue timings et l'état Loop.
 - Portée: consigner les retours manuels sur les fonctions macOS existantes; aucune modification de code.
 - Limite: le SHA exact de l'AU testé n'est pas consigné. Rejouer ces scénarios sur l'artefact candidat de distribution; pluginval sur l'artefact alpha reste séparément requis.
+
+### VISUAL-019 — Flash v1 piloté par la vélocité
+
+- Status: Done — implémentation, build/tests et validation utilisateur dans Logic terminés le 2026-11-24.
+- Priority: P1.
+- Scope: sur le renderer Metal macOS, ajouter un mélange bref vers le blanc déclenché par NoteOn d'un cue; utiliser le même événement de vélocité et la même enveloppe fixe qu'RGB Split; ajouter un toggle Flash sauvegardé.
+- Acceptance: intensité augmente avec vélocité 1–127 (maximum 65 %); durée reste fixe (Attack/Hold/Release 5/40/180 ms); l'image revient intacte au neutre; vélocité 0/NoteOff/non-assignée n'active pas l'effet; RGB Split, CC1, cue, Loop et lecture restent indépendants; l'état Flash est persisté, absent/false dans les sessions historiques; AU build/tests et installation passent; l'utilisateur confirme que les essais fonctionnent parfaitement dans Logic. Le contrôle Flash est indisponible et clairement signalé sous Windows.
+- Exclusions: autres effets, réglages utilisateur d'enveloppe/intensité, MIDI Learn, parité Windows, pluginval de distribution et mesure de performance chiffrée.

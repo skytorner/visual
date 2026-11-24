@@ -14,17 +14,17 @@ Cadrage : 2026-11-24. `AVSampler` est un instrument vidéo MIDI JUCE natif. `Aud
 ```text
 DAW / MIDI
   -> AVSamplerAudioProcessor::processBlock (instrument silencieux)
-  -> notes 36/38/40/41 -> Cue 1..4; CC1 -> Speed; vélocité NoteOn -> RGB trigger
+  -> notes 36/38/40/41 -> Cue 1..4; CC1 -> Speed; vélocité NoteOn -> triggers RGB Split + Flash
   -> atomiques bornés vers l'éditeur
   -> timer éditeur sur le thread message
        -> transport/seek/speed de VideoFramePlayerComponent
-       -> trigger de l'enveloppe RGB côté renderer
+       -> triggers des enveloppes RGB Split et Flash côté renderer
   -> macOS: AVFoundation AVPlayerItemVideoOutput -> CVPixelBuffer
-             -> CVMetalTextureCache -> MTKView / shader RGB Split
-  -> Windows: JUCE VideoComponent / playback backend (RGB Split indisponible)
+             -> CVMetalTextureCache -> MTKView / shader RGB Split + Flash
+  -> Windows: JUCE VideoComponent / playback backend (RGB Split et Flash indisponibles)
 
 État JUCE sauvegardé dans le projet hôte : chemin média, quatre Cue timings,
-Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation RGB Split.
+Loop, Play/Pause demandé, Cue sélectionné, valeur CC1, activation RGB Split et Flash.
 ```
 
 ## MIDI, threads et rendu
@@ -33,6 +33,7 @@ Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation RGB Split
 - NoteOff, vélocité zéro et notes non assignées ne déclenchent pas de Cue/RGB. Si plusieurs cues arrivent avant le prochain tick éditeur, la mailbox ne retient que le plus récent.
 - L'éditeur exécute les opérations de transport sur le thread message. La lecture, le seek, la vitesse et le rendu vidéo ne tournent pas dans le callback audio.
 - Le RGB Split décale rouge et bleu en directions opposées, garde le vert centré et borne les UV. La vélocité pilote l'intensité; l'enveloppe Attack/Hold/Release est transitoire. L'activation est persistée.
+- Flash mélange l'image vers le blanc, au maximum 65 %. Le NoteOn partagé avec RGB Split fournit la vélocité; durée fixe Attack/Hold/Release 5/40/180 ms. Activation persistée, désactivée par défaut, hors état ancien si la propriété est absente. Rendu Metal macOS uniquement.
 - CC1 pilote Speed indépendamment de RGB Split. Mapping courant : 0,5× à 1,5×; l'utilisateur confirme dans Logic les extrêmes, la neutralité à 64 et save/reload. Refaire sur le candidat de distribution identifié par SHA.
 - La fluidité de lecture en boucle est confirmée à l'usage par l'utilisateur. Aucune mesure de latence MIDI-image, framerate ou coût CPU/GPU n'est disponible.
 

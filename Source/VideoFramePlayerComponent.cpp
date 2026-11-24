@@ -136,3 +136,18 @@ bool VideoFramePlayerComponent::isRgbSplitAvailable() const noexcept
 {
     return false;
 }
+
+void VideoFramePlayerComponent::setFlashEnabled(bool enabled)
+{
+    juce::ignoreUnused(enabled);
+}
+
+void VideoFramePlayerComponent::triggerFlashVelocity(int velocity)
+{
+    juce::ignoreUnused(velocity);
+}
+
+bool VideoFramePlayerComponent::isFlashAvailable() const noexcept
+{
+    return false;
+}

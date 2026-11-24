@@ -49,7 +49,8 @@ private:
     int activeCueIndex = -1;
     bool displayedPlaybackRequested = true;
     bool displayedRgbSplitEnabled = true;
-    std::uint32_t lastSeenRgbSplitTrigger = 0;
+    bool displayedFlashEnabled = false;
+    std::uint32_t lastSeenCueEffectTrigger = 0;
     int lastAppliedSpeedMidiCcValue = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AVSamplerAudioProcessorEditor)

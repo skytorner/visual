@@ -16,6 +16,7 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | Élément | Statut | Preuve / limite |
 | --- | --- | --- |
 | AU macOS et Logic | PASS manuel rapporté | Le parcours actuel charge et fonctionne dans Logic. Autres hôtes non qualifiés. |
+| Flash v1 (VISUAL-019) | EN COURS / NOT TESTED | Implémentation Mac sur la branche de travail; build/install et QA Logic restent à faire avant de revendiquer le nouvel effet fonctionnel. |
 | Processus build VST3 Windows x64 | PASS CI / EN PLACE | GitHub Actions run `45435924725` compile `AVSampler_VST3` depuis le commit source `7dbc2e3` et publie l'artefact QA `AVSampler-Windows-VST3-7dbc2e3...`, SHA256 archive `4450ceddcef0f67ee92244b248a5df55755b42dab194896b069ae22f86451037`, avec provenance du binaire. Cela prouve le build, pas le fonctionnement dans un hôte. |
 | VST3 Windows et REAPER | DEFERRED / NOT TESTED | La QA Windows est planifiée après stabilisation des fonctionnalités macOS. Le renderer prototype utilise JUCE `VideoComponent`; RGB Split y est indisponible. Ne pas annoncer Windows supporté avant qualification réelle dans REAPER. |
 | Package installable sans environnement de développement | NOT AVAILABLE | Les scripts de release et le workflow versionnés package `AudioReactiveImagePOC`; `make install-avsampler-au` est une installation locale développeur qui compile sur la machine. |
@@ -174,6 +175,17 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | CC1 simultané, Loop, sauvegarde/réouverture | PASS manuel rapporté | L'utilisateur confirme que tout fonctionne correctement en boucle; fluidité confirmée. |
 | Fluidité perçue | PASS manuel rapporté | L'utilisateur rapporte une lecture fluide en boucle; aucune mesure CPU/GPU instrumentée. |
 | pluginval AU AV Sampler | PASS strictness 4, 2 essais | `log audio react4.txt`: `AudioUnit:Synths/aumu,AVsm,Vpoc`, AVSampler v0.1.0, `ALL TESTS PASSED` deux fois. Processing/state/editor/automation testés à 44.1/48/96 kHz, buffers 64–1024 et sub-block automation 32; zéro entrée, sortie stéréo. Warning non bloquant `Current program is -1`. Aucun chemin de bundle ou SHA d'exécutable dans le rapport; strictness 5 non rapporté. |
+
+## VISUAL-019 — Flash velocity
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Mapping vélocité et enveloppe fixe 5/40/180 ms | PASS automatisé | CTest `VideoEffectMathTests`: intensité faible/forte, maximum 65 %, décroissance et retour au neutre. |
+| Publication atomique NoteOn et exclusion NoteOff / vélocité 0 / note non assignée | PASS tests + inspection | `AVSamplerCoreTests` confirme la vélocité du cue; le traitement reste dans les atomiques existants, sans appel renderer dans `processBlock()`. |
+| Persistance du toggle et compatibilité session historique | PASS automatisé | `AVSamplerCoreTests`: activation restaurée et propriété absente par défaut désactivée. |
+| Build et installation AU macOS | PASS build/install | Build Release local; CTest 5/5; AU installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; signature vérifiée. Exécutable installé après signature ad hoc SHA-256 `7f95d72f9054668f0d035d0fd90f6c107683831dd806d59d679c2e962afaba13`. |
+| Validation utilisateur dans Logic | PASS manuel rapporté | Après installation du build identifié ci-dessus, l'utilisateur confirme que Flash fonctionne parfaitement et que tous les essais sont concluants. |
+| Disponibilité VST3 Windows | Non disponible | L'UI doit signaler que Flash n'est pas porté au renderer Windows. |
 
 ## VISUAL-012 — Composition UI et pads assignés
 
