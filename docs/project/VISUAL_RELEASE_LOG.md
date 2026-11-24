@@ -11,8 +11,17 @@ Ce journal conserve les validations de tickets et les releases. Il ne constitue 
 - `make help`: PASS; `make status`: PASS, branche et SHA imprimés.
 - `make test BUILD_DIR=/private/tmp/visual-009-build BUILD_TYPE=Release`: PASS, 1/1 (`visual_audio_tests`, suite rapide du POC audio historique uniquement).
 - Vérification des liens Markdown relatifs: PASS, 10 fichiers sans cible manquante. `git diff --check`: PASS.
-- Outils: `/usr/bin/auval` disponible; application pluginval présente sous `/Applications/pluginval.app`, pas trouvée dans le PATH. Aucun test pluginval ni auval n'a été lancé pendant cet audit. Un nouveau log pluginval est attendu de l'utilisateur et devra être associé au format/artefact réellement testé avant mise à jour de la matrice.
+- Outils au moment de l'audit initial: `/usr/bin/auval` disponible; application pluginval présente sous `/Applications/pluginval.app`, pas trouvée dans le PATH. Le premier état QA attendait encore le nouveau log utilisateur; voir l'addendum ci-dessous.
 - Modifications limitées à la documentation et à l'aide `make package`; aucun code runtime/build/package installé, tag ou release créé.
+
+### Addendum pluginval — log utilisateur reçu le 2026-11-24
+
+- AV Sampler AU détecté par `AudioUnit:Synths/aumu,AVsm,Vpoc`, présenté comme AVSampler v0.1.0. Deux exécutions GUI complètes, toutes deux terminées `SUCCESS`, `ALL TESTS PASSED`, strictness 4.
+- Les essais couvrent ouverture à froid/chaud, éditeur, édition pendant traitement, état, automation, buses et audio processing à 44.1/48/96 kHz, blocs 64/128/256/512/1024, sub-block automation 32. Le plugin rapporte zéro entrée et deux sorties; la validation d'un instrument silencieux passe.
+- Avertissement lors de changement de programme: `Current program is -1`; le test continue et finit par `SUCCESS`. Pas de strictness 5 dans ce journal.
+- Le rapport sélectionne l'AU par type/subtype/manufacturer, sans chemin de bundle ni SHA de l'exécutable. La preuve confirme donc que pluginval a trouvé et chargé l'AU enregistré, mais ne lie pas indépendamment ce test à un fichier binaire par empreinte.
+- Le même journal teste séparément AudioReactiveImagePOC VST3 et AU à strictness 4 (`ALL TESTS PASSED`); l'AU audio affiche également l'avertissement `Current program is -1`. Ces résultats ne sont pas transférés à AV Sampler.
+- Le précédent blocage de lancement avant chargement est désormais supersédé par ces exécutions manuelles réussies pour strictness 4.
 
 ## VISUAL-013 — Merge et clôture du ticket de code
 

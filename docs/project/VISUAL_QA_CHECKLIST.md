@@ -6,10 +6,10 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 ## État AV Sampler sur main — résumé release readiness
 
 - `main` contient VISUAL-009 à VISUAL-014, y compris la timeline/session, CC1, le renderer Metal et RGB Split.
-- L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload et fonctionnement RGB Split; le dernier retour confirme aussi une lecture fluide en boucle. Résultats manuels rapportés, sans SHA binaire installé dans le dernier retour et sans mesure chiffrée de latence, framerate ou CPU/GPU.
+- L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload et fonctionnement RGB Split; le dernier retour confirme aussi une lecture fluide en boucle. Résultats manuels rapportés, sans mesure chiffrée de latence, framerate ou CPU/GPU. Le journal pluginval récent ne relie pas le test à un SHA binaire.
 - CC1 à 0/127 a été confirmé; CC1=64 et sauvegarde/réouverture de cette valeur restent à vérifier explicitement.
 - Le déplacement du média puis Relink et la préservation des Cue timings sont implémentés/prévus, mais le scénario complet dans Logic n'est pas rapporté comme exécuté.
-- pluginval a échoué auparavant avant le chargement du plugin (code 134 sur l'initialisation AppKit/`--help`); les builds 014a/b ont donc `NOT RUN`, pas PASS. Un nouvel essai manuel a été annoncé par l'utilisateur; attendre le journal complet avant de mettre à jour ces lignes. Un redémarrage ou une exécution partielle ne suffit pas à conclure.
+- Un ancien lancement pluginval s'était interrompu avant chargement (code 134). Le nouveau journal utilisateur `log audio react4.txt` rapporte deux validations complètes de l'AU AV Sampler v0.1.0 à strictness 4, `ALL TESTS PASSED`. Le journal identifie le composant par `aumu,AVsm,Vpoc`, mais ne donne ni chemin du bundle ni SHA de l'exécutable; strictness 5 n'est pas rapporté. L'avertissement `Current program is -1` apparaît lors du changement de programme et n'empêche pas le résultat `SUCCESS`.
 
 ## Porte Closed Alpha 1 — état actuel
 
@@ -19,9 +19,11 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | Package installable sans environnement de développement | NOT AVAILABLE | Les scripts de release et le workflow versionnés package `AudioReactiveImagePOC`; `make install-avsampler-au` est une installation locale développeur qui compile sur la machine. |
 | Installation/mise à jour/désinstallation par des testeurs | NOT TESTED | Aucun package AV Sampler pour cohorte n'existe encore. |
 | Signature notarisation / provenance du package alpha | NOT TESTED | L'installation développeur applique une signature ad hoc; aucune notarisation ni signature de distribution établie. |
+| pluginval AU | PASS strictness 4 | Deux essais GUI complets sur `aumu,AVsm,Vpoc`, version 0.1.0. Le rapport ne lie pas le test à un SHA; strictness 5 non exécuté/rapporté. |
 | Versions macOS, codecs et matériel minimal | NOT DEFINED | Un média utilisateur a fonctionné; aucune matrice de compatibilité n'est formalisée. |
 | Relink après déplacement média | NOT REPORTED | Les timings doivent être vérifiés sur le candidat de distribution. |
 | CC1=64 et save/reload | NOT TESTED | Les extrêmes sont confirmés, pas ces cas précis. |
+| pluginval sur le package alpha exact | NOT TESTED | Strictness 4 passe sur l'AU de développement enregistré, mais le log ne donne pas le chemin ou SHA. Refaire et consigner le test sur l'artefact de cohorte. |
 
 **Décision actuelle : NO-GO pour envoyer une Closed Alpha; GO pour préparer et qualifier son package séparément.**
 
@@ -92,6 +94,8 @@ La nouvelle direction vidéo/MIDI est autorisée le 2026-11-23. Les validations 
 | Latence MIDI → nouvelle image | NOT MEASURED | Aucune précision temporelle revendiquée. |
 | Lecture avec éditeur fermé | NOT TESTED | Dépendance éventuelle du rendu au composant UI à qualifier. |
 
+La ligne pluginval de cette matrice concerne la tentative strictness 5 du 2026-11-23. Le journal ultérieur rapporte deux passes strictness 4 sur l'AU enregistré après VISUAL-014b; voir la section VISUAL-014b. Ce nouveau résultat ne convertit pas l'essai strictness 5 en PASS.
+
 ## VISUAL-010 — Timeline interactive
 
 | Vérification | Statut | Portée |
@@ -144,7 +148,7 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | --- | --- | --- |
 | Rendu Metal JUCE personnalisé compilable dans l'AU | PASS build | L'AU `AVSampler_AU` et les exécutables C++ compilent sur la branche dédiée. |
 | Tests CTest existants | PASS 4/4 | `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release`. |
-| pluginval | NOT RUN | L'exécutable de `/Applications/pluginval.app` se termine avec le code 134 même sur `--help`, avant une validation de plugin. |
+| pluginval sur l'artefact du spike 014a | NOT RUN à l'époque | Le lancement local de cette phase s'était terminé avec le code 134 avant chargement. Un journal ultérieur valide l'AU actuel après 014b à strictness 4; il ne donne pas le SHA exact du bundle testé. |
 | `auval` local | NOT DETECTED | `auval -v aumu AVsm Vpoc` échoue à trouver l'AU dans cet environnement; le test hôte Logic ci-dessous confirme toutefois la détection et l'ouverture. |
 | AU détecté après rescan et relance de Logic | PASS manuel rapporté | L'utilisateur confirme que le nouveau build fonctionne dans Logic. `auval` local ne retrouve pas le composant, malgré cette validation hôte. |
 | Image rendue, lecture et fonctionnement général | PASS manuel rapporté | L'utilisateur rapporte que tout fonctionne; aucune capture ni test instrumenté. |
@@ -167,9 +171,7 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | Frappe douce vs forte, retrigger, changement de Cue, retour progressif | PASS manuel rapporté | La checklist 014b a été confirmée globalement; niveaux et retours fonctionnent. |
 | CC1 simultané, Loop, sauvegarde/réouverture | PASS manuel rapporté | L'utilisateur confirme que tout fonctionne correctement en boucle; fluidité confirmée. |
 | Fluidité perçue | PASS manuel rapporté | L'utilisateur rapporte une lecture fluide en boucle; aucune mesure CPU/GPU instrumentée. |
-| pluginval | NOT RUN | Le binaire local se termine avec le code 134 dès `--help`. |
-
-Statut du nouvel essai AV Sampler : logs utilisateur attendus; ne pas remplacer `NOT RUN` sans preuve de plugin chargé et d'un résultat terminal complet.
+| pluginval AU AV Sampler | PASS strictness 4, 2 essais | `log audio react4.txt`: `AudioUnit:Synths/aumu,AVsm,Vpoc`, AVSampler v0.1.0, `ALL TESTS PASSED` deux fois. Processing/state/editor/automation testés à 44.1/48/96 kHz, buffers 64–1024 et sub-block automation 32; zéro entrée, sortie stéréo. Warning non bloquant `Current program is -1`. Aucun chemin de bundle ou SHA d'exécutable dans le rapport; strictness 5 non rapporté. |
 
 ## VISUAL-012 — Composition UI et pads assignés
 

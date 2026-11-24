@@ -70,7 +70,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-009 — Native MIDI Video POC
 
-- Status: Done — le scénario essentiel de lecture/loop, déclenchement des quatre cues dans Logic, cycle de région et sauvegarde/réouverture est confirmé manuellement puis prolongé par VISUAL-010 à VISUAL-014. Les mesures de latence, l'éditeur fermé et pluginval restent des qualifications séparées, pas des preuves transférées.
+- Status: Done — le scénario essentiel de lecture/loop, déclenchement des quatre cues dans Logic, cycle de région et sauvegarde/réouverture est confirmé manuellement puis prolongé par VISUAL-010 à VISUAL-014. Latence mesurée et lecture éditeur fermé restent des qualifications séparées.
 - Priority: P0.
 - Scope: ajouter une cible instrument AU silencieuse; charger une vidéo locale; lecture/pause continue et boucle; quatre Cue Points réglables à la position courante; MIDI 36, 38, 40, 41 déclenche les cues; sauvegarder chemin, positions et loop; tests du mapping pur.
 - Exclusions: timeline éditable, mappings personnalisés, 16 pads, MIDI Learn, CC, effets vélocité, export vidéo, transport sync et moteur vidéo personnalisé.
@@ -145,7 +145,7 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 ### VISUAL-013 — Premier effet vidéo piloté par MIDI CC
 
-- Status: Needs verification — PR #8 fusionnée dans `main` au commit `7bfddf9`; l'utilisateur confirme le contrôle CC1 en Logic et les extrêmes 0/127. La neutralité 64 et le save/reload ne sont pas séparément confirmés; pluginval non exécuté.
+- Status: Needs verification — PR #8 fusionnée dans `main` au commit `7bfddf9`; l'utilisateur confirme le contrôle CC1 en Logic et les extrêmes 0/127. La neutralité 64 et le save/reload ne sont pas séparément confirmés. Un pluginval strictness 4 générique passe sur l'AU, sans remplacer ces vérifications MIDI manuelles.
 - Priority: P1.
 - Scope: activer uniquement Speed parmi les emplacements FX, piloté par CC1 (0–127 -> 0,5×–1,5×; 64 = 1×), avec affichage de la vitesse et sauvegarde/restauration de la valeur.
 - Acceptance:
@@ -196,4 +196,4 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 - Priority: P0 pour distribution à une cohorte; pas nécessaire à l'audit lui-même.
 - Scope: package AV Sampler AU macOS issu d'un SHA identifié, installation sans environnement de développement, instructions de mise à jour/désinstallation, exigences de signature, versions minimales macOS, codecs et guide de feedback pour 3–5 testeurs Logic.
 - Acceptance: installation, scan Logic, vidéo/Cues/Loop, CC1, RGB Split, save/reopen et relink vérifiés sur le package exact; tests/outils et QA manuelle tracés; pas de publication publique ni de revendication VST3/Windows/latence sans preuve.
-- Pré-requis QA à consigner: CC1=64 et save/reopen; relink après déplacement de média; pluginval/AU validation selon disponibilité et logs complets. Une impossibilité outil est tracée comme BLOCKED, pas comme PASS.
+- Pré-requis QA à consigner: CC1=64 et save/reopen; relink après déplacement de média; pluginval strictness 4 est déjà PASS sur l'AU de développement (log sans SHA). Refaire le contrôle sur le package exact en consignant son SHA; strictness 5 n'est pas rapporté. Une impossibilité outil est tracée comme BLOCKED, pas comme PASS.

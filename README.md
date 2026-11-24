@@ -38,7 +38,7 @@ In Logic, load a local video, place MIDI notes 36/38/40/41 in a region, and play
 - Supported macOS versions, codec/container matrix and minimum hardware are not formally declared.
 - Project state stores a media path, not video bytes; cross-machine project portability is not guaranteed.
 - Media relink/replacement preservation, Logic CC1 neutral/save-reopen, playback with the editor closed, and numeric responsiveness/performance measurements need explicit release evidence.
-- `pluginval` has previously exited before testing this AU in the local environment. A later manual app run is awaiting its complete logs; no new PASS is inferred from a restart or partial run.
+- A complete user-provided GUI log now reports two AV Sampler AU runs at pluginval strictness 4 with `ALL TESTS PASSED`. It identifies AVSampler v0.1.0 by AU type/subtype/manufacturer, but does not record the loaded component path or executable SHA; strictness 5 is not reported. The log contains a non-failing `Current program is -1` warning. An earlier local launch had aborted before plugin load.
 - Frame-accurate or sample-accurate video triggering and a guaranteed latency are not claimed.
 
 ## Repository map
