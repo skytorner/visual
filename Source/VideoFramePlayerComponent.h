@@ -5,11 +5,10 @@
 #include <functional>
 #include <memory>
 
-/** macOS video surface that pulls decoded AVFoundation frames and displays them
-    through a Metal-backed native view. This is the VISUAL-014a renderer spike;
-    it intentionally does not apply visual effects yet.
+/** Platform-selected video surface. macOS uses the AVFoundation/Metal renderer;
+    Windows currently uses JUCE VideoComponent for the playback/control spike.
 */
-class VideoFramePlayerComponent final : public juce::NSViewComponent
+class VideoFramePlayerComponent final : public juce::Component
 {
 public:
     using LoadCallback = std::function<void(const juce::URL&, juce::Result)>;
@@ -33,6 +32,8 @@ public:
     float getAudioVolume() const;
     void setRgbSplitEnabled(bool enabled);
     void triggerRgbSplitVelocity(int velocity);
+    bool isRgbSplitAvailable() const noexcept;
+    void resized() override;
 
     std::function<void(const juce::String&)> onErrorOccurred;
 

@@ -1,0 +1,59 @@
+name: AV Sampler Windows build
+
+on:
+  pull_request:
+    paths:
+      - "CMakeLists.txt"
+      - "Source/AVSampler*.cpp"
+      - "Source/AVSampler*.h"
+      - "Source/CueRouting.h"
+      - "Source/CueTimelineComponent.*"
+      - "Source/SamplerUiComponents.*"
+      - "Source/VideoFramePlayerComponent.*"
+      - ".github/workflows/avsampler-windows-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-vst3:
+    name: Build AVSampler VST3 (Windows x64)
+    runs-on: windows-latest
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -A x64
+
+      - name: Build AVSampler VST3
+        run: cmake --build build --config Release --target AVSampler_VST3
+
+      - name: Record build identity
+        shell: pwsh
+        run: |
+          $bundle = "build/AVSampler_artefacts/Release/VST3/AVSampler.vst3"
+          $pluginBinary = Get-ChildItem -Path $bundle -Recurse -File |
+            Where-Object { $_.Extension -eq ".vst3" } |
+            Select-Object -First 1
+          if ($null -eq $pluginBinary) { throw "VST3 binary not found inside $bundle" }
+          $sha256 = (Get-FileHash -Path $pluginBinary.FullName -Algorithm SHA256).Hash
+          @(
+            "Source commit: $env:SOURCE_SHA"
+            "Workflow commit: $env:GITHUB_SHA"
+            "Bundle: AVSampler.vst3"
+            "Binary: $($pluginBinary.FullName)"
+            "SHA256: $sha256"
+          ) | Set-Content -Path "build/AVSampler-windows-build-info.txt"
+
+      - name: Upload Windows QA build
+        uses: actions/upload-artifact@v4
+        with:
+          name: AVSampler-Windows-VST3-${{ github.event.pull_request.head.sha || github.sha }}
+          path: |
+            build/AVSampler_artefacts/Release/VST3/AVSampler.vst3
+            build/AVSampler-windows-build-info.txt
+          if-no-files-found: error

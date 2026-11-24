@@ -16,6 +16,8 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | Élément | Statut | Preuve / limite |
 | --- | --- | --- |
 | AU macOS et Logic | PASS manuel rapporté | Le parcours actuel charge et fonctionne dans Logic. Autres hôtes non qualifiés. |
+| Processus build VST3 Windows x64 | PASS CI / EN PLACE | GitHub Actions run `45435924725` compile `AVSampler_VST3` depuis le commit source `7dbc2e3` et publie l'artefact QA `AVSampler-Windows-VST3-7dbc2e3...`, SHA256 archive `4450ceddcef0f67ee92244b248a5df55755b42dab194896b069ae22f86451037`, avec provenance du binaire. Cela prouve le build, pas le fonctionnement dans un hôte. |
+| VST3 Windows et REAPER | DEFERRED / NOT TESTED | La QA Windows est planifiée après stabilisation des fonctionnalités macOS. Le renderer prototype utilise JUCE `VideoComponent`; RGB Split y est indisponible. Ne pas annoncer Windows supporté avant qualification réelle dans REAPER. |
 | Package installable sans environnement de développement | NOT AVAILABLE | Les scripts de release et le workflow versionnés package `AudioReactiveImagePOC`; `make install-avsampler-au` est une installation locale développeur qui compile sur la machine. |
 | Installation/mise à jour/désinstallation par des testeurs | NOT TESTED | Aucun package AV Sampler pour cohorte n'existe encore. |
 | Signature notarisation / provenance du package alpha | NOT TESTED | L'installation développeur applique une signature ad hoc; aucune notarisation ni signature de distribution établie. |
@@ -25,7 +27,7 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 | CC1=64 et save/reload | NOT TESTED | Les extrêmes sont confirmés, pas ces cas précis. |
 | pluginval sur le package alpha exact | NOT TESTED | Strictness 4 passe sur l'AU de développement enregistré, mais le log ne donne pas le chemin ou SHA. Refaire et consigner le test sur l'artefact de cohorte. |
 
-**Décision actuelle : NO-GO pour envoyer une Closed Alpha; GO pour préparer et qualifier son package séparément.**
+**Décision actuelle : NO-GO pour envoyer une Closed Alpha multi-plateforme; GO pour le processus de build Windows de VISUAL-016. La QA REAPER/Windows est volontairement reportée pendant la poursuite du développement macOS.**
 
 ## Matrice AudioReactiveImagePOC (plugin audio historique seulement)
 

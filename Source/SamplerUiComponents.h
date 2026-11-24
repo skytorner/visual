@@ -33,6 +33,7 @@ public:
     FxControlBar();
     void setSpeedMultiplier(double multiplier);
     void setRgbSplitEnabled(bool enabled);
+    void setRgbSplitAvailable(bool available);
     void setLastMidiVelocity(int velocity);
     void paint(juce::Graphics& graphics) override;
     void resized() override;
@@ -42,6 +43,7 @@ public:
 private:
     double speedMultiplier = 1.0;
     bool rgbSplitEnabled = true;
+    bool rgbSplitAvailable = true;
     int lastMidiVelocity = 0;
     juce::TextButton rgbSplitButton { "RGB SPLIT" };
 };

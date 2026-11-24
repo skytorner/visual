@@ -345,20 +345,22 @@ struct VideoFramePlayerComponent::Impl
     explicit Impl(VideoFramePlayerComponent& ownerToUse)
         : owner(ownerToUse)
     {
+        owner.addAndMakeVisible(videoSurface);
         id<MTLDevice> device = MTLCreateSystemDefaultDevice();
         view = [[AVSamplerMetalVideoView alloc] initWithFrame:NSZeroRect device:device];
-        owner.setView((__bridge void*)view);
+        videoSurface.setView((__bridge void*)view);
     }
 
     ~Impl()
     {
-        owner.setView(nullptr);
+        videoSurface.setView(nullptr);
         [view shutdown];
         view.delegate = nil;
         view = nil;
     }
 
     VideoFramePlayerComponent& owner;
+    juce::NSViewComponent videoSurface;
     __strong AVSamplerMetalVideoView* view = nil;
     juce::URL currentURL;
     double playSpeed = 1.0;
@@ -371,6 +373,12 @@ VideoFramePlayerComponent::VideoFramePlayerComponent()
 }
 
 VideoFramePlayerComponent::~VideoFramePlayerComponent() = default;
+
+void VideoFramePlayerComponent::resized()
+{
+    if (impl != nullptr)
+        impl->videoSurface.setBounds(getLocalBounds());
+}
 
 void VideoFramePlayerComponent::loadAsync(const juce::URL& url, LoadCallback callback)
 {
@@ -482,3 +490,5 @@ void VideoFramePlayerComponent::triggerRgbSplitVelocity(int velocity)
 {
     [impl->view triggerRgbSplitVelocity:velocity];
 }
+
+bool VideoFramePlayerComponent::isRgbSplitAvailable() const noexcept { return true; }

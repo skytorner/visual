@@ -141,6 +141,16 @@ void FxControlBar::setRgbSplitEnabled(bool enabled)
     repaint();
 }
 
+void FxControlBar::setRgbSplitAvailable(bool available)
+{
+    rgbSplitAvailable = available;
+    rgbSplitButton.setEnabled(available);
+    rgbSplitButton.setTooltip(available
+        ? "Toggle RGB Split triggered by MIDI note velocity"
+        : "RGB Split is not available on this video renderer yet");
+    repaint();
+}
+
 void FxControlBar::setLastMidiVelocity(int velocity)
 {
     const auto clampedVelocity = juce::jlimit(0, 127, velocity);
@@ -187,26 +197,28 @@ void FxControlBar::paint(juce::Graphics& graphics)
         const auto isSpeedControl = i == 1;
         const auto isRgbSplitControl = i == 2;
         graphics.setColour(isSpeedControl ? juce::Colour(0xff1e2d39)
-            : isRgbSplitControl && rgbSplitEnabled ? juce::Colour(0xff292339)
+            : isRgbSplitControl && rgbSplitAvailable && rgbSplitEnabled ? juce::Colour(0xff292339)
             : juce::Colour(0xff20252d));
         graphics.fillRoundedRectangle(cell, 5.0f);
         graphics.setColour(isSpeedControl ? juce::Colour(0xff3bd5df)
-            : isRgbSplitControl && rgbSplitEnabled ? juce::Colour(0xffb676f4)
+            : isRgbSplitControl && rgbSplitAvailable && rgbSplitEnabled ? juce::Colour(0xffb676f4)
             : juce::Colour(0xff3a414c));
         graphics.drawRoundedRectangle(cell, 5.0f, 1.0f);
         if (isRgbSplitControl)
         {
-            graphics.setColour(rgbSplitEnabled ? juce::Colour(0xffd9c0fb)
-                                                : juce::Colour(0xff8793a6));
+            graphics.setColour(rgbSplitAvailable && rgbSplitEnabled
+                ? juce::Colour(0xffd9c0fb) : juce::Colour(0xff8793a6));
             graphics.setFont(9.0f);
-            const auto velocityText = lastMidiVelocity > 0
+            const auto velocityText = ! rgbSplitAvailable ? juce::String("PENDING")
+                : lastMidiVelocity > 0
                 ? "VELOCITY " + juce::String(lastMidiVelocity) : juce::String("VELOCITY");
             graphics.drawFittedText(velocityText,
                 cell.withY(cell.getY() + 39.0f).withHeight(13.0f).toNearestInt(),
                 juce::Justification::centred, 1);
             graphics.setColour(juce::Colour(0xffa98cc8));
             graphics.setFont(8.0f);
-            graphics.drawFittedText(rgbSplitEnabled ? "MIDI NOTE ON" : "DISABLED",
+            graphics.drawFittedText(! rgbSplitAvailable ? "WINDOWS PORT PENDING"
+                : rgbSplitEnabled ? "MIDI NOTE ON" : "DISABLED",
                 cell.withY(cell.getY() + 51.0f).withHeight(11.0f).toNearestInt(),
                 juce::Justification::centred, 1);
             continue;
