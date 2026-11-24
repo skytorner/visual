@@ -14,8 +14,10 @@ Status: In progress. Branche: `codex/VISUAL-014a-metal-video-renderer`, créée 
 - Le nouveau composant macOS obtient les frames décodées par `AVPlayerItemVideoOutput`, les convertit en textures Metal via `CVMetalTextureCache` et les affiche avec `MTKView`. Ce sous-ticket ne contient aucun effet RGB ni paramètre MIDI.
 - Build Release de `AVSampler_AU`, `AVSamplerCoreTests`, `CueRoutingTests` et `TimelineMathTests` : PASS. CTest : 4/4 PASS. `git diff --check` : PASS.
 - pluginval : non exécuté; le binaire de `/Applications/pluginval.app` termine avec le code 134 sur `--help`, avant l'analyse.
-- `auval` : non exécuté sur le bundle; il ne trouve pas le composant AU tant qu'il n'est pas installé. L'AU de build reste dans `/private/tmp/visual-009-build/AVSampler_artefacts/Release/AU/AVSampler.component`.
-- QA Logic du rendu, seek/loop/CC1/reload et mesure de cadence/CPU/GPU : NOT TESTED. L'AU n'a pas été installé ni ouvert dans Logic.
+- Installation du build testée dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; l'ancien bundle a été sauvegardé sous `/private/tmp/AVSampler.component.pre-014a-20261124`. Le binaire installé correspond au build avant signature locale.
+- Le bundle généré a échoué la vérification stricte initiale de signature car il ne contient pas `Contents/Resources`; après signature ad hoc locale, la vérification passe. Malgré l'installation et le rescan du cache utilisateur (cache sauvegardé sous `/private/tmp/com.apple.audiounits.cache.pre-014a-20261124`), `auval -v aumu AVsm Vpoc` ne trouve toujours pas le composant. Cause de non-découverte non déterminée.
+- La procédure macOS versionnée utilise désormais `make install-avsampler-au` pour compiler et installer chaque build AV Sampler destiné à Logic; fermer Logic avant copie puis lancer le scan de l'hôte après installation.
+- QA Logic du rendu, seek/loop/CC1/reload et mesure de cadence/CPU/GPU : NOT TESTED. Aucune ouverture de Logic ni vérification visuelle effectuée.
 
 ## VISUAL-013 — Premier effet vidéo piloté par MIDI CC
 

@@ -123,7 +123,7 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | Rendu Metal JUCE personnalisé compilable dans l'AU | PASS build | L'AU `AVSampler_AU` et les exécutables C++ compilent sur la branche dédiée. |
 | Tests CTest existants | PASS 4/4 | `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release`. |
 | pluginval | NOT RUN | L'exécutable de `/Applications/pluginval.app` se termine avec le code 134 même sur `--help`, avant une validation de plugin. |
-| `auval` | BLOCKED | L'AU compilé n'est pas installé dans un dossier Audio Units; aucune copie/installation n'a été faite. |
+| `auval` / découverte par l'hôte | NOT DETECTED | Le bundle est installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; après rescan du cache, `auval -v aumu AVsm Vpoc` échoue encore avec « didn't find the component ». Le rendu n'a donc pas été testé dans Logic. |
 | Frames AVFoundation rendues dans l'éditeur AU | NOT TESTED | Doit être confirmé dans Logic avant l'effet RGB. |
 | Seek Cue, Loop, vitesse CC1, rechargement média | NOT TESTED | Non-régression du transport/session à vérifier. |
 | Cadence, fluidité et coût CPU/GPU sur vidéo réelle | NOT MEASURED | Consigner résolution/codec et limites observées. |

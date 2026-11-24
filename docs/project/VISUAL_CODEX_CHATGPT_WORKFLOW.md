@@ -35,7 +35,8 @@ Ce document définit la boucle légère entre l'humain, Codex et ChatGPT pour `s
 - `make` : tests DSP CTest puis compilation JUCE incrémentale; pour la QA complète, il reste à lancer pluginval sur les nouveaux artefacts.
 - `make test` : tests DSP rapides; `make plugin` : build AU/VST3/Standalone.
 - `make status` : branche et SHA à consigner dans les rapports QA.
-- `make install` : copie volontaire des AU/VST3 compilés dans les dossiers utilisateur. **Fermer d'abord Logic Pro et REAPER**; ce n'est pas une étape implicite du build.
+- `make install-avsampler-au` : commande de référence pour toute build AV Sampler destinée à un essai dans Logic; elle compile puis installe l'AU vers `~/Library/Audio/Plug-Ins/Components/AVSampler.component`. Utiliser cette commande à chaque nouveau build à valider dans Logic, puis relancer le scan de l'hôte. **Fermer Logic avant l'installation.**
+- `make install` : compile puis copie les AU/VST3 du POC et l'AU AV Sampler dans les dossiers utilisateur. L'installation reste une étape explicite; un build seul ne remplace pas le plugin chargé par le DAW.
 - `make package` : compile et utilise le packaging ZIP macOS déjà existant dans `dist/`.
 - Le `Makefile` n'est qu'une couche de confort autour de CMake/CTest : aucun changement de stack ou de source de vérité. Sur Windows, utiliser les commandes CMake/PowerShell.
 
