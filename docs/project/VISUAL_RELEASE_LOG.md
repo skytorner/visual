@@ -132,8 +132,18 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 - Color Boost ajuste la saturation du frame Metal autour d'une estimation de luminance BT.709; vélocité 1–127 pilote 1,0×–1,6×, avec retour au neutre par l'enveloppe 5/40/180 ms partagée. Pas de changement intentionnel de teinte; canaux clampés, écrêtage léger possible aux valeurs fortes. Toggle persisté, désactivé par défaut et indisponible sur Windows.
 - Build Release macOS configurée dans `/private/tmp/visual-021-build` et compilation complète (`cmake --build /private/tmp/visual-021-build --config Release --parallel 6`) : PASS. CTest : 5/5 PASS; `git diff --check` : PASS.
 - AU installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; `codesign --verify --deep --strict` : PASS. SHA-256 exécutable buildé avant signature : `5bb3af088b0f8d5f13e05d3f6662c1e56ca6837e8ee4a3ad2603809130219e53`; après signature ad hoc, exécutable installé : `f6c14af1cbb2dc78f89097d166f612fdedeee38ec3562a28d2e77ea60c6cc71e`.
-- Build Windows et REAPER : NOT RUN, reportés jusqu'à la fin des fonctionnalités macOS. Exécution runtime du shader Metal et comportement dans Logic : en attente de QA humaine.
-- L'utilisateur confirme que l'AU installé « ça marche bien »; validation manuelle globale rapportée, sans détail itemisé des scénarios. PR #19 ouverte en attente de fusion; inclusion à Closed Alpha 1 à décider séparément.
+- Build Windows et REAPER : NOT RUN, reportés jusqu'à la fin des fonctionnalités macOS. La validation dans Logic est rapportée par l'utilisateur ci-dessous.
+- L'utilisateur confirme que l'AU installé « ça marche bien »; validation manuelle globale rapportée, sans détail itemisé des scénarios. PR #19 fusionnée dans `main` au commit `042c8e1`; les checks audio et compilation Windows x64 CI ont réussi, sans valider REAPER. Inclusion à Closed Alpha 1 à décider séparément.
+
+## VISUAL-022 — Video Echo macOS — 2026-11-25
+
+- Conception v1 : mélanger l'image Metal courante avec deux frames récentes pondérées 0,65/0,35, mix maximal 45 % contrôlé par vélocité et enveloppe 5/40/180 ms. Historique de deux textures Metal, actif uniquement quand le toggle est coché; réinitialisation après seek, boucle, nouveau média ou résolution différente.
+- `cmake -S . -B /private/tmp/visual-022-build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DFETCHCONTENT_SOURCE_DIR_JUCE=/Users/renjy/Documents/IT/vsts/visual/build/_deps/juce-src` : PASS. Build Release complète de toutes les cibles macOS : PASS. CTest : 5/5 PASS. `git diff --check` : PASS.
+- `make install-avsampler-au BUILD_DIR=/private/tmp/visual-022-build BUILD_TYPE=Release` : PASS; AU installé à `~/Library/Audio/Plug-Ins/Components/AVSampler.component`. `codesign --verify --deep --strict` : PASS. SHA-256 binaire AU avant signature `8ac785f8353f45c4a7dff83c84f2677c52b3d61a7ba1a56ded2d9260a08ea103`; binaire installé après signature ad hoc `6aeabb75a74a47d32b693de62f175774b1ca0541ad900cdb88d7a4d8f94e0f14`.
+- Validation shader : PASS via `MTLDevice newLibraryWithSource`; la source extraite compile et expose `avs_vertex` / `avs_fragment`. `xcrun metal` n'est pas disponible car le composant Metal Toolchain manque; l'exécution du pipeline avec de vraies textures, l'effet visuel, la mémoire/cadence et la lecture restent à vérifier dans Logic.
+- Code source compilé : `7bf69d2c4caf1a2bee10ce24f589cbe3e2135092`.
+- Installation et signature concernent ce binaire AU source; le SHA du binaire installé est consigné ci-dessus. QA Logic avant fusion en attente.
+- Portage Windows non inclus; inclusion à Closed Alpha 1 reste une décision produit distincte.
 
 ## Initial Setup
 

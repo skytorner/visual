@@ -5,8 +5,8 @@ Sources : tests manuels déclarés dans Logic Pro 13 et REAPER sur macOS; logs p
 
 ## État AV Sampler sur main — résumé release readiness
 
-- `main` contient VISUAL-009 à VISUAL-020, y compris timeline/session, CC1, renderer Metal, RGB Split, Flash et Zoom Punch.
-- L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload, RGB Split, Flash, Zoom Punch et lecture fluide en boucle. Résultats manuels rapportés, sans mesure chiffrée de latence, framerate ou CPU/GPU.
+- `main` contient VISUAL-009 à VISUAL-021, y compris timeline/session, CC1, renderer Metal, RGB Split, Flash, Zoom Punch et Color Boost.
+- L'utilisateur confirme dans Logic le déclenchement MIDI, cycle des notes, Loop, save/reload, RGB Split, Flash, Zoom Punch, Color Boost et lecture fluide en boucle. Résultats manuels rapportés, sans mesure chiffrée de latence, framerate ou CPU/GPU.
 - L'utilisateur confirme dans Logic CC1 à 0/64/127 et la restauration de la valeur après save/reload; SHA exact de l'AU utilisé non consigné.
 - L'utilisateur confirme le déplacement puis le relink de la vidéo avec conservation des Cue timings et du Loop; refaire sur l'artefact candidat de distribution.
 - Un ancien lancement pluginval s'était interrompu avant chargement (code 134). Le nouveau journal utilisateur `log audio react4.txt` rapporte deux validations complètes de l'AU AV Sampler v0.1.0 à strictness 4, `ALL TESTS PASSED`. Le journal identifie le composant par `aumu,AVsm,Vpoc`, mais ne donne ni chemin du bundle ni SHA de l'exécutable; strictness 5 n'est pas rapporté. L'avertissement `Current program is -1` apparaît lors du changement de programme et n'empêche pas le résultat `SUCCESS`.
@@ -217,10 +217,22 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | --- | --- | --- |
 | Mapping saturation / vélocité et enveloppe 5/40/180 ms | PASS automatisé | CTest `VideoEffectMathTests`: vélocité 0/1/64/127, maximum 1,6× et retour à 1×. |
 | Persistance et compatibilité des anciens projets | PASS automatisé | CTest `AVSamplerCoreTests`: toggle actif restauré; propriété absente désactivée. |
-| Shader Metal, effet combiné et bornes des canaux | PASS compilation; visuel en attente | Shader inclus dans l'AU Release; observer le rendu réel et les effets combinés dans Logic. La compilation ne valide pas l'exécution runtime du shader. |
+| Shader Metal, effet combiné et bornes des canaux | PASS manuel rapporté | L'utilisateur confirme après installation que Color Boost fonctionne bien dans Logic. Le détail des combinaisons et scénarios n'est pas itemisé. |
 | Build Release, installation AU et signature | PASS build/install | Build `/private/tmp/visual-021-build`; CTest 5/5. SHA-256 exécutable avant signature `5bb3af088b0f8d5f13e05d3f6662c1e56ca6837e8ee4a3ad2603809130219e53`; SHA-256 exécutable installé après signature ad hoc `f6c14af1cbb2dc78f89097d166f612fdedeee38ec3562a28d2e77ea60c6cc71e`. `codesign --verify --deep --strict` passe. |
 | Validation utilisateur dans Logic | PASS manuel rapporté | Après installation de l'AU identifié ci-dessus, l'utilisateur confirme « ça marche bien ». Les scénarios individuels vélocité, combinaison, loop et save/reload ne sont pas détaillés séparément. |
 | Renderer Windows | Indisponible connu | Color Boost est rendu sur Metal macOS seulement; Windows/REAPER reste reporté à la fin. |
+
+## VISUAL-022 — Video Echo macOS
+
+| Vérification | Statut | Portée |
+| --- | --- | --- |
+| Mix par vélocité et enveloppe 5/40/180 ms | À exécuter | CTest: vélocité 0/1/64/127, maximum 45 %, retour à 0. |
+| État projet et compatibilité des sessions anciennes | À exécuter | Toggle restauré actif; propriété absente désactivée. |
+| Compilation runtime du shader Metal | PASS technique | Source extraite et compilée avec `MTLDevice newLibraryWithSource`; `avs_vertex` et `avs_fragment` présents. La validation du pipeline/dessin réel dans Logic reste à faire. |
+| Ring de deux frames / resets / budget texture | À exécuter | Valider l'effet visuel, mémoire/cadence perçue, seek/Cue, loop, remplacement média et nouvelle résolution dans Logic. |
+| Build Release, installation AU et signature | À exécuter | Enregistrer SHA du code et de l'AU installé; installer le build testé avant QA Logic. |
+| Validation utilisateur dans Logic | EN ATTENTE QA HUMAINE | Vérifier intensité faible/forte, retrigger/retour neutre, combinaison des autres FX, MIDI loop et save/reload. |
+| Renderer Windows | Indisponible connu | L'effet exige l'accès aux frames; le prototype Windows n'utilise pas ce renderer. |
 
 ## VISUAL-012 — Composition UI et pads assignés
 

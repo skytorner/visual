@@ -231,8 +231,17 @@ Pas de vidéo export, FFT, beat detection, TouchDesigner runtime, Web/desktop, m
 
 ### VISUAL-021 — Color Boost piloté par la vélocité (macOS)
 
-- Status: Done — implémenté et validé par l'utilisateur dans Logic; PR #19 ouverte en attente de fusion.
+- Status: Done — implémenté et validé par l'utilisateur dans Logic; PR #19 fusionnée dans `main` au commit `042c8e1`.
 - Priority: P1 pour le prototype macOS; inclusion dans Closed Alpha 1 à réévaluer après validation.
 - Scope: augmenter temporairement la saturation dans le shader Metal macOS, sans modifier la teinte intentionnellement. La vélocité 1–127 contrôle un multiplicateur de saturation de 1,0× à 1,6×; durée fixe Attack/Hold/Release 5/40/180 ms. Toggle persisté, désactivé par défaut pour les nouveaux et anciens projets.
 - Acceptance: velocity 0/NoteOff/non assignée n'active pas l'effet; faible/forte vélocité donne une saturation différente; l'image revient à la saturation originale après l'enveloppe; RGB Split, Flash, Zoom Punch, CC1, Cue, Loop et silence audio restent inchangés; save/reload et compatibilité des anciens projets testés; build/tests/install AU et QA Logic; renderer Windows indique explicitement indisponible.
 - Exclusions: hue shift, luminosité/contraste indépendants, réglage continu du multiplicateur/enveloppe, parité Windows, changement de `processBlock()` et inclusion automatique dans l'alpha.
+
+### VISUAL-022 — Video Echo piloté par la vélocité (macOS)
+
+- Status: In progress — branche `codex/VISUAL-022-video-echo`, créée depuis `main` au commit `042c8e1`.
+- Priority: P1 pour le prototype macOS; inclusion dans Closed Alpha 1 à décider après validation.
+- Scope: mélanger temporairement l'image courante avec les deux dernières frames vidéo capturées par le renderer Metal. Vélocité NoteOn 1–127 règle le mix jusqu'à 45 %, durée fixe 5/40/180 ms. Pondérations des deux retards : 65 % / 35 %. Toggle persisté, désactivé par défaut pour les nouveaux et anciens projets.
+- Technical constraints: conserver deux textures d'historique privées seulement lorsque l'effet est actif; copier la frame courante sur GPU après le rendu; vider l'historique après activation, seek/Cue, recul ou saut temporel >250 ms, changement de média ou de résolution. Aucun accès audio-thread au média/GPU; renderer Windows déclare l'effet indisponible.
+- Acceptance: vélocité 0/NoteOff/non assignée ne déclenche pas; frappes faibles/fortes modulent l'écho et l'image revient au neutre; l'historique ne traverse pas les seeks, boucles ni médias; pas d'effet quand désactivé; état sauvegardé et ancien projet défaut OFF; RGB Split, Flash, Zoom Punch, Color Boost, CC1, Cue, Loop et silence audio restent fonctionnels; tests/build/install AU et QA Logic; aucune régression de lecture/loop.
+- Exclusions: délais/temps de répétition configurables, plus de deux textures, persistance des frames, paramètres distincts par pad, parité Windows et promesse de coût GPU sans mesure.
