@@ -17,7 +17,7 @@ Status: In progress. Branche: `codex/VISUAL-014a-metal-video-renderer`, créée 
 - Installation du build testée dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; l'ancien bundle a été sauvegardé sous `/private/tmp/AVSampler.component.pre-014a-20261124`. Le binaire installé correspond au build avant signature locale.
 - Le bundle généré a échoué la vérification stricte initiale de signature car il ne contient pas `Contents/Resources`; après signature ad hoc locale, la vérification passe. Malgré l'installation et le rescan du cache utilisateur (cache sauvegardé sous `/private/tmp/com.apple.audiounits.cache.pre-014a-20261124`), `auval -v aumu AVsm Vpoc` ne trouve toujours pas le composant. Cause de non-découverte non déterminée.
 - La procédure macOS versionnée utilise désormais `make install-avsampler-au` pour compiler et installer chaque build AV Sampler destiné à Logic; fermer Logic avant copie puis lancer le scan de l'hôte après installation.
-- QA Logic du rendu, seek/loop/CC1/reload et mesure de cadence/CPU/GPU : NOT TESTED. Aucune ouverture de Logic ni vérification visuelle effectuée.
+- 2026-11-24 : après rescan et relance de Logic, l'utilisateur confirme « tout fonctionne ». Cela valide manuellement la détection du nouvel AU, le rendu vidéo et, dans le contexte de la checklist, Cue Points, Loop et CC1. Le remplacement/rechargement de média n'a pas été détaillé séparément; aucune mesure chiffrée CPU/GPU ou latence n'a été faite.
 
 ## VISUAL-013 — Premier effet vidéo piloté par MIDI CC
 

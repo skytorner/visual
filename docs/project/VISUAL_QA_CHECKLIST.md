@@ -124,9 +124,11 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 | Tests CTest existants | PASS 4/4 | `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release`. |
 | pluginval | NOT RUN | L'exécutable de `/Applications/pluginval.app` se termine avec le code 134 même sur `--help`, avant une validation de plugin. |
 | `auval` / découverte par l'hôte | NOT DETECTED | Le bundle est installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; après rescan du cache, `auval -v aumu AVsm Vpoc` échoue encore avec « didn't find the component ». Le rendu n'a donc pas été testé dans Logic. |
-| Frames AVFoundation rendues dans l'éditeur AU | NOT TESTED | Doit être confirmé dans Logic avant l'effet RGB. |
-| Seek Cue, Loop, vitesse CC1, rechargement média | NOT TESTED | Non-régression du transport/session à vérifier. |
-| Cadence, fluidité et coût CPU/GPU sur vidéo réelle | NOT MEASURED | Consigner résolution/codec et limites observées. |
+| AU détecté après rescan et relance de Logic | PASS manuel rapporté | L'utilisateur confirme que le nouveau build fonctionne dans Logic. `auval` local ne retrouve pas le composant, malgré cette validation hôte. |
+| Image rendue, lecture et fonctionnement général | PASS manuel rapporté | L'utilisateur rapporte que tout fonctionne; aucune capture ni test instrumenté. |
+| Cue Points, Loop vidéo et CC1 | PASS manuel rapporté | Inclus dans le retour « tout fonctionne » après la checklist proposée; aucune latence chiffrée. |
+| Remplacement/rechargement de média | NOT REPORTED | Le retour global ne détaille pas ce scénario individuellement. |
+| Cadence et coût CPU/GPU | NOT MEASURED | Fonctionnement jugé bon à l'usage par l'utilisateur; aucun relevé chiffré. |
 
 ## VISUAL-014b — RGB Split velocity
 

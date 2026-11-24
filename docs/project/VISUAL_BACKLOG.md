@@ -164,13 +164,14 @@ Une tâche = une branche = tests = PR = mise à jour docs. Les tickets ne doiven
 
 #### VISUAL-014a — Prototype d'accès aux frames et rendu GPU
 
+- Status: Validated in Logic — l'utilisateur confirme après rescan et relance de Logic que l'affichage et le fonctionnement sont bons. Aucun relevé chiffré CPU/GPU; garder cette mesure comme suivi de performance.
 - Scope: remplacer uniquement le composant d'affichage vidéo par un rendu macOS qui reçoit les frames décodées et les présente via Metal, en gardant l'architecture transport/session du sampler.
 - Acceptance: vidéo affichée dans l'AU Logic; ouverture, lecture, seek Cue, Loop, vitesse CC1, fermeture/rechargement du média restent fonctionnels; lecture des frames sans copie CPU complète; fluidité et usage CPU/GPU consignés. Aucun effet visuel actif dans ce sous-ticket.
 - Exclusions: RGB Split, vélocité, nouveaux effets et migration VST3/autres plateformes.
 
 #### VISUAL-014b — RGB Split avec enveloppe de vélocité
 
-- Status: Open — dépend de la validation complète de VISUAL-014a.
+- Status: Open — le chemin de rendu est validé manuellement dans Logic; implémentation autorisée sur une nouvelle branche.
 - Scope: vitesse indépendante sur CC1; vélocité NoteOn 1–127 pilote l'amplitude du décalage RGB, note velocity 0/NoteOff ignorée; rouge à droite, bleu à gauche, vert centré; enveloppe attack/hold/release et retrigger.
 - Initial values: vélocité normalisée `(velocity - 1) / 126`, amplitude max proposée 1,5 % de la largeur, Attack 0–10 ms, Hold 40 ms, Release 180 ms; clamp aux bords pour éviter le noir.
 - Acceptance: frappes faibles/fortes donnent un Split faible/fort, l'effet revient au neutre et se retrigger; cues/loop/CC1/save-reload inchangés; désactivation rétablit l'image originale; anciennes sessions sans état RGB sont compatibles.
