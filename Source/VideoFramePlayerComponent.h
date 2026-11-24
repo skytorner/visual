@@ -42,6 +42,9 @@ public:
     void setColorBoostEnabled(bool enabled);
     void triggerColorBoostVelocity(int velocity);
     bool isColorBoostAvailable() const noexcept;
+    void setVideoEchoEnabled(bool enabled);
+    void triggerVideoEchoVelocity(int velocity);
+    bool isVideoEchoAvailable() const noexcept;
     void resized() override;
 
     std::function<void(const juce::String&)> onErrorOccurred;

@@ -52,6 +52,7 @@ private:
     bool displayedFlashEnabled = false;
     bool displayedZoomPunchEnabled = false;
     bool displayedColorBoostEnabled = false;
+    bool displayedVideoEchoEnabled = false;
     std::uint32_t lastSeenCueEffectTrigger = 0;
     int lastAppliedSpeedMidiCcValue = -1;
 

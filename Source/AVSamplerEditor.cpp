@@ -131,6 +131,12 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
         audioProcessor.setColorBoostEnabled(enabled);
         videoComponent.setColorBoostEnabled(enabled);
     };
+    fxControlBar.onVideoEchoEnabledChanged = [this](bool enabled)
+    {
+        displayedVideoEchoEnabled = enabled;
+        audioProcessor.setVideoEchoEnabled(enabled);
+        videoComponent.setVideoEchoEnabled(enabled);
+    };
 
     titleLabel.setText("AV SAMPLER", juce::dontSendNotification);
     titleLabel.setFont(juce::FontOptions(16.0f).withStyle("Bold"));
@@ -156,19 +162,23 @@ AVSamplerAudioProcessorEditor::AVSamplerAudioProcessorEditor(AVSamplerAudioProce
     displayedFlashEnabled = state.flashEnabled;
     displayedZoomPunchEnabled = state.zoomPunchEnabled;
     displayedColorBoostEnabled = state.colorBoostEnabled;
+    displayedVideoEchoEnabled = state.videoEchoEnabled;
     lastSeenCueEffectTrigger = audioProcessor.getLatestCueEffectTrigger();
     fxControlBar.setRgbSplitAvailable(videoComponent.isRgbSplitAvailable());
     fxControlBar.setFlashAvailable(videoComponent.isFlashAvailable());
     fxControlBar.setZoomPunchAvailable(videoComponent.isZoomPunchAvailable());
     fxControlBar.setColorBoostAvailable(videoComponent.isColorBoostAvailable());
+    fxControlBar.setVideoEchoAvailable(videoComponent.isVideoEchoAvailable());
     fxControlBar.setRgbSplitEnabled(displayedRgbSplitEnabled);
     fxControlBar.setFlashEnabled(displayedFlashEnabled);
     fxControlBar.setZoomPunchEnabled(displayedZoomPunchEnabled);
     fxControlBar.setColorBoostEnabled(displayedColorBoostEnabled);
+    fxControlBar.setVideoEchoEnabled(displayedVideoEchoEnabled);
     videoComponent.setRgbSplitEnabled(displayedRgbSplitEnabled);
     videoComponent.setFlashEnabled(displayedFlashEnabled);
     videoComponent.setZoomPunchEnabled(displayedZoomPunchEnabled);
     videoComponent.setColorBoostEnabled(displayedColorBoostEnabled);
+    videoComponent.setVideoEchoEnabled(displayedVideoEchoEnabled);
     fxControlBar.setSpeedMultiplier(
         avsampler::videoSpeedMultiplierForControllerValue(state.speedMidiCcValue));
     updateLoopButtonAppearance(displayedLoopState);
@@ -270,6 +280,13 @@ void AVSamplerAudioProcessorEditor::timerCallback()
         videoComponent.setColorBoostEnabled(displayedColorBoostEnabled);
     }
 
+    if (state.videoEchoEnabled != displayedVideoEchoEnabled)
+    {
+        displayedVideoEchoEnabled = state.videoEchoEnabled;
+        fxControlBar.setVideoEchoEnabled(displayedVideoEchoEnabled);
+        videoComponent.setVideoEchoEnabled(displayedVideoEchoEnabled);
+    }
+
     const auto cueEffectTrigger = audioProcessor.getLatestCueEffectTrigger();
     if (cueEffectTrigger != lastSeenCueEffectTrigger)
     {
@@ -286,6 +303,8 @@ void AVSamplerAudioProcessorEditor::timerCallback()
                 videoComponent.triggerZoomPunchVelocity(velocity);
             if (videoComponent.isColorBoostAvailable() && displayedColorBoostEnabled)
                 videoComponent.triggerColorBoostVelocity(velocity);
+            if (videoComponent.isVideoEchoAvailable() && displayedVideoEchoEnabled)
+                videoComponent.triggerVideoEchoVelocity(velocity);
         }
     }
 

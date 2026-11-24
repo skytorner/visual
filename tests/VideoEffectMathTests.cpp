@@ -26,6 +26,7 @@ int main()
     using avsampler::videoEffects::flashWhiteMixForVelocityAndElapsedSeconds;
     using avsampler::videoEffects::zoomPunchScaleForVelocityAndElapsedSeconds;
     using avsampler::videoEffects::colorBoostSaturationForVelocityAndElapsedSeconds;
+    using avsampler::videoEffects::videoEchoMixForVelocityAndElapsedSeconds;
 
     if (! check(rgbSplitIntensityForVelocity(0) == 0.0f, "Velocity 0 must not trigger RGB Split"))
         return 1;
@@ -105,6 +106,22 @@ int main()
         return 1;
     if (! check(colorBoostSaturationForVelocityAndElapsedSeconds(127, 0.225) == 1.0,
                 "Color Boost envelope must return to neutral saturation"))
+        return 1;
+
+    if (! check(videoEchoMixForVelocityAndElapsedSeconds(0, 0.005) == 0.0,
+                "Velocity 0 must not trigger Video Echo"))
+        return 1;
+    if (! check(videoEchoMixForVelocityAndElapsedSeconds(1, 0.005) == 0.0,
+                "Velocity 1 must map to neutral Video Echo"))
+        return 1;
+    if (! check(near(videoEchoMixForVelocityAndElapsedSeconds(64, 0.005), 0.225),
+                "Video Echo mix must follow MIDI velocity"))
+        return 1;
+    if (! check(near(videoEchoMixForVelocityAndElapsedSeconds(127, 0.005), 0.45),
+                "Maximum velocity must reach the bounded Video Echo mix"))
+        return 1;
+    if (! check(videoEchoMixForVelocityAndElapsedSeconds(127, 0.225) == 0.0,
+                "Video Echo envelope must return to neutral"))
         return 1;
 
     std::cout << "Video effect velocity mapping and envelope tests passed\n";

@@ -181,3 +181,18 @@ bool VideoFramePlayerComponent::isColorBoostAvailable() const noexcept
 {
     return false;
 }
+
+void VideoFramePlayerComponent::setVideoEchoEnabled(bool enabled)
+{
+    juce::ignoreUnused(enabled);
+}
+
+void VideoFramePlayerComponent::triggerVideoEchoVelocity(int velocity)
+{
+    juce::ignoreUnused(velocity);
+}
+
+bool VideoFramePlayerComponent::isVideoEchoAvailable() const noexcept
+{
+    return false;
+}

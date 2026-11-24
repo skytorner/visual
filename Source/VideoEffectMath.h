@@ -69,4 +69,13 @@ constexpr double colorBoostSaturationForVelocityAndElapsedSeconds(int velocity,
     const auto envelope = rgbSplitEnvelopeForElapsedSeconds(elapsedSeconds);
     return 1.0 + (maximumSaturationMultiplier - 1.0) * intensity * envelope;
 }
+
+constexpr double videoEchoMixForVelocityAndElapsedSeconds(int velocity,
+                                                            double elapsedSeconds) noexcept
+{
+    constexpr double maximumEchoMix = 0.45;
+    const auto intensity = static_cast<double>(rgbSplitIntensityForVelocity(velocity));
+    const auto envelope = rgbSplitEnvelopeForElapsedSeconds(elapsedSeconds);
+    return maximumEchoMix * intensity * envelope;
+}
 }

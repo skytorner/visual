@@ -33,6 +33,13 @@
 @property(nonatomic, assign) BOOL colorBoostEnabled;
 @property(nonatomic, assign) int colorBoostVelocity;
 @property(nonatomic, assign) CFTimeInterval colorBoostStartTime;
+@property(nonatomic, assign) BOOL videoEchoEnabled;
+@property(nonatomic, assign) int videoEchoVelocity;
+@property(nonatomic, assign) CFTimeInterval videoEchoStartTime;
+@property(nonatomic, strong) NSArray<id<MTLTexture>>* videoEchoHistoryTextures;
+@property(nonatomic, assign) NSUInteger videoEchoWriteIndex;
+@property(nonatomic, assign) NSUInteger videoEchoFrameCount;
+@property(nonatomic, assign) double lastVideoEchoDisplaySeconds;
 @property(nonatomic, assign) NSUInteger loadGeneration;
 @property(nonatomic, copy) NSString* rendererSetupError;
 
@@ -48,6 +55,10 @@
 - (void)triggerZoomPunchVelocity:(int)velocity;
 - (void)setColorBoostEnabled:(BOOL)enabled;
 - (void)triggerColorBoostVelocity:(int)velocity;
+- (void)setVideoEchoEnabled:(BOOL)enabled;
+- (void)triggerVideoEchoVelocity:(int)velocity;
+- (void)resetVideoEchoHistory;
+- (BOOL)ensureVideoEchoHistoryForWidth:(NSUInteger)width height:(NSUInteger)height;
 @end
 
 @implementation AVSamplerMetalVideoView
@@ -114,7 +125,10 @@
         }
         fragment float4 avs_fragment(VertexOut input [[stage_in]],
                                      constant float4& effects [[buffer(0)]],
-                                     texture2d<float> frame [[texture(0)]]) {
+                                     constant float4& echoParameters [[buffer(1)]],
+                                     texture2d<float> frame [[texture(0)]],
+                                     texture2d<float> echoFrameOne [[texture(1)]],
+                                     texture2d<float> echoFrameTwo [[texture(2)]]) {
             constexpr sampler frameSampler(coord::normalized, address::clamp_to_edge, filter::linear);
             const float2 center = float2(0.5, 0.5);
             const float2 zoomedUv = center + (input.uv - center) / max(effects.z, 1.0);
@@ -130,6 +144,11 @@
             }
             else {
                 color = frame.sample(frameSampler, zoomedUv);
+            }
+            if (echoParameters.x > 0.0) {
+                const float3 echoColor = echoFrameOne.sample(frameSampler, zoomedUv).rgb * 0.65
+                    + echoFrameTwo.sample(frameSampler, zoomedUv).rgb * 0.35;
+                color.rgb = mix(color.rgb, echoColor, clamp(echoParameters.x, 0.0, 0.45));
             }
             if (effects.w > 1.0) {
                 const float luminance = dot(color.rgb, float3(0.2126, 0.7152, 0.0722));
@@ -239,6 +258,7 @@
     self.playerItem = nil;
     self.videoOutput = nil;
     self.currentFrameTexture = nil;
+    [self resetVideoEchoHistory];
     self.rgbSplitIntensity = 0.0f;
     self.nativeVideoSize = CGSizeZero;
     if (_currentVideoTexture != nullptr)
@@ -314,6 +334,63 @@
     self.colorBoostStartTime = CACurrentMediaTime();
 }
 
+- (void)setVideoEchoEnabled:(BOOL)enabled
+{
+    if (_videoEchoEnabled == enabled)
+        return;
+
+    _videoEchoEnabled = enabled;
+    self.videoEchoVelocity = 0;
+    [self resetVideoEchoHistory];
+}
+
+- (void)triggerVideoEchoVelocity:(int)velocity
+{
+    if (! self.videoEchoEnabled || velocity <= 0)
+        return;
+
+    self.videoEchoVelocity = juce::jlimit(1, 127, velocity);
+    self.videoEchoStartTime = CACurrentMediaTime();
+}
+
+- (void)resetVideoEchoHistory
+{
+    self.videoEchoHistoryTextures = nil;
+    self.videoEchoWriteIndex = 0;
+    self.videoEchoFrameCount = 0;
+    self.lastVideoEchoDisplaySeconds = -1.0;
+}
+
+- (BOOL)ensureVideoEchoHistoryForWidth:(NSUInteger)width height:(NSUInteger)height
+{
+    if (self.videoEchoHistoryTextures.count == 2
+        && self.videoEchoHistoryTextures[0].width == width
+        && self.videoEchoHistoryTextures[0].height == height)
+        return YES;
+
+    [self resetVideoEchoHistory];
+    MTLTextureDescriptor* descriptor = [MTLTextureDescriptor
+        texture2DDescriptorWithPixelFormat:MTLPixelFormatBGRA8Unorm
+                                     width:width
+                                    height:height
+                                 mipmapped:NO];
+    descriptor.storageMode = MTLStorageModePrivate;
+    descriptor.usage = MTLTextureUsageShaderRead;
+    NSMutableArray<id<MTLTexture>>* textures = [NSMutableArray arrayWithCapacity:2];
+    for (NSUInteger index = 0; index < 2; ++index)
+    {
+        id<MTLTexture> texture = [self.device newTextureWithDescriptor:descriptor];
+        if (texture == nil)
+        {
+            [self resetVideoEchoHistory];
+            return NO;
+        }
+        [textures addObject:texture];
+    }
+    self.videoEchoHistoryTextures = [textures copy];
+    return YES;
+}
+
 - (void)shutdown
 {
     [self closeVideo];
@@ -329,6 +406,7 @@
     if (self.player == nil)
         return;
 
+    [self resetVideoEchoHistory];
     const auto time = CMTimeMakeWithSeconds(juce::jmax(0.0, seconds), 600);
     [self.player seekToTime:time toleranceBefore:kCMTimeZero toleranceAfter:kCMTimeZero];
 }
@@ -341,6 +419,7 @@
     if (pass == nil || drawable == nil || commandBuffer == nil)
         return;
 
+    BOOL receivedNewVideoFrame = NO;
     if (self.player != nil && self.videoOutput != nil && _textureCache != nullptr)
     {
         const CMTime itemTime = self.player.currentTime;
@@ -361,10 +440,20 @@
 
                 if (textureResult == kCVReturnSuccess && newTexture != nullptr)
                 {
+                    const auto displaySeconds = CMTimeGetSeconds(displayTime);
+                    if (self.videoEchoEnabled && std::isfinite(displaySeconds))
+                    {
+                        if (self.lastVideoEchoDisplaySeconds >= 0.0
+                            && (displaySeconds <= self.lastVideoEchoDisplaySeconds
+                                || displaySeconds - self.lastVideoEchoDisplaySeconds > 0.25))
+                            [self resetVideoEchoHistory];
+                        self.lastVideoEchoDisplaySeconds = displaySeconds;
+                    }
                     if (_currentVideoTexture != nullptr)
                         CFRelease(_currentVideoTexture);
                     _currentVideoTexture = newTexture;
                     self.currentFrameTexture = CVMetalTextureGetTexture(newTexture);
+                    receivedNewVideoFrame = YES;
                 }
                 else if (newTexture != nullptr)
                 {
@@ -381,6 +470,9 @@
 
     if (self.pipeline != nil && self.currentFrameTexture != nil)
     {
+        const BOOL videoEchoReady = self.videoEchoEnabled
+            && [self ensureVideoEchoHistoryForWidth:self.currentFrameTexture.width
+                                             height:self.currentFrameTexture.height];
         const double videoAspect = self.currentFrameTexture.width > 0 && self.currentFrameTexture.height > 0
             ? static_cast<double>(self.currentFrameTexture.width)
                 / static_cast<double>(self.currentFrameTexture.height) : 1.0;
@@ -412,16 +504,62 @@
         const auto colorBoostSaturation = self.colorBoostEnabled
             ? avsampler::videoEffects::colorBoostSaturationForVelocityAndElapsedSeconds(
                 self.colorBoostVelocity, colorBoostElapsedSeconds) : 1.0;
+        const auto videoEchoElapsedSeconds = currentTime - self.videoEchoStartTime;
+        const auto videoEchoMix = videoEchoReady
+            ? avsampler::videoEffects::videoEchoMixForVelocityAndElapsedSeconds(
+                self.videoEchoVelocity, videoEchoElapsedSeconds) : 0.0;
         const float effectValues[4] {
             static_cast<float>(offsetUv), static_cast<float>(flashWhiteMix),
             static_cast<float>(zoomPunchScale), static_cast<float>(colorBoostSaturation)
         };
+        const float echoParameters[4] { static_cast<float>(videoEchoMix), 0.0f, 0.0f, 0.0f };
         [encoder setFragmentBytes:effectValues length:sizeof(effectValues) atIndex:0];
+        [encoder setFragmentBytes:echoParameters length:sizeof(echoParameters) atIndex:1];
         [encoder setFragmentTexture:self.currentFrameTexture atIndex:0];
+        id<MTLTexture> firstHistoryFrame = self.currentFrameTexture;
+        id<MTLTexture> secondHistoryFrame = self.currentFrameTexture;
+        if (videoEchoReady && self.videoEchoFrameCount > 0)
+        {
+            const auto textureCount = self.videoEchoHistoryTextures.count;
+            const auto firstIndex = (self.videoEchoWriteIndex + textureCount - 1) % textureCount;
+            firstHistoryFrame = self.videoEchoHistoryTextures[firstIndex];
+            if (self.videoEchoFrameCount > 1)
+            {
+                const auto secondIndex = (self.videoEchoWriteIndex + textureCount - 2) % textureCount;
+                secondHistoryFrame = self.videoEchoHistoryTextures[secondIndex];
+            }
+        }
+        [encoder setFragmentTexture:firstHistoryFrame atIndex:1];
+        [encoder setFragmentTexture:secondHistoryFrame atIndex:2];
         [encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:0 vertexCount:6];
     }
 
     [encoder endEncoding];
+    if (receivedNewVideoFrame && self.videoEchoEnabled
+        && self.videoEchoHistoryTextures.count == 2)
+    {
+        id<MTLTexture> historyDestination = self.videoEchoHistoryTextures[self.videoEchoWriteIndex];
+        id<MTLBlitCommandEncoder> blitEncoder = [commandBuffer blitCommandEncoder];
+        if (blitEncoder != nil)
+        {
+            const MTLSize frameSize = MTLSizeMake(self.currentFrameTexture.width,
+                                                  self.currentFrameTexture.height, 1);
+            [blitEncoder copyFromTexture:self.currentFrameTexture
+                             sourceSlice:0
+                             sourceLevel:0
+                            sourceOrigin:MTLOriginMake(0, 0, 0)
+                              sourceSize:frameSize
+                               toTexture:historyDestination
+                        destinationSlice:0
+                        destinationLevel:0
+                       destinationOrigin:MTLOriginMake(0, 0, 0)];
+            [blitEncoder endEncoding];
+            self.videoEchoWriteIndex = (self.videoEchoWriteIndex + 1)
+                % self.videoEchoHistoryTextures.count;
+            self.videoEchoFrameCount = juce::jmin(static_cast<NSUInteger>(2),
+                                                  self.videoEchoFrameCount + 1);
+        }
+    }
     [commandBuffer presentDrawable:drawable];
     [commandBuffer commit];
 }
@@ -621,3 +759,15 @@ void VideoFramePlayerComponent::triggerColorBoostVelocity(int velocity)
 }
 
 bool VideoFramePlayerComponent::isColorBoostAvailable() const noexcept { return true; }
+
+void VideoFramePlayerComponent::setVideoEchoEnabled(bool enabled)
+{
+    [impl->view setVideoEchoEnabled:enabled];
+}
+
+void VideoFramePlayerComponent::triggerVideoEchoVelocity(int velocity)
+{
+    [impl->view triggerVideoEchoVelocity:velocity];
+}
+
+bool VideoFramePlayerComponent::isVideoEchoAvailable() const noexcept { return true; }
