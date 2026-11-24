@@ -134,17 +134,18 @@ Note VISUAL-011 : l'utilisateur a validé globalement la version avant fusion, s
 
 | Vérification | Statut | Portée |
 | --- | --- | --- |
-| Build Release AU AV Sampler | PASS | Cible `AVSampler_AU` compilée après implémentation.
-| Installation du build récent pour Logic | PASS installation | `make install-avsampler-au BUILD_DIR=/private/tmp/visual-009-build BUILD_TYPE=Release`; bundle signé ad hoc et présent dans le dossier utilisateur AU.
-| CTest | PASS 5/5 | CueRoutingTests, TimelineMathTests, VideoEffectMathTests, AudioReactiveImageProcessorTests et AVSamplerCoreTests.
-| Mapping vélocité 0/1/20/64/100/127 et limites | PASS automatisé | `VideoEffectMathTests` vérifie courbe, clamps, intensité max et bornes.
-| Attack/Hold/Release et retour neutre | PASS automatisé | 5/40/180 ms avec courbe smoothstep; durées et points d'enveloppe testés par `VideoEffectMathTests`.
-| NoteOn assigné publie la vélocité; NoteOff, vélocité 0 et notes non assignées ignorés | PASS automatisé | `AVSamplerCoreTests`; publication atomique sans traitement graphique dans `processBlock()`.
-| Activation RGB Split sauvegardée; intensité momentanée non sauvegardée; ancienne session | PASS automatisé + statique | Tests pour l'état actif/inactif et défaut des sessions sans clé; le compteur d'événement et l'enveloppe sont hors sérialisation.
-| Shader Metal RGB, déplacement/absence de bord noir, intensité liée à la vélocité | NOT TESTED dans Logic | Le build est installé; validation visuelle humaine restante.
-| Frappe douce vs forte, retrigger, changement de Cue, retour progressif | NOT TESTED dans Logic | Tester vélocités 20, 64 et 127 dans Logic.
-| CC1 simultané, Loop, sauvegarde/réouverture | NOT TESTED dans Logic | Confirmer que vitesse, transport et état d'activation restent indépendants.
-| pluginval | NOT RUN | Le binaire local se termine avec le code 134 dès `--help`.
+| Build Release AU AV Sampler | PASS | Cible `AVSampler_AU` compilée après implémentation. |
+| Installation du build récent pour Logic | PASS installation | `make install-avsampler-au BUILD_DIR=/private/tmp/visual-009-build BUILD_TYPE=Release`; bundle signé ad hoc et présent dans le dossier utilisateur AU. |
+| CTest | PASS 5/5 | CueRoutingTests, TimelineMathTests, VideoEffectMathTests, AudioReactiveImageProcessorTests et AVSamplerCoreTests. |
+| Mapping vélocité 0/1/20/64/100/127 et limites | PASS automatisé | `VideoEffectMathTests` vérifie courbe, clamps, intensité max et bornes. |
+| Attack/Hold/Release et retour neutre | PASS automatisé | 5/40/180 ms avec courbe smoothstep; durées et points d'enveloppe testés par `VideoEffectMathTests`. |
+| NoteOn assigné publie la vélocité; NoteOff, vélocité 0 et notes non assignées ignorés | PASS automatisé | `AVSamplerCoreTests`; publication atomique sans traitement graphique dans `processBlock()`. |
+| Activation RGB Split sauvegardée; intensité momentanée non sauvegardée; ancienne session | PASS automatisé + statique | Tests pour l'état actif/inactif et défaut des sessions sans clé; le compteur d'événement et l'enveloppe sont hors sérialisation. |
+| Shader Metal RGB, déplacement/absence de bord noir, intensité liée à la vélocité | PASS manuel rapporté | L'utilisateur confirme que tout fonctionne dans Logic. |
+| Frappe douce vs forte, retrigger, changement de Cue, retour progressif | PASS manuel rapporté | La checklist 014b a été confirmée globalement; niveaux et retours fonctionnent. |
+| CC1 simultané, Loop, sauvegarde/réouverture | PASS manuel rapporté | L'utilisateur confirme que tout fonctionne correctement en boucle; fluidité confirmée. |
+| Fluidité perçue | PASS manuel rapporté | L'utilisateur rapporte une lecture fluide en boucle; aucune mesure CPU/GPU instrumentée. |
+| pluginval | NOT RUN | Le binaire local se termine avec le code 134 dès `--help`. |
 
 ## VISUAL-012 — Composition UI et pads assignés
 

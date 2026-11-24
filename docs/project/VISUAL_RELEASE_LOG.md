@@ -29,7 +29,7 @@ Status: In progress. Branche: `codex/VISUAL-014b-rgb-split-velocity`, créée de
 - Bouton RGB Split ajouté dans la barre FX; activé par défaut, état persisté, intensité de frappe transitoire non persistée.
 - Build/install Release : `make install-avsampler-au BUILD_DIR=/private/tmp/visual-009-build BUILD_TYPE=Release` PASS; `codesign --verify --deep --strict` PASS. Après l'optimisation du shader bypass, le dernier build a de nouveau été installé par cette commande.
 - CTest : `ctest --test-dir /private/tmp/visual-009-build --output-on-failure -C Release` PASS, 5/5, incluant mapping/enveloppe et événements/state AV Sampler. `git diff --check` PASS. Un premier avertissement du setter Objective-C a été corrigé avant le build installé final; avertissements JUCE/SDK Apple historiques seulement.
-- Validation visuelle de RGB Split dans Logic, niveaux de vélocité, retrigger, CC1 simultané et session reload : NOT TESTED; le nouveau build attend l'essai utilisateur.
+- 2026-11-24 : après installation et essai dans Logic, l'utilisateur confirme que tout fonctionne correctement et que la lecture reste fluide en boucle. Les contrôles demandés (intensité vélocité, retour, retrigger/Cues, toggle sauvegardé, CC1, Loop) sont validés globalement; aucune mesure chiffrée CPU/GPU, latence ou framerate n'a été faite.
 
 ## VISUAL-013 — Premier effet vidéo piloté par MIDI CC
 

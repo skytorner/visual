@@ -26,7 +26,7 @@ VISUAL-010 fournit la timeline interactive pour déplacer les quatre Cue Points;
 
 ## Phase 3 — MIDI Effects
 
-VISUAL-013 active Speed via MIDI CC1 (0,5×–1,5×; 64 = 1×). VISUAL-014a remplace l'affichage vidéo par le rendu Metal; la lecture, les Cue Points, le Loop et CC1 ont été confirmés dans Logic. VISUAL-014b ajoute RGB Split contrôlé par vélocité, avec enveloppe transitoire et activation persistée; la QA utilisateur de l'effet reste à faire. Les autres effets, modes de pad, 16 pads et MIDI Learn restent ultérieurs.
+VISUAL-013 active Speed via MIDI CC1 (0,5×–1,5×; 64 = 1×). VISUAL-014a remplace l'affichage vidéo par le rendu Metal; la lecture, les Cue Points, le Loop et CC1 ont été confirmés dans Logic. VISUAL-014b ajoute RGB Split contrôlé par vélocité, avec enveloppe transitoire et activation persistée; l'utilisateur confirme que l'effet fonctionne et reste fluide en boucle. Les autres effets, modes de pad, 16 pads et MIDI Learn restent ultérieurs.
 
 ## Phase 4 — Validation produit
 
