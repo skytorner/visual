@@ -30,6 +30,9 @@
 @property(nonatomic, assign) BOOL zoomPunchEnabled;
 @property(nonatomic, assign) int zoomPunchVelocity;
 @property(nonatomic, assign) CFTimeInterval zoomPunchStartTime;
+@property(nonatomic, assign) BOOL colorBoostEnabled;
+@property(nonatomic, assign) int colorBoostVelocity;
+@property(nonatomic, assign) CFTimeInterval colorBoostStartTime;
 @property(nonatomic, assign) NSUInteger loadGeneration;
 @property(nonatomic, copy) NSString* rendererSetupError;
 
@@ -43,6 +46,8 @@
 - (void)triggerFlashVelocity:(int)velocity;
 - (void)setZoomPunchEnabled:(BOOL)enabled;
 - (void)triggerZoomPunchVelocity:(int)velocity;
+- (void)setColorBoostEnabled:(BOOL)enabled;
+- (void)triggerColorBoostVelocity:(int)velocity;
 @end
 
 @implementation AVSamplerMetalVideoView
@@ -125,6 +130,11 @@
             }
             else {
                 color = frame.sample(frameSampler, zoomedUv);
+            }
+            if (effects.w > 1.0) {
+                const float luminance = dot(color.rgb, float3(0.2126, 0.7152, 0.0722));
+                color.rgb = clamp(float3(luminance) + (color.rgb - float3(luminance)) * effects.w,
+                                  float3(0.0), float3(1.0));
             }
             if (effects.y > 0.0)
                 color.rgb = mix(color.rgb, float3(1.0), clamp(effects.y, 0.0, 0.65));
@@ -288,6 +298,22 @@
     self.zoomPunchStartTime = CACurrentMediaTime();
 }
 
+- (void)setColorBoostEnabled:(BOOL)enabled
+{
+    _colorBoostEnabled = enabled;
+    if (! enabled)
+        self.colorBoostVelocity = 0;
+}
+
+- (void)triggerColorBoostVelocity:(int)velocity
+{
+    if (! self.colorBoostEnabled || velocity <= 0)
+        return;
+
+    self.colorBoostVelocity = juce::jlimit(1, 127, velocity);
+    self.colorBoostStartTime = CACurrentMediaTime();
+}
+
 - (void)shutdown
 {
     [self closeVideo];
@@ -382,9 +408,13 @@
         const auto zoomPunchScale = self.zoomPunchEnabled
             ? avsampler::videoEffects::zoomPunchScaleForVelocityAndElapsedSeconds(
                 self.zoomPunchVelocity, zoomPunchElapsedSeconds) : 1.0;
+        const auto colorBoostElapsedSeconds = currentTime - self.colorBoostStartTime;
+        const auto colorBoostSaturation = self.colorBoostEnabled
+            ? avsampler::videoEffects::colorBoostSaturationForVelocityAndElapsedSeconds(
+                self.colorBoostVelocity, colorBoostElapsedSeconds) : 1.0;
         const float effectValues[4] {
             static_cast<float>(offsetUv), static_cast<float>(flashWhiteMix),
-            static_cast<float>(zoomPunchScale), 0.0f
+            static_cast<float>(zoomPunchScale), static_cast<float>(colorBoostSaturation)
         };
         [encoder setFragmentBytes:effectValues length:sizeof(effectValues) atIndex:0];
         [encoder setFragmentTexture:self.currentFrameTexture atIndex:0];
@@ -579,3 +609,15 @@ void VideoFramePlayerComponent::triggerZoomPunchVelocity(int velocity)
 }
 
 bool VideoFramePlayerComponent::isZoomPunchAvailable() const noexcept { return true; }
+
+void VideoFramePlayerComponent::setColorBoostEnabled(bool enabled)
+{
+    [impl->view setColorBoostEnabled:enabled];
+}
+
+void VideoFramePlayerComponent::triggerColorBoostVelocity(int velocity)
+{
+    [impl->view triggerColorBoostVelocity:velocity];
+}
+
+bool VideoFramePlayerComponent::isColorBoostAvailable() const noexcept { return true; }

@@ -166,3 +166,18 @@ bool VideoFramePlayerComponent::isZoomPunchAvailable() const noexcept
 {
     return false;
 }
+
+void VideoFramePlayerComponent::setColorBoostEnabled(bool enabled)
+{
+    juce::ignoreUnused(enabled);
+}
+
+void VideoFramePlayerComponent::triggerColorBoostVelocity(int velocity)
+{
+    juce::ignoreUnused(velocity);
+}
+
+bool VideoFramePlayerComponent::isColorBoostAvailable() const noexcept
+{
+    return false;
+}

@@ -60,4 +60,13 @@ constexpr double zoomPunchScaleForVelocityAndElapsedSeconds(int velocity,
     const auto envelope = rgbSplitEnvelopeForElapsedSeconds(elapsedSeconds);
     return 1.0 + (maximumZoomScale - 1.0) * intensity * envelope;
 }
+
+constexpr double colorBoostSaturationForVelocityAndElapsedSeconds(int velocity,
+                                                                  double elapsedSeconds) noexcept
+{
+    constexpr double maximumSaturationMultiplier = 1.6;
+    const auto intensity = static_cast<double>(rgbSplitIntensityForVelocity(velocity));
+    const auto envelope = rgbSplitEnvelopeForElapsedSeconds(elapsedSeconds);
+    return 1.0 + (maximumSaturationMultiplier - 1.0) * intensity * envelope;
+}
 }

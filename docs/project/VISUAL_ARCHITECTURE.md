@@ -7,24 +7,24 @@ Cadrage : 2026-11-24. `AVSampler` est un instrument vidéo MIDI JUCE natif. `Aud
 - JUCE 8.0.8, C++17 et CMake.
 - `AudioReactiveImagePOC` conserve ses identifiants, paramètres, formats et état historiques.
 - AV Sampler garde sa propre identité de plugin. Le prototype ajoute les formats AU + VST3 sur macOS et VST3 sur Windows; seul l'AU macOS dans Logic est actuellement qualifié.
-- Interface JUCE native. Le renderer macOS utilise AVFoundation et Metal/MetalKit. Le prototype Windows enveloppe `juce::VideoComponent` pour lecture/transport; son build x64 passe dans GitHub Actions (run `45435924725`), mais le chargement et le comportement dans REAPER restent à qualifier dans VISUAL-017. Cette vue ne donne pas accès aux frames pour RGB Split et Flash; ces effets sont signalés indisponibles sur ce prototype.
+- Interface JUCE native. Le renderer macOS utilise AVFoundation et Metal/MetalKit. Le prototype Windows enveloppe `juce::VideoComponent` pour lecture/transport; son build x64 passe dans GitHub Actions (run `45435924725`), mais le chargement et le comportement dans REAPER restent à qualifier dans VISUAL-017. Cette vue ne donne pas accès aux frames pour RGB Split, Flash, Zoom Punch ou Color Boost; ces effets sont signalés indisponibles sur ce prototype.
 
 ## Flux actuel AV Sampler
 
 ```text
 DAW / MIDI
   -> AVSamplerAudioProcessor::processBlock (instrument silencieux)
-  -> notes 36/38/40/41 -> Cue 1..4; CC1 -> Speed; vélocité NoteOn -> triggers RGB Split + Flash + Zoom Punch
+  -> notes 36/38/40/41 -> Cue 1..4; CC1 -> Speed; vélocité NoteOn -> triggers RGB Split + Flash + Zoom Punch + Color Boost
   -> atomiques bornés vers l'éditeur
   -> timer éditeur sur le thread message
        -> transport/seek/speed de VideoFramePlayerComponent
-       -> triggers des enveloppes RGB Split, Flash et Zoom Punch côté renderer
+       -> triggers des enveloppes RGB Split, Flash, Zoom Punch et Color Boost côté renderer
   -> macOS: AVFoundation AVPlayerItemVideoOutput -> CVPixelBuffer
-             -> CVMetalTextureCache -> MTKView / shader RGB Split + Flash + Zoom Punch
+             -> CVMetalTextureCache -> MTKView / shader RGB Split + Flash + Zoom Punch + Color Boost
   -> Windows: JUCE VideoComponent / playback backend (effets visuels indisponibles)
 
 État JUCE sauvegardé dans le projet hôte : chemin média, quatre Cue timings,
-Loop, Play/Pause demandé, Cue sélectionné, valeur CC1, activation RGB Split, Flash et Zoom Punch.
+Loop, Play/Pause demandé, Cue sélectionné, valeur CC1, activation RGB Split, Flash, Zoom Punch et Color Boost.
 ```
 
 ## MIDI, threads et rendu
@@ -35,6 +35,7 @@ Loop, Play/Pause demandé, Cue sélectionné, valeur CC1, activation RGB Split, 
 - Le RGB Split décale rouge et bleu en directions opposées, garde le vert centré et borne les UV. La vélocité pilote l'intensité; l'enveloppe Attack/Hold/Release est transitoire. L'activation est persistée.
 - Flash mélange l'image vers le blanc, au maximum 65 %. Le NoteOn partagé avec RGB Split fournit la vélocité; durée fixe Attack/Hold/Release 5/40/180 ms. Activation persistée, désactivée par défaut, hors état ancien si la propriété est absente. Rendu Metal macOS uniquement.
 - Zoom Punch transforme les UV autour du centre de l'image avant l'échantillonnage; l'échelle varie de 1,0× à 1,12× selon la vélocité et revient à 1,0× avec la même enveloppe 5/40/180 ms. Le même buffer de constantes Metal porte décalage RGB, mélange Flash et échelle Zoom. Activation persistée, désactivée par défaut dans les anciennes sessions. Rendu Metal macOS uniquement; l'utilisateur confirme que l'effet fonctionne dans Logic.
+- Color Boost multiplie temporairement la saturation RGB autour d'une estimation de luminance BT.709, jusqu'à 1,6×; la vélocité module l'amplitude avec la même enveloppe 5/40/180 ms. Les canaux sont bornés à [0,1], donc un écrêtage subtil est possible aux fortes saturations. Le multiplicateur occupe le quatrième champ du buffer Metal des effets; l'activation est persistée et désactivée par défaut dans les anciennes sessions. Rendu Metal macOS uniquement; QA Logic en attente.
 - CC1 pilote Speed indépendamment de RGB Split. Mapping courant : 0,5× à 1,5×; l'utilisateur confirme dans Logic les extrêmes, la neutralité à 64 et save/reload. Refaire sur le candidat de distribution identifié par SHA.
 - La fluidité de lecture en boucle est confirmée à l'usage par l'utilisateur. Aucune mesure de latence MIDI-image, framerate ou coût CPU/GPU n'est disponible.
 

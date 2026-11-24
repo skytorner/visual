@@ -10,11 +10,11 @@ La direction évolue volontairement du POC audio vers un sampler vidéo MIDI nat
 
 ## Produit livré sur `main` — prototype interne
 
-Le prototype comprend une cible instrument AU macOS, un lecteur vidéo AVFoundation avec présentation Metal, une lecture/Loop, quatre Cue Points manipulables et quatre notes MIDI fixes (36/38/40/41). Les notes sont présentées comme C1/D1/E1/F1 dans la configuration Logic testée. CC1 pilote la vitesse de lecture; la vélocité NoteOn déclenche RGB Split et Flash. L'état de projet conserve le média référencé, les Cue Points, Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation des deux effets.
+Le prototype comprend une cible instrument AU macOS, un lecteur vidéo AVFoundation avec présentation Metal, une lecture/Loop, quatre Cue Points manipulables et quatre notes MIDI fixes (36/38/40/41). Les notes sont présentées comme C1/D1/E1/F1 dans la configuration Logic testée. CC1 pilote la vitesse de lecture; la vélocité NoteOn déclenche RGB Split, Flash et Zoom Punch. L'état de projet conserve le média référencé, les Cue Points, Loop, Play/Pause demandé, Cue sélectionné, valeur CC1 et activation de ces effets.
 
 L'utilisateur confirme manuellement que le parcours fonctionne dans Logic, que le cycle de région rejoue les notes et que la lecture vidéo reste fluide en boucle. Cela constitue une validation fonctionnelle rapportée, pas une mesure instrumentée de latence, cadence ou usage CPU/GPU.
 
-Le parcours Mac est validé manuellement dans Logic avec l'AU, y compris RGB Split, Flash et Zoom Punch (VISUAL-020 validé par l'utilisateur sur l'AU installé). La qualification VST3 Windows/REAPER est reportée à la fin de la stabilisation des fonctionnalités macOS; le prototype Windows ne prend pas encore en charge les effets Metal. Autres DAW, versions macOS minimales et compatibilité codec étendue restent non qualifiés. Une seule vidéo et une seule tête de lecture sont prises en charge. Aucune précision frame-perfect ni latence garantie n'est promise.
+Le parcours Mac est validé manuellement dans Logic avec l'AU, y compris RGB Split, Flash et Zoom Punch (VISUAL-020 validé par l'utilisateur sur l'AU installé). VISUAL-021 ajoute actuellement Color Boost au prototype macOS; sa validation Logic reste en attente. La qualification VST3 Windows/REAPER est reportée à la fin de la stabilisation des fonctionnalités macOS; le prototype Windows ne prend pas encore en charge les effets Metal. Autres DAW, versions macOS minimales et compatibilité codec étendue restent non qualifiés. Une seule vidéo et une seule tête de lecture sont prises en charge. Aucune précision frame-perfect ni latence garantie n'est promise.
 
 ## POC audio conservé
 
@@ -27,7 +27,8 @@ Le plugin `AudioReactiveImagePOC` conserve l'analyse RMS/peak/envelope, le passt
 - CC1 mappé sur 0,5×–1,5×. L'utilisateur confirme dans Logic la valeur neutre 64 et sa restauration après save/reload, en plus des extrêmes 0/127; refaire sur l'artefact candidat de distribution.
 - RGB Split déclenché par la vélocité MIDI avec activation sauvegardée. L'utilisateur confirme l'effet et une lecture fluide en boucle.
 - Flash v1 est déclenché par NoteOn des cues sur le renderer Metal macOS; la vélocité règle l'intensité, avec une enveloppe fixe de 5/40/180 ms. Son activation est sauvegardée et désactivée par défaut pour préserver les anciennes sessions. Pas encore disponible sur Windows.
-- Zoom Punch est déclenché par NoteOn des cues sur le renderer Metal macOS; la vélocité règle l'amplitude d'un zoom centré jusqu'à 1,12×, avec l'enveloppe fixe de 5/40/180 ms. Son activation est sauvegardée et désactivée par défaut, y compris pour les anciennes sessions. Pas encore disponible sur Windows; vérification Logic en attente.
+- Zoom Punch est déclenché par NoteOn des cues sur le renderer Metal macOS; la vélocité règle l'amplitude d'un zoom centré jusqu'à 1,12×, avec l'enveloppe fixe de 5/40/180 ms. Son activation est sauvegardée et désactivée par défaut, y compris pour les anciennes sessions. L'utilisateur l'a validé dans Logic; effet non disponible sur Windows.
+- Color Boost (VISUAL-021) augmente actuellement la saturation sur le renderer Metal macOS, jusqu'à 1,6× selon la vélocité, avec la même enveloppe 5/40/180 ms. Son toggle est sauvegardé et désactivé par défaut; la validation Logic est en attente et le renderer Windows ne le prend pas en charge.
 
 ## Produit et phases de distribution
 
@@ -58,7 +59,7 @@ Closed Alpha 2 vise 5 à 10 utilisateurs et les corrections d'Alpha 1. Closed Be
 
 ## Suite produit après Closed Alpha
 
-16 pads, MIDI Learn, mapping entièrement personnalisable, plusieurs lecteurs vidéo, polyphonie vidéo et export restent en aval de la validation de cette première cohorte. Zoom Punch est un ajout au prototype interne macOS; son inclusion dans le package Closed Alpha 1 reste à décider et ne change pas les critères actuels d'alpha. D'autres DAW Windows/macOS restent à qualifier séparément.
+16 pads, MIDI Learn, mapping entièrement personnalisable, plusieurs lecteurs vidéo, polyphonie vidéo et export restent en aval de la validation de cette première cohorte. Zoom Punch et Color Boost sont des ajouts au prototype interne macOS; leur inclusion dans le package Closed Alpha 1 reste à décider et ne change pas les critères actuels d'alpha. D'autres DAW Windows/macOS restent à qualifier séparément.
 
 ## Hors périmètre initial
 
@@ -68,7 +69,7 @@ Polyphonie vidéo, plusieurs lecteurs, moteur 3D, export vidéo, séquenceur MID
 
 Utilisateur initial : beatmaker/producteur sur macOS, notamment Logic Pro. Premier succès : programmer quatre notes dans une région MIDI et rejouer la performance visuelle correspondante.
 
-Ordre de travail et distribution : stabilisation des fonctionnalités AU macOS/Logic (Zoom Punch validé; PR #18 à fusionner) -> QA hôte et parité Windows VST3/REAPER (VISUAL-017 reporté jusqu'à la fin de cette stabilisation) -> décision de périmètre et packages Closed Alpha 1 contrôlés -> Closed Alpha 2 -> Closed Beta -> qualification progressive d'autres DAW. Le workflow Windows x64 de compilation et d'artefact QA est déjà en place; il ne vaut pas qualification Windows.
+Ordre de travail et distribution : stabilisation des fonctionnalités AU macOS/Logic (Zoom Punch validé; Color Boost en cours) -> QA hôte et parité Windows VST3/REAPER (VISUAL-017 reporté jusqu'à la fin de cette stabilisation) -> décision de périmètre et packages Closed Alpha 1 contrôlés -> Closed Alpha 2 -> Closed Beta -> qualification progressive d'autres DAW. Le workflow Windows x64 de compilation et d'artefact QA est déjà en place; il ne vaut pas qualification Windows.
 
 ## Média
 

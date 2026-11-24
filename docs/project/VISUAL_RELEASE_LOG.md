@@ -125,7 +125,15 @@ pluginval sur le nouvel artefact n'est pas exécuté dans cette tâche. L'artefa
 - Code source compilé : `35048d27aad9e629be97bddafadeb1a2b3c8065a`.
 - `git diff --check` : PASS. Build Windows et test REAPER : NOT RUN, reportés conformément à D-028.
 - L'utilisateur confirme dans Logic « fonctionne très bien » après installation de l'AU identifié ci-dessus; validation manuelle rapportée. L'ajout n'établit pas l'inclusion de Zoom Punch dans Closed Alpha 1.
-- PR #18 ouverte et vérifiable; CI PR : `audio-analysis`, GitGuardian et compilation VST3 Windows x64 PASS. Le résultat Windows prouve la compilation seulement; aucun test REAPER exécuté. Fusion en attente d'autorisation explicite.
+- PR #18 fusionnée dans `main` au commit `595c533`. CI PR : `audio-analysis`, GitGuardian et compilation VST3 Windows x64 PASS. Le résultat Windows prouve la compilation seulement; aucun test REAPER exécuté.
+
+## VISUAL-021 — Color Boost macOS — 2026-11-25
+
+- Color Boost ajuste la saturation du frame Metal autour d'une estimation de luminance BT.709; vélocité 1–127 pilote 1,0×–1,6×, avec retour au neutre par l'enveloppe 5/40/180 ms partagée. Pas de changement intentionnel de teinte; canaux clampés, écrêtage léger possible aux valeurs fortes. Toggle persisté, désactivé par défaut et indisponible sur Windows.
+- Build Release macOS configurée dans `/private/tmp/visual-021-build` et compilation complète (`cmake --build /private/tmp/visual-021-build --config Release --parallel 6`) : PASS. CTest : 5/5 PASS; `git diff --check` : PASS.
+- AU installé dans `~/Library/Audio/Plug-Ins/Components/AVSampler.component`; `codesign --verify --deep --strict` : PASS. SHA-256 exécutable buildé avant signature : `5bb3af088b0f8d5f13e05d3f6662c1e56ca6837e8ee4a3ad2603809130219e53`; après signature ad hoc, exécutable installé : `f6c14af1cbb2dc78f89097d166f612fdedeee38ec3562a28d2e77ea60c6cc71e`.
+- Build Windows et REAPER : NOT RUN, reportés jusqu'à la fin des fonctionnalités macOS. Exécution runtime du shader Metal et comportement dans Logic : en attente de QA humaine.
+- Validation Logic à effectuer par l'utilisateur avant fusion; inclusion à Closed Alpha 1 à décider séparément.
 
 ## Initial Setup
 
